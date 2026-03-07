@@ -1,0 +1,18 @@
+{
+  "type": "test_spacequotapolicypayload",
+  "id": "msg-spacequotapolicypayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "maxStagingBytes": 3.14,
+    "maxOpenChangeSets": 3.14,
+    "maxAppliedChangeSetsPerMonth": 3.14,
+    "tokenBudget": 3.14,
+    "maxParticipantStagingBytes": 3.14,
+    "maxUploadsPerDay": 3.14,
+    "maxOpenChangeSetsPerParticipant": 3.14,
+    "maxToolCallsPerHour": 3.14,
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

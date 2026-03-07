@@ -1,0 +1,10 @@
+{
+  "type": "test_gatewaygetconnectorpolicypayload",
+  "id": "msg-gatewaygetconnectorpolicypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "scopeType": "global",
+    "scopeId": "sample-scopeId"
+  }
+}

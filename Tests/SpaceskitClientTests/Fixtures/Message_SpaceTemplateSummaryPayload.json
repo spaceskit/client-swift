@@ -1,0 +1,15 @@
+{
+  "type": "test_spacetemplatesummarypayload",
+  "id": "msg-spacetemplatesummarypayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "templateId": "sample-templateId",
+    "title": "sample-title",
+    "communicationMode": null,
+    "agentPresetIds": [
+      "sample-agentPresetIds"
+    ],
+    "createdBy": "sample-createdBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

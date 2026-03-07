@@ -1,0 +1,6 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "deviceId": "sample-deviceId",
+  "nextPublicKey": "sample-nextPublicKey",
+  "platform": "sample-platform"
+}

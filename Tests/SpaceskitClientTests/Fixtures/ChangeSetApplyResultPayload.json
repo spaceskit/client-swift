@@ -1,0 +1,12 @@
+{
+  "changeSetId": "sample-changeSetId",
+  "adapter": null,
+  "appliedPaths": [
+    "sample-appliedPaths"
+  ],
+  "rollbackPath": "sample-rollbackPath",
+  "git": null,
+  "commitMessage": "sample-commitMessage",
+  "commitHash": "sample-commitHash",
+  "warning": "sample-warning"
+}

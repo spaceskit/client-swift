@@ -1,0 +1,21 @@
+{
+  "type": "test_authrevokedeviceresponsepayload",
+  "id": "msg-authrevokedeviceresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "deviceId": "sample-deviceId",
+    "revoked": true,
+    "device": {
+      "deviceId": "sample-deviceId",
+      "principalId": "sample-principalId",
+      "publicKey": "sample-publicKey",
+      "platform": "sample-platform",
+      "keyVersion": "sample-keyVersion",
+      "status": "active",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt",
+      "lastSeenAt": "sample-lastSeenAt",
+      "revokedAt": "sample-revokedAt"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "targetAgentId": "sample-targetAgentId",
+  "reason": "sample-reason",
+  "unblockedByTurnId": "sample-unblockedByTurnId"
+}

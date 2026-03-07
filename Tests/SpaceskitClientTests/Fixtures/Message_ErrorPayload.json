@@ -1,0 +1,14 @@
+{
+  "type": "test_errorpayload",
+  "id": "msg-errorpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "code": "INVALID_ARGUMENT",
+    "message": "sample-message",
+    "details": {
+      "example": true
+    },
+    "retryable": true,
+    "correlationId": "sample-correlationId"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "test_authlistdevicesresponsepayload",
+  "id": "msg-authlistdevicesresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "devices": [
+      {
+        "deviceId": "sample-deviceId",
+        "principalId": "sample-principalId",
+        "publicKey": "sample-publicKey",
+        "platform": "sample-platform",
+        "keyVersion": "sample-keyVersion",
+        "status": "active",
+        "createdAt": "sample-createdAt",
+        "updatedAt": "sample-updatedAt",
+        "lastSeenAt": "sample-lastSeenAt",
+        "revokedAt": "sample-revokedAt"
+      }
+    ]
+  }
+}

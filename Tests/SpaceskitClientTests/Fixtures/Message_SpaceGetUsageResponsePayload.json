@@ -1,0 +1,56 @@
+{
+  "type": "test_spacegetusageresponsepayload",
+  "id": "msg-spacegetusageresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceUsage": {
+      "spaceId": "sample-spaceId",
+      "stagingBytes": 3.14,
+      "openChangeSets": 3.14,
+      "appliedChangeSetsPerMonth": 3.14,
+      "inputTokens": 3.14,
+      "outputTokens": 3.14,
+      "totalTokens": 3.14,
+      "tokenSpendUsd": 3.14,
+      "tokenAccuracy": "reported",
+      "usageSource": "ledger",
+      "updatedAt": "sample-updatedAt"
+    },
+    "participantUsage": {
+      "spaceId": "sample-spaceId",
+      "principalId": "sample-principalId",
+      "stagingBytes": 3.14,
+      "uploadsToday": 3.14,
+      "openChangeSets": 3.14,
+      "toolCallsPerHour": 3.14,
+      "updatedAt": "sample-updatedAt"
+    },
+    "agentSessions": [
+      {
+        "sessionId": "sample-sessionId",
+        "spaceId": "sample-spaceId",
+        "agentId": "sample-agentId",
+        "agentRole": "sample-agentRole",
+        "status": "active",
+        "startedAt": "sample-startedAt",
+        "endedAt": "sample-endedAt",
+        "lastActivityAt": "sample-lastActivityAt",
+        "turnCount": 42,
+        "inputTokens": 3.14,
+        "outputTokens": 3.14,
+        "totalTokens": 3.14,
+        "spentUsd": 3.14,
+        "tokenAccuracy": "reported",
+        "usageSource": "ledger"
+      }
+    ],
+    "globalLifetime": {
+      "inputTokens": 3.14,
+      "outputTokens": 3.14,
+      "totalTokens": 3.14,
+      "spentUsd": 3.14,
+      "tokenAccuracy": "reported",
+      "usageSource": "ledger"
+    }
+  }
+}

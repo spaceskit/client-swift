@@ -1,0 +1,8 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "inviteId": "sample-inviteId",
+  "participantId": "sample-participantId",
+  "revokedInvite": true,
+  "revokedParticipant": true
+}

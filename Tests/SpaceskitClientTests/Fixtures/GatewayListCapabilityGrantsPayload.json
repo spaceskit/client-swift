@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "includeRevoked": true,
+  "includeExpired": true
+}

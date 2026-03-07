@@ -1,0 +1,8 @@
+{
+  "remoteAgentId": "sample-remoteAgentId",
+  "displayName": "sample-displayName",
+  "description": "sample-description",
+  "metadata": {
+    "key1": "value1"
+  }
+}

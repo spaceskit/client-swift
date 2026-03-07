@@ -1,0 +1,11 @@
+{
+  "type": "test_spacepullsharedcontextpayload",
+  "id": "msg-spacepullsharedcontextpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "sourceSpaceId": "sample-sourceSpaceId",
+    "targetSpaceId": "sample-targetSpaceId",
+    "limit": 3.14
+  }
+}

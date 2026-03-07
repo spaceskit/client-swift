@@ -1,0 +1,24 @@
+{
+  "type": "test_gatewayupsertconnectorbindingpayload",
+  "id": "msg-gatewayupsertconnectorbindingpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "bindingId": "sample-bindingId",
+    "connectorId": "sample-connectorId",
+    "bindingType": null,
+    "selector": {
+      "key1": "value1"
+    },
+    "targetType": null,
+    "targetSpaceId": "sample-targetSpaceId",
+    "allowedActions": [
+      null
+    ],
+    "capabilityTypes": [
+      "sample-capabilityTypes"
+    ],
+    "priority": 3.14,
+    "enabled": true
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "templateId": "sample-templateId",
+  "title": "sample-title",
+  "description": "sample-description",
+  "communicationMode": null,
+  "baseAgents": [
+    {
+      "agentId": "sample-agentId",
+      "profileId": "sample-profileId",
+      "role": "participant",
+      "turnOrder": 3.14,
+      "isPrimary": true
+    }
+  ],
+  "agentPresetIds": [
+    "sample-agentPresetIds"
+  ],
+  "sourceSpaceId": "sample-sourceSpaceId",
+  "tags": [
+    "sample-tags"
+  ]
+}

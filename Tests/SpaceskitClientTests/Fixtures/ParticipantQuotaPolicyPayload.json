@@ -1,0 +1,10 @@
+{
+  "spaceId": "sample-spaceId",
+  "principalId": "sample-principalId",
+  "maxStagingBytes": 3.14,
+  "maxUploadsPerDay": 3.14,
+  "maxOpenChangeSets": 3.14,
+  "maxToolCallsPerHour": 3.14,
+  "updatedBy": "sample-updatedBy",
+  "updatedAt": "sample-updatedAt"
+}

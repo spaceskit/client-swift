@@ -1,0 +1,12 @@
+{
+  "type": "test_gatewayrevokecapabilitypayload",
+  "id": "msg-gatewayrevokecapabilitypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "capabilityId": "sample-capabilityId",
+    "reason": "sample-reason"
+  }
+}

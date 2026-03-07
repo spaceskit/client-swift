@@ -1,0 +1,41 @@
+{
+  "" : {
+    "const-values" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary.swiftconstvalues",
+    "dependencies" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary.d",
+    "diagnostics" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary.dia",
+    "emit-module-dependencies" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary-emit-module.dia",
+    "pch" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/SpaceskitClient-primary.swiftdeps"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/AdapterClient.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/AdapterClient.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/AdapterClient.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/AdapterClient.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/Auth.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Auth.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Auth.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Auth.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/GatewayClient.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GatewayClient.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GatewayClient.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GatewayClient.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/GeneratedProtocol.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GeneratedProtocol.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GeneratedProtocol.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/GeneratedProtocol.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/Protocol.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Protocol.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Protocol.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Protocol.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/Types.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Types.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Types.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/arm64/Types.o"
+  }
+}

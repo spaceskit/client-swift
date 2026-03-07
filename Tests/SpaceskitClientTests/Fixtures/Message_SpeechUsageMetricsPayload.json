@@ -1,0 +1,10 @@
+{
+  "type": "test_speechusagemetricspayload",
+  "id": "msg-speechusagemetricspayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14
+  }
+}

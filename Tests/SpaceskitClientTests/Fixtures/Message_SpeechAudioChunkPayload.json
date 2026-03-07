@@ -1,0 +1,20 @@
+{
+  "type": "test_speechaudiochunkpayload",
+  "id": "msg-speechaudiochunkpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "sessionId": "sample-sessionId",
+    "sequenceNo": 3.14,
+    "sequence": 3.14,
+    "audioBase64": "sample-audioBase64",
+    "sampleRateHz": 3.14,
+    "channels": 3.14,
+    "codec": "sample-codec",
+    "audioDurationSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14,
+    "transcriptText": "sample-transcriptText",
+    "isFinal": true
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "changeSetId": "sample-changeSetId",
+  "spaceId": "sample-spaceId",
+  "participantId": "sample-participantId",
+  "createdByPrincipalId": "sample-createdByPrincipalId",
+  "status": null,
+  "title": "sample-title",
+  "description": "sample-description",
+  "adapter": null,
+  "targetBranch": "sample-targetBranch",
+  "workspaceBasePath": "sample-workspaceBasePath",
+  "submittedAt": "sample-submittedAt",
+  "reviewedAt": "sample-reviewedAt",
+  "appliedAt": "sample-appliedAt",
+  "expiresAt": "sample-expiresAt",
+  "createdAt": "sample-createdAt",
+  "updatedAt": "sample-updatedAt"
+}

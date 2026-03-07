@@ -1,0 +1,25 @@
+{
+  "spacePolicy": {
+    "spaceId": "sample-spaceId",
+    "maxStagingBytes": 3.14,
+    "maxOpenChangeSets": 3.14,
+    "maxAppliedChangeSetsPerMonth": 3.14,
+    "tokenBudget": 3.14,
+    "maxParticipantStagingBytes": 3.14,
+    "maxUploadsPerDay": 3.14,
+    "maxOpenChangeSetsPerParticipant": 3.14,
+    "maxToolCallsPerHour": 3.14,
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  },
+  "participantPolicy": {
+    "spaceId": "sample-spaceId",
+    "principalId": "sample-principalId",
+    "maxStagingBytes": 3.14,
+    "maxUploadsPerDay": 3.14,
+    "maxOpenChangeSets": 3.14,
+    "maxToolCallsPerHour": 3.14,
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "statuses": [
+    "sample-statuses"
+  ],
+  "resourceId": "sample-resourceId",
+  "limit": 3.14
+}

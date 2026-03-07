@@ -1,0 +1,9 @@
+{
+  "spaceId": "sample-spaceId",
+  "principalId": "sample-principalId",
+  "stagingBytes": 3.14,
+  "uploadsToday": 3.14,
+  "openChangeSets": 3.14,
+  "toolCallsPerHour": 3.14,
+  "updatedAt": "sample-updatedAt"
+}

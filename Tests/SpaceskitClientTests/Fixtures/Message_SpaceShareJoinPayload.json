@@ -1,0 +1,16 @@
+{
+  "type": "test_spacesharejoinpayload",
+  "id": "msg-spacesharejoinpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "inviteToken": "sample-inviteToken",
+    "deviceId": "sample-deviceId",
+    "devicePublicKey": "sample-devicePublicKey",
+    "identityModeHint": "device_key",
+    "appleIdAssertion": "sample-appleIdAssertion",
+    "joinRoute": null,
+    "relaySessionToken": "sample-relaySessionToken"
+  }
+}

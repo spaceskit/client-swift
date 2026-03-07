@@ -1,0 +1,13 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "providerId": "sample-providerId",
+  "model": "sample-model",
+  "apiKey": "sample-apiKey",
+  "apiKeySecretRef": "sample-apiKeySecretRef",
+  "baseURL": "sample-baseURL",
+  "allowedModels": [
+    "sample-allowedModels"
+  ],
+  "allowCustomModel": true,
+  "nativeCliToolsEnabled": true
+}

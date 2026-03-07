@@ -1,0 +1,8 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "state": "sample-state",
+  "turnCount": 42,
+  "activeAgentId": "sample-activeAgentId",
+  "pendingFeedback": 42
+}

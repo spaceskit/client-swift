@@ -1,0 +1,7 @@
+{
+  "changeSetId": "sample-changeSetId",
+  "unifiedDiff": "sample-unifiedDiff",
+  "files": null,
+  "changeType": "sample-changeType",
+  "sizeBytes": 3.14
+}

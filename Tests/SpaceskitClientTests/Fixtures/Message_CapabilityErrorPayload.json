@@ -1,0 +1,14 @@
+{
+  "type": "test_capabilityerrorpayload",
+  "id": "msg-capabilityerrorpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "invocationId": "sample-invocationId",
+    "providerId": "sample-providerId",
+    "code": "sample-code",
+    "message": "sample-message",
+    "details": {
+      "example": true
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "test_syncqueryresourcespayload",
+  "id": "msg-syncqueryresourcespayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "peerId": "sample-peerId",
+    "resourceId": "sample-resourceId",
+    "types": [
+      "sample-types"
+    ],
+    "tags": [
+      "sample-tags"
+    ],
+    "updatedAfter": "sample-updatedAfter",
+    "cursor": "sample-cursor",
+    "limit": 3.14
+  }
+}

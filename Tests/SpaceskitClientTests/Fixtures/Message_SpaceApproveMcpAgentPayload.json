@@ -1,0 +1,13 @@
+{
+  "type": "test_spaceapprovemcpagentpayload",
+  "id": "msg-spaceapprovemcpagentpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "remoteAgentId": "sample-remoteAgentId",
+    "displayName": "sample-displayName",
+    "agentId": "sample-agentId",
+    "profileId": "sample-profileId"
+  }
+}

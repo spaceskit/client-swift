@@ -1,0 +1,12 @@
+{
+  "type": "test_spacelinkresponsepayload",
+  "id": "msg-spacelinkresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "link": null,
+    "targetSpaceId": "sample-targetSpaceId",
+    "mode": "sample-mode",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

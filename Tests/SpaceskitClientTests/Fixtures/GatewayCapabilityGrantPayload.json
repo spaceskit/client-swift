@@ -1,0 +1,13 @@
+{
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "capabilityId": "sample-capabilityId",
+  "level": "read",
+  "source": "sample-source",
+  "reason": "sample-reason",
+  "grantedBy": "sample-grantedBy",
+  "grantedAt": "sample-grantedAt",
+  "expiresAt": "sample-expiresAt",
+  "revokedAt": "sample-revokedAt",
+  "updatedAt": "sample-updatedAt"
+}

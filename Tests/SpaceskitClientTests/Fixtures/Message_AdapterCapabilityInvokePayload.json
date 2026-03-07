@@ -1,0 +1,14 @@
+{
+  "type": "test_adaptercapabilityinvokepayload",
+  "id": "msg-adaptercapabilityinvokepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "invocationId": "sample-invocationId",
+    "capability": "sample-capability",
+    "operation": "sample-operation",
+    "args": {
+      "key1": "value1"
+    },
+    "targetProvider": "sample-targetProvider"
+  }
+}

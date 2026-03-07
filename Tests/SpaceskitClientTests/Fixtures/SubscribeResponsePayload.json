@@ -1,0 +1,11 @@
+{
+  "subscribedSpaceUids": [
+    "sample-subscribedSpaceUids"
+  ],
+  "denied": [
+    {
+      "spaceUid": "sample-spaceUid",
+      "reason": "sample-reason"
+    }
+  ]
+}

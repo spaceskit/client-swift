@@ -1,0 +1,7 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "agentId": "sample-agentId",
+  "idleDurationMs": 3.14,
+  "lastTurnId": "sample-lastTurnId"
+}

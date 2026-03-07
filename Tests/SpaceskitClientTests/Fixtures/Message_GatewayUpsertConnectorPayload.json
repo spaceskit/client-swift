@@ -1,0 +1,24 @@
+{
+  "type": "test_gatewayupsertconnectorpayload",
+  "id": "msg-gatewayupsertconnectorpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "connectorId": "sample-connectorId",
+    "familyId": "sample-familyId",
+    "displayName": "sample-displayName",
+    "accountFingerprint": "sample-accountFingerprint",
+    "label": "sample-label",
+    "status": null,
+    "metadata": {
+      "key1": "value1"
+    },
+    "secretRefs": [
+      {
+        "key": "sample-key",
+        "ref": "sample-ref",
+        "backend": "sample-backend"
+      }
+    ]
+  }
+}

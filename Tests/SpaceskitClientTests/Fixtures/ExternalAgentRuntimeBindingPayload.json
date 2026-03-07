@@ -1,0 +1,10 @@
+{
+  "runtimeKind": null,
+  "spaceId": "sample-spaceId",
+  "agentId": "sample-agentId",
+  "endpointId": "sample-endpointId",
+  "remoteAgentId": "sample-remoteAgentId",
+  "displayName": "sample-displayName",
+  "createdAt": "sample-createdAt",
+  "updatedAt": "sample-updatedAt"
+}

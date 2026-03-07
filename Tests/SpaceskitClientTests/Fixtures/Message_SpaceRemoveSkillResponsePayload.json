@@ -1,0 +1,17 @@
+{
+  "type": "test_spaceremoveskillresponsepayload",
+  "id": "msg-spaceremoveskillresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "removed": true,
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "skillId": "sample-skillId",
+    "skills": [
+      "sample-skills"
+    ],
+    "space": {
+      "example": true
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "test_changesetfilepayload",
+  "id": "msg-changesetfilepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "relativePath": "sample-relativePath",
+    "stagedPath": "sample-stagedPath",
+    "sha256": "sample-sha256",
+    "sizeBytes": 3.14,
+    "changeType": "added",
+    "createdAt": "sample-createdAt"
+  }
+}

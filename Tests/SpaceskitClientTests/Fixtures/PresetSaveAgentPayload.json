@@ -1,0 +1,18 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "presetId": "sample-presetId",
+  "title": "sample-title",
+  "description": "sample-description",
+  "defaultAgents": [
+    {
+      "agentId": "sample-agentId",
+      "profileId": "sample-profileId",
+      "role": "participant",
+      "turnOrder": 3.14,
+      "isPrimary": true
+    }
+  ],
+  "tags": [
+    "sample-tags"
+  ]
+}

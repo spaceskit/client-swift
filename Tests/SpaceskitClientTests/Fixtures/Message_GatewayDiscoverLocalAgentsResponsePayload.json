@@ -1,0 +1,25 @@
+{
+  "type": "test_gatewaydiscoverlocalagentsresponsepayload",
+  "id": "msg-gatewaydiscoverlocalagentsresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "agents": [
+      {
+        "id": "sample-id",
+        "name": "sample-name",
+        "detected": true,
+        "executablePath": "sample-executablePath",
+        "appPath": "sample-appPath",
+        "serviceReachable": true,
+        "recommendedProviderId": "sample-recommendedProviderId",
+        "recommendedModel": "sample-recommendedModel",
+        "requiresApiKey": true,
+        "availableModels": [
+          "sample-availableModels"
+        ],
+        "detectionError": "sample-detectionError",
+        "notes": "sample-notes"
+      }
+    ]
+  }
+}

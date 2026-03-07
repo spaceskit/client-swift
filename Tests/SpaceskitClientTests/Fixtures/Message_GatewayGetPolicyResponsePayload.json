@@ -1,0 +1,25 @@
+{
+  "type": "test_gatewaygetpolicyresponsepayload",
+  "id": "msg-gatewaygetpolicyresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "policy": {
+      "allowedCapabilityTypes": [
+        "sample-allowedCapabilityTypes"
+      ],
+      "deniedCapabilityTypes": [
+        "sample-deniedCapabilityTypes"
+      ],
+      "allowedSkillIds": [
+        "sample-allowedSkillIds"
+      ],
+      "deniedSkillIds": [
+        "sample-deniedSkillIds"
+      ],
+      "globalFlags": {
+        "key1": "value1"
+      },
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

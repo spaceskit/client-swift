@@ -1,0 +1,17 @@
+{
+  "participant": {
+    "participantId": "sample-participantId",
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "principalId": "sample-principalId",
+    "principalType": "sample-principalType",
+    "mode": "collaborator",
+    "status": "active",
+    "joinedViaInviteId": "sample-joinedViaInviteId",
+    "deviceId": "sample-deviceId",
+    "devicePublicKey": "sample-devicePublicKey",
+    "joinedAt": "sample-joinedAt",
+    "updatedAt": "sample-updatedAt",
+    "revokedAt": "sample-revokedAt"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "test_spacegetpayload",
+  "id": "msg-spacegetpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId"
+  }
+}

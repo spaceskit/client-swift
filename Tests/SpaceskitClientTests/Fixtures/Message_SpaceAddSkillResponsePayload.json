@@ -1,0 +1,16 @@
+{
+  "type": "test_spaceaddskillresponsepayload",
+  "id": "msg-spaceaddskillresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "skillId": "sample-skillId",
+    "skills": [
+      "sample-skills"
+    ],
+    "space": {
+      "example": true
+    }
+  }
+}

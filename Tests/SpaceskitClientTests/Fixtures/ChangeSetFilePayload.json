@@ -1,0 +1,8 @@
+{
+  "relativePath": "sample-relativePath",
+  "stagedPath": "sample-stagedPath",
+  "sha256": "sample-sha256",
+  "sizeBytes": 3.14,
+  "changeType": "added",
+  "createdAt": "sample-createdAt"
+}

@@ -1,0 +1,11 @@
+{
+  "windowDays": 3.14,
+  "sessionCount": 3.14,
+  "inputTokens": 3.14,
+  "cachedInputTokens": 3.14,
+  "outputTokens": 3.14,
+  "totalTokens": 3.14,
+  "estimatedCostUsd": 3.14,
+  "tokenAccuracy": "reported",
+  "usageSource": "ledger"
+}

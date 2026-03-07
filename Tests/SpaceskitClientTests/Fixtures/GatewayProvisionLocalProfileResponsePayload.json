@@ -1,0 +1,9 @@
+{
+  "profileId": "sample-profileId",
+  "profileName": "sample-profileName",
+  "created": true,
+  "providerId": "sample-providerId",
+  "model": "sample-model",
+  "agentId": "sample-agentId",
+  "assignmentCreated": true
+}

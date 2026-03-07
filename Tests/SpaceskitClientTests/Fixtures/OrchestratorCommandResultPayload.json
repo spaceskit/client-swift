@@ -1,0 +1,14 @@
+{
+  "commandId": "sample-commandId",
+  "correlationId": "sample-correlationId",
+  "apiVersion": "sample-apiVersion",
+  "commandType": "sample-commandType",
+  "targetSpaceId": "sample-targetSpaceId",
+  "targetAgentId": "sample-targetAgentId",
+  "status": "accepted",
+  "result": {
+    "key1": "value1"
+  },
+  "error": null,
+  "message": "sample-message"
+}

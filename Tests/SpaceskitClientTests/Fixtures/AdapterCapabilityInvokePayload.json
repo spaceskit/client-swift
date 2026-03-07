@@ -1,0 +1,9 @@
+{
+  "invocationId": "sample-invocationId",
+  "capability": "sample-capability",
+  "operation": "sample-operation",
+  "args": {
+    "key1": "value1"
+  },
+  "targetProvider": "sample-targetProvider"
+}

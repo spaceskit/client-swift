@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "integrationClass": null,
+  "requestedName": "sample-requestedName",
+  "useCase": "sample-useCase",
+  "sourceURL": "sample-sourceURL",
+  "notes": "sample-notes"
+}

@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "capabilityId": "sample-capabilityId",
+  "reason": "sample-reason"
+}

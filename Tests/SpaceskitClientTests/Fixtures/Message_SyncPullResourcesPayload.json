@@ -1,0 +1,24 @@
+{
+  "type": "test_syncpullresourcespayload",
+  "id": "msg-syncpullresourcespayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "peerId": "sample-peerId",
+    "idempotencyKey": "sample-idempotencyKey",
+    "refs": [
+      {
+        "type": "sample-type",
+        "id": "sample-id",
+        "versionHash": "sample-versionHash",
+        "resourceType": "sample-resourceType",
+        "resourceId": "sample-resourceId",
+        "title": "sample-title",
+        "updatedAt": "sample-updatedAt",
+        "tags": [
+          "sample-tags"
+        ]
+      }
+    ]
+  }
+}

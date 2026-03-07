@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "turnId": "sample-turnId",
+  "limit": 3.14,
+  "offset": 3.14
+}

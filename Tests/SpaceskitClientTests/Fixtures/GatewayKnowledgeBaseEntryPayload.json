@@ -1,0 +1,14 @@
+{
+  "entryId": "sample-entryId",
+  "name": "sample-name",
+  "kind": null,
+  "uri": "sample-uri",
+  "description": "sample-description",
+  "tags": [
+    "sample-tags"
+  ],
+  "scopeType": null,
+  "spaceId": "sample-spaceId",
+  "createdAt": "sample-createdAt",
+  "updatedAt": "sample-updatedAt"
+}

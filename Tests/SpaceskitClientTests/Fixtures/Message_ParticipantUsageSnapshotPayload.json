@@ -1,0 +1,14 @@
+{
+  "type": "test_participantusagesnapshotpayload",
+  "id": "msg-participantusagesnapshotpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "principalId": "sample-principalId",
+    "stagingBytes": 3.14,
+    "uploadsToday": 3.14,
+    "openChangeSets": 3.14,
+    "toolCallsPerHour": 3.14,
+    "updatedAt": "sample-updatedAt"
+  }
+}

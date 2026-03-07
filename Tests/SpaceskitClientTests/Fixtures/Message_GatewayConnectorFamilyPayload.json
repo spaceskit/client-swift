@@ -1,0 +1,21 @@
+{
+  "type": "test_gatewayconnectorfamilypayload",
+  "id": "msg-gatewayconnectorfamilypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "familyId": "sample-familyId",
+    "displayName": "sample-displayName",
+    "kind": null,
+    "runtime": null,
+    "trustClass": null,
+    "embeddedEnabled": true,
+    "capabilityTypes": [
+      "sample-capabilityTypes"
+    ],
+    "features": {
+      "key1": "value1"
+    },
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

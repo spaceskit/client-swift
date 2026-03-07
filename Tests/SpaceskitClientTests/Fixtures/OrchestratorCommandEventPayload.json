@@ -1,0 +1,7 @@
+{
+  "status": "accepted",
+  "event": {
+    "key1": "value1"
+  },
+  "createdAt": "sample-createdAt"
+}

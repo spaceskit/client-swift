@@ -1,0 +1,9 @@
+{
+  "enabled": true,
+  "managedSttSecondsMonthlyLimit": 3.14,
+  "managedTtsCharsMonthlyLimit": 3.14,
+  "managedTtsSecondsMonthlyLimit": 3.14,
+  "managedCurrentMonthSttSeconds": 3.14,
+  "managedCurrentMonthTtsChars": 3.14,
+  "managedCurrentMonthTtsSeconds": 3.14
+}

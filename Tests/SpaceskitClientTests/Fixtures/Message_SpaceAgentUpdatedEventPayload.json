@@ -1,0 +1,13 @@
+{
+  "type": "test_spaceagentupdatedeventpayload",
+  "id": "msg-spaceagentupdatedeventpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "agentId": "sample-agentId",
+    "oldProfileId": "sample-oldProfileId",
+    "newProfileId": "sample-newProfileId",
+    "updatedAt": "sample-updatedAt"
+  }
+}

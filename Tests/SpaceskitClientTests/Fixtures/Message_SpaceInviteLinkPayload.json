@@ -1,0 +1,13 @@
+{
+  "type": "test_spaceinvitelinkpayload",
+  "id": "msg-spaceinvitelinkpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "version": null,
+    "relayInviteId": "sample-relayInviteId",
+    "relayUrl": "sample-relayUrl",
+    "spaceIdHint": "sample-spaceIdHint",
+    "spaceUidHint": "sample-spaceUidHint",
+    "fallbackGatewayUrl": "sample-fallbackGatewayUrl"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "preferredModels": [
+    "sample-preferredModels"
+  ],
+  "fallbackModels": [
+    "sample-fallbackModels"
+  ],
+  "constraints": {
+    "key1": "value1"
+  }
+}

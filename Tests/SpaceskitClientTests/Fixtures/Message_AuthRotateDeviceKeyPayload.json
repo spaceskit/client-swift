@@ -1,0 +1,11 @@
+{
+  "type": "test_authrotatedevicekeypayload",
+  "id": "msg-authrotatedevicekeypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "deviceId": "sample-deviceId",
+    "nextPublicKey": "sample-nextPublicKey",
+    "platform": "sample-platform"
+  }
+}

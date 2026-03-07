@@ -1,0 +1,24 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "name": "sample-name",
+  "timezone": "sample-timezone",
+  "schedulePreset": {
+    "kind": null,
+    "intervalHours": 3.14,
+    "minute": 3.14,
+    "hour": 3.14,
+    "daysOfWeek": [
+      3.14
+    ]
+  },
+  "action": {
+    "type": null,
+    "promptText": "sample-promptText",
+    "targetAgentId": "sample-targetAgentId"
+  },
+  "primarySpaceId": "sample-primarySpaceId",
+  "relatedSpaceIds": [
+    "sample-relatedSpaceIds"
+  ]
+}

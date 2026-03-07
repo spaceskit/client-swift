@@ -1,0 +1,10 @@
+{
+  "templateId": "sample-templateId",
+  "title": "sample-title",
+  "communicationMode": null,
+  "agentPresetIds": [
+    "sample-agentPresetIds"
+  ],
+  "createdBy": "sample-createdBy",
+  "updatedAt": "sample-updatedAt"
+}

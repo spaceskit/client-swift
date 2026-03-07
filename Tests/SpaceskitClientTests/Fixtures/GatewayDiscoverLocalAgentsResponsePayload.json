@@ -1,0 +1,20 @@
+{
+  "agents": [
+    {
+      "id": "sample-id",
+      "name": "sample-name",
+      "detected": true,
+      "executablePath": "sample-executablePath",
+      "appPath": "sample-appPath",
+      "serviceReachable": true,
+      "recommendedProviderId": "sample-recommendedProviderId",
+      "recommendedModel": "sample-recommendedModel",
+      "requiresApiKey": true,
+      "availableModels": [
+        "sample-availableModels"
+      ],
+      "detectionError": "sample-detectionError",
+      "notes": "sample-notes"
+    }
+  ]
+}

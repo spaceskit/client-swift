@@ -1,0 +1,14 @@
+{
+  "type": "test_gatewayprovisionlocalprofileresponsepayload",
+  "id": "msg-gatewayprovisionlocalprofileresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "profileId": "sample-profileId",
+    "profileName": "sample-profileName",
+    "created": true,
+    "providerId": "sample-providerId",
+    "model": "sample-model",
+    "agentId": "sample-agentId",
+    "assignmentCreated": true
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "providerId": "sample-providerId",
+  "displayName": "sample-displayName",
+  "group": null,
+  "integrationClass": null,
+  "status": null,
+  "hasApiKey": true,
+  "requiresApiKey": true,
+  "baseURL": "sample-baseURL",
+  "detectionStatus": null,
+  "detectionError": "sample-detectionError",
+  "models": [
+    {
+      "id": "sample-id",
+      "displayName": "sample-displayName",
+      "source": null,
+      "available": true,
+      "contextWindow": 3.14
+    }
+  ],
+  "installHint": "sample-installHint",
+  "recommended": true,
+  "supportsHostedBilling": true,
+  "configAllowed": true
+}

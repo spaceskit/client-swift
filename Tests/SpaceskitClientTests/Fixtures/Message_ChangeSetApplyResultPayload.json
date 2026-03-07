@@ -1,0 +1,17 @@
+{
+  "type": "test_changesetapplyresultpayload",
+  "id": "msg-changesetapplyresultpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "changeSetId": "sample-changeSetId",
+    "adapter": null,
+    "appliedPaths": [
+      "sample-appliedPaths"
+    ],
+    "rollbackPath": "sample-rollbackPath",
+    "git": null,
+    "commitMessage": "sample-commitMessage",
+    "commitHash": "sample-commitHash",
+    "warning": "sample-warning"
+  }
+}

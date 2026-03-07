@@ -1,0 +1,13 @@
+{
+  "integrationRequestId": "sample-integrationRequestId",
+  "integrationClass": null,
+  "requestedName": "sample-requestedName",
+  "useCase": "sample-useCase",
+  "sourceURL": "sample-sourceURL",
+  "notes": "sample-notes",
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "status": "sample-status",
+  "createdAt": "sample-createdAt",
+  "updatedAt": "sample-updatedAt"
+}

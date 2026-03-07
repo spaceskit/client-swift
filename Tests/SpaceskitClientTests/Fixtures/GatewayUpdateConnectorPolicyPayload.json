@@ -1,0 +1,11 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "scopeType": "global",
+  "scopeId": "sample-scopeId",
+  "requestsPerMinute": 3.14,
+  "burst": 3.14,
+  "disabled": true,
+  "disableReason": "sample-disableReason",
+  "disabledUntil": "sample-disabledUntil",
+  "updatedBy": "sample-updatedBy"
+}

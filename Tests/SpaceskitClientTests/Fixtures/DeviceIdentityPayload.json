@@ -1,0 +1,12 @@
+{
+  "deviceId": "sample-deviceId",
+  "principalId": "sample-principalId",
+  "publicKey": "sample-publicKey",
+  "platform": "sample-platform",
+  "keyVersion": "sample-keyVersion",
+  "status": "active",
+  "createdAt": "sample-createdAt",
+  "updatedAt": "sample-updatedAt",
+  "lastSeenAt": "sample-lastSeenAt",
+  "revokedAt": "sample-revokedAt"
+}

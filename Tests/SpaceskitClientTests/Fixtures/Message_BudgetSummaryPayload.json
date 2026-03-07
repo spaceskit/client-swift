@@ -1,0 +1,12 @@
+{
+  "type": "test_budgetsummarypayload",
+  "id": "msg-budgetsummarypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "softCapUsd": 3.14,
+    "hardCapUsd": 3.14,
+    "warningThreshold": 3.14,
+    "spentUsd": 3.14,
+    "leftUsd": 3.14
+  }
+}

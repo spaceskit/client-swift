@@ -1,0 +1,9 @@
+{
+  "window": "primary",
+  "label": "session",
+  "usedPercent": 3.14,
+  "remainingPercent": 3.14,
+  "windowMinutes": 3.14,
+  "resetsAt": "sample-resetsAt",
+  "resetDescription": "sample-resetDescription"
+}

@@ -1,0 +1,21 @@
+{
+  "windows": null,
+  "last7d": {
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14,
+    "estimatedCostUsd": 3.14
+  },
+  "last30d": {
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14,
+    "estimatedCostUsd": 3.14
+  },
+  "lifetime": {
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14,
+    "estimatedCostUsd": 3.14
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "test_providertelemetrywindowpayload",
+  "id": "msg-providertelemetrywindowpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "scopeId": "sample-scopeId",
+    "scopeName": "sample-scopeName",
+    "window": "primary",
+    "usedPercent": 3.14,
+    "remainingPercent": 3.14,
+    "resetsAt": "sample-resetsAt",
+    "windowDurationMins": 3.14
+  }
+}

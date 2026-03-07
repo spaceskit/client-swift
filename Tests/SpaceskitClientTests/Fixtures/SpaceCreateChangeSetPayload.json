@@ -1,0 +1,9 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "title": "sample-title",
+  "description": "sample-description",
+  "adapter": null,
+  "targetBranch": "sample-targetBranch",
+  "expiresInSeconds": 3.14
+}

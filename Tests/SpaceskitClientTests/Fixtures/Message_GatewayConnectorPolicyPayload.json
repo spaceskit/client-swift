@@ -1,0 +1,16 @@
+{
+  "type": "test_gatewayconnectorpolicypayload",
+  "id": "msg-gatewayconnectorpolicypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "scopeType": "global",
+    "scopeId": "sample-scopeId",
+    "requestsPerMinute": 3.14,
+    "burst": 3.14,
+    "disabled": true,
+    "disableReason": "sample-disableReason",
+    "disabledUntil": "sample-disabledUntil",
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

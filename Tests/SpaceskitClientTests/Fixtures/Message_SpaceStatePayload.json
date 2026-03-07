@@ -1,0 +1,13 @@
+{
+  "type": "test_spacestatepayload",
+  "id": "msg-spacestatepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "state": "sample-state",
+    "turnCount": 42,
+    "activeAgentId": "sample-activeAgentId",
+    "pendingFeedback": 42
+  }
+}

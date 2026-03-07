@@ -1,0 +1,9 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "changeSetId": "sample-changeSetId",
+  "uploadId": "sample-uploadId",
+  "contentBase64": "sample-contentBase64",
+  "sourcePath": "sample-sourcePath",
+  "expectedSha256": "sample-expectedSha256"
+}

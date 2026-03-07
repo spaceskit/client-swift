@@ -1,0 +1,15 @@
+{
+  "eventId": "sample-eventId",
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "turnId": "sample-turnId",
+  "seq": 42,
+  "eventType": "sample-eventType",
+  "actorId": "sample-actorId",
+  "lineageId": "sample-lineageId",
+  "hopCount": 3.14,
+  "payload": {
+    "key1": "value1"
+  },
+  "createdAt": "sample-createdAt"
+}

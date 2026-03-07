@@ -1,0 +1,11 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "correlationId": "sample-correlationId",
+  "idempotencyKey": "sample-idempotencyKey",
+  "commandType": "list_rooms",
+  "targetSpaceId": "sample-targetSpaceId",
+  "targetAgentId": "sample-targetAgentId",
+  "payload": {
+    "key1": "value1"
+  }
+}

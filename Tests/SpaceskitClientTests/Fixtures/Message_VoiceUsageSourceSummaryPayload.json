@@ -1,0 +1,12 @@
+{
+  "type": "test_voiceusagesourcesummarypayload",
+  "id": "msg-voiceusagesourcesummarypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "source": "managed",
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14,
+    "estimatedCostUsd": 3.14
+  }
+}

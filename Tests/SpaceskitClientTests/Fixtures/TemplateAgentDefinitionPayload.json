@@ -1,0 +1,7 @@
+{
+  "agentId": "sample-agentId",
+  "profileId": "sample-profileId",
+  "role": "participant",
+  "turnOrder": 3.14,
+  "isPrimary": true
+}

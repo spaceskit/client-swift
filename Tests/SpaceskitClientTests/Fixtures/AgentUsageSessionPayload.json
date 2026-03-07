@@ -1,0 +1,17 @@
+{
+  "sessionId": "sample-sessionId",
+  "spaceId": "sample-spaceId",
+  "agentId": "sample-agentId",
+  "agentRole": "sample-agentRole",
+  "status": "active",
+  "startedAt": "sample-startedAt",
+  "endedAt": "sample-endedAt",
+  "lastActivityAt": "sample-lastActivityAt",
+  "turnCount": 42,
+  "inputTokens": 3.14,
+  "outputTokens": 3.14,
+  "totalTokens": 3.14,
+  "spentUsd": 3.14,
+  "tokenAccuracy": "reported",
+  "usageSource": "ledger"
+}

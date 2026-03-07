@@ -1,0 +1,22 @@
+{
+  "invite": {
+    "inviteId": "sample-inviteId",
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "issuedByPrincipalId": "sample-issuedByPrincipalId",
+    "mode": "collaborator",
+    "status": "active",
+    "expiresAt": "sample-expiresAt",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt",
+    "inviteToken": "sample-inviteToken",
+    "inviteLink": {
+      "version": null,
+      "relayInviteId": "sample-relayInviteId",
+      "relayUrl": "sample-relayUrl",
+      "spaceIdHint": "sample-spaceIdHint",
+      "spaceUidHint": "sample-spaceUidHint",
+      "fallbackGatewayUrl": "sample-fallbackGatewayUrl"
+    }
+  }
+}

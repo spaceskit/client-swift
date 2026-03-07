@@ -1,0 +1,10 @@
+{
+  "type": "test_gatewaylistintegrationrequestspayload",
+  "id": "msg-gatewaylistintegrationrequestspayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "integrationClass": null,
+    "limit": 3.14
+  }
+}

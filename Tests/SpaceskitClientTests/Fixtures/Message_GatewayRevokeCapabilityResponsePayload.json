@@ -1,0 +1,24 @@
+{
+  "type": "test_gatewayrevokecapabilityresponsepayload",
+  "id": "msg-gatewayrevokecapabilityresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "revoked": true,
+    "capabilityId": "sample-capabilityId",
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "grant": {
+      "principalId": "sample-principalId",
+      "deviceId": "sample-deviceId",
+      "capabilityId": "sample-capabilityId",
+      "level": "read",
+      "source": "sample-source",
+      "reason": "sample-reason",
+      "grantedBy": "sample-grantedBy",
+      "grantedAt": "sample-grantedAt",
+      "expiresAt": "sample-expiresAt",
+      "revokedAt": "sample-revokedAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "invocationId": "sample-invocationId",
+  "providerId": "sample-providerId",
+  "data": {
+    "example": true
+  },
+  "durationMs": 3.14
+}

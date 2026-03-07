@@ -1,0 +1,25 @@
+{
+  "type": "test_speechstartpayload",
+  "id": "msg-speechstartpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "sessionId": "sample-sessionId",
+    "locale": "sample-locale",
+    "sourceDevice": "sample-sourceDevice",
+    "enableTranscription": true,
+    "enablePlayback": true,
+    "agentId": "sample-agentId",
+    "autoSubmitTurns": true,
+    "preferredSource": null,
+    "preferredProviderId": "sample-preferredProviderId",
+    "byokProviderId": "sample-byokProviderId",
+    "localModelProviderId": "sample-localModelProviderId",
+    "appleSpeechProviderId": "sample-appleSpeechProviderId",
+    "allowByokFallback": true,
+    "allowLocalFallback": true,
+    "allowAppleSpeechFallback": true
+  }
+}

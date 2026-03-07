@@ -1,0 +1,21 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "sample-artifactId",
+      "spaceId": "sample-spaceId",
+      "turnId": "sample-turnId",
+      "agentId": "sample-agentId",
+      "type": "sample-type",
+      "title": "sample-title",
+      "mimeType": "sample-mimeType",
+      "sizeBytes": 3.14,
+      "tags": [
+        "sample-tags"
+      ],
+      "visibility": "shared",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  ],
+  "total": 3.14
+}

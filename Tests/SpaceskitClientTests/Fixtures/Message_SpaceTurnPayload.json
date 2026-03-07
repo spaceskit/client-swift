@@ -1,0 +1,18 @@
+{
+  "type": "test_spaceturnpayload",
+  "id": "msg-spaceturnpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "turnId": "sample-turnId",
+    "agentId": "sample-agentId",
+    "status": "sample-status",
+    "inputText": "sample-inputText",
+    "outputText": "sample-outputText",
+    "promptTokens": 3.14,
+    "completionTokens": 3.14,
+    "totalTokens": 3.14,
+    "createdAt": "sample-createdAt",
+    "completedAt": "sample-completedAt",
+    "replyToTurnId": "sample-replyToTurnId"
+  }
+}

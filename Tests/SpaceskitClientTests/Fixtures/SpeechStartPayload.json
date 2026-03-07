@@ -1,0 +1,20 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "sessionId": "sample-sessionId",
+  "locale": "sample-locale",
+  "sourceDevice": "sample-sourceDevice",
+  "enableTranscription": true,
+  "enablePlayback": true,
+  "agentId": "sample-agentId",
+  "autoSubmitTurns": true,
+  "preferredSource": null,
+  "preferredProviderId": "sample-preferredProviderId",
+  "byokProviderId": "sample-byokProviderId",
+  "localModelProviderId": "sample-localModelProviderId",
+  "appleSpeechProviderId": "sample-appleSpeechProviderId",
+  "allowByokFallback": true,
+  "allowLocalFallback": true,
+  "allowAppleSpeechFallback": true
+}

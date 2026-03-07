@@ -1,0 +1,12 @@
+{
+  "type": "test_agentidlepayload",
+  "id": "msg-agentidlepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "agentId": "sample-agentId",
+    "idleDurationMs": 3.14,
+    "lastTurnId": "sample-lastTurnId"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "telemetry": [
+    {
+      "providerId": "sample-providerId",
+      "status": null,
+      "fetchedAt": "sample-fetchedAt",
+      "message": "sample-message",
+      "quota": {
+        "available": true,
+        "sourceLabel": "sample-sourceLabel",
+        "windows": [
+          {
+            "window": "primary",
+            "label": "session",
+            "usedPercent": 3.14,
+            "remainingPercent": 3.14,
+            "windowMinutes": 3.14,
+            "resetsAt": "sample-resetsAt",
+            "resetDescription": "sample-resetDescription"
+          }
+        ],
+        "creditsRemaining": 3.14,
+        "accountLabel": "sample-accountLabel",
+        "updatedAt": "sample-updatedAt",
+        "message": "sample-message",
+        "installHint": {
+          "command": "sample-command",
+          "docsUrl": "sample-docsUrl"
+        }
+      },
+      "summary": {
+        "windowDays": 3.14,
+        "sessionCount": 3.14,
+        "inputTokens": 3.14,
+        "cachedInputTokens": 3.14,
+        "outputTokens": 3.14,
+        "totalTokens": 3.14,
+        "estimatedCostUsd": 3.14,
+        "tokenAccuracy": "reported",
+        "usageSource": "ledger"
+      },
+      "sessions": [
+        {
+          "sessionId": "sample-sessionId",
+          "model": "sample-model",
+          "startedAt": "sample-startedAt",
+          "lastActivityAt": "sample-lastActivityAt",
+          "inputTokens": 3.14,
+          "cachedInputTokens": 3.14,
+          "outputTokens": 3.14,
+          "totalTokens": 3.14,
+          "estimatedCostUsd": 3.14,
+          "tokenAccuracy": "reported",
+          "usageSource": "ledger"
+        }
+      ]
+    }
+  ],
+  "generatedAt": "sample-generatedAt"
+}

@@ -1,0 +1,14 @@
+{
+  "type": "test_authissuehttpprincipaltokenresponsepayload",
+  "id": "msg-authissuehttpprincipaltokenresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "token": "sample-token",
+    "tokenType": null,
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "issuedAt": "sample-issuedAt",
+    "expiresAt": "sample-expiresAt",
+    "ttlSeconds": 3.14
+  }
+}

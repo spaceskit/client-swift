@@ -1,0 +1,36 @@
+{
+  "type": "test_usagegetsnapshotresponsepayload",
+  "id": "msg-usagegetsnapshotresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "snapshot": {
+      "computedAt": "sample-computedAt",
+      "currency": null,
+      "windows": null,
+      "last7d": {
+        "inputTokens": 3.14,
+        "outputTokens": 3.14,
+        "totalTokens": 3.14,
+        "spentUsd": 3.14,
+        "tokenAccuracy": "reported",
+        "usageSource": "ledger"
+      },
+      "last30d": {
+        "inputTokens": 3.14,
+        "outputTokens": 3.14,
+        "totalTokens": 3.14,
+        "spentUsd": 3.14,
+        "tokenAccuracy": "reported",
+        "usageSource": "ledger"
+      },
+      "lifetime": {
+        "inputTokens": 3.14,
+        "outputTokens": 3.14,
+        "totalTokens": 3.14,
+        "spentUsd": 3.14,
+        "tokenAccuracy": "reported",
+        "usageSource": "ledger"
+      }
+    }
+  }
+}

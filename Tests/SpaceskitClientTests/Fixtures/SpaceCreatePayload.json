@@ -1,0 +1,44 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "spaceId": "sample-spaceId",
+  "workspaceRoot": "sample-workspaceRoot",
+  "resourceId": "sample-resourceId",
+  "spaceType": "sample-spaceType",
+  "name": "sample-name",
+  "goal": "sample-goal",
+  "turnModel": "sample-turnModel",
+  "templateId": "sample-templateId",
+  "templateRevision": 3.14,
+  "capabilities": [
+    "sample-capabilities"
+  ],
+  "capabilityOverrides": {
+    "key1": "value1"
+  },
+  "visibility": "shared",
+  "turnModelConfig": {
+    "key1": "value1"
+  },
+  "maxTurns": 3.14,
+  "moderatorProfileId": "sample-moderatorProfileId",
+  "initialAgents": [
+    {
+      "apiVersion": "sample-apiVersion",
+      "idempotencyKey": "sample-idempotencyKey",
+      "spaceId": "sample-spaceId",
+      "agentId": "sample-agentId",
+      "profileId": "sample-profileId",
+      "securityScope": {
+        "key1": "value1"
+      },
+      "spawnContext": "sample-spawnContext",
+      "contextOverrides": {
+        "key1": "value1"
+      },
+      "role": "participant",
+      "turnOrder": 3.14,
+      "isPrimary": true
+    }
+  ]
+}

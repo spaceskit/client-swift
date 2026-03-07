@@ -1,0 +1,12 @@
+{
+  "type": "sample-type",
+  "id": "sample-id",
+  "versionHash": "sample-versionHash",
+  "resourceType": "sample-resourceType",
+  "resourceId": "sample-resourceId",
+  "title": "sample-title",
+  "updatedAt": "sample-updatedAt",
+  "tags": [
+    "sample-tags"
+  ]
+}

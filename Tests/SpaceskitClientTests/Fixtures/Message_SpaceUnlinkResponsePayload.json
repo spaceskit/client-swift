@@ -1,0 +1,10 @@
+{
+  "type": "test_spaceunlinkresponsepayload",
+  "id": "msg-spaceunlinkresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "removed": true,
+    "sourceSpaceId": "sample-sourceSpaceId",
+    "targetSpaceId": "sample-targetSpaceId"
+  }
+}

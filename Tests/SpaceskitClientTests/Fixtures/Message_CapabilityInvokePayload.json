@@ -1,0 +1,13 @@
+{
+  "type": "test_capabilityinvokepayload",
+  "id": "msg-capabilityinvokepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "capability": "sample-capability",
+    "method": "sample-method",
+    "params": {
+      "key1": "value1"
+    },
+    "targetProvider": "sample-targetProvider"
+  }
+}

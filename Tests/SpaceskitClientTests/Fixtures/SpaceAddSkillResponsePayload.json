@@ -1,0 +1,11 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "skillId": "sample-skillId",
+  "skills": [
+    "sample-skills"
+  ],
+  "space": {
+    "example": true
+  }
+}

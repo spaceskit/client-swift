@@ -1,0 +1,26 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "profileId": "sample-profileId",
+  "name": "sample-name",
+  "description": "sample-description",
+  "personalityPrompt": "sample-personalityPrompt",
+  "defaultSkillIds": [
+    "sample-defaultSkillIds"
+  ],
+  "providerHint": "sample-providerHint",
+  "modelHint": "sample-modelHint",
+  "modelConfig": {
+    "preferredModels": [
+      "sample-preferredModels"
+    ],
+    "fallbackModels": [
+      "sample-fallbackModels"
+    ],
+    "constraints": {
+      "key1": "value1"
+    }
+  },
+  "canModerate": true,
+  "isDefault": true
+}

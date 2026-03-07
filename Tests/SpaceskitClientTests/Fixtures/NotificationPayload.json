@@ -1,0 +1,14 @@
+{
+  "notificationId": "sample-notificationId",
+  "category": "sample-category",
+  "severity": "info",
+  "title": "sample-title",
+  "body": "sample-body",
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "agentId": "sample-agentId",
+  "data": {
+    "key1": "value1"
+  },
+  "createdAt": "sample-createdAt"
+}

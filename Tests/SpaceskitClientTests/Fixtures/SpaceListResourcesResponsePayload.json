@@ -1,0 +1,15 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "resources": [
+    {
+      "resourceId": "sample-resourceId",
+      "spaceId": "sample-spaceId",
+      "spaceUid": "sample-spaceUid",
+      "uri": "sample-uri",
+      "type": "folder",
+      "label": "sample-label",
+      "addedAt": "sample-addedAt"
+    }
+  ]
+}

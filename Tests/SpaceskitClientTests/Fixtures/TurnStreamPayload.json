@@ -1,0 +1,9 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "turnId": "sample-turnId",
+  "agentId": "sample-agentId",
+  "delta": "sample-delta",
+  "seq": 42,
+  "done": true
+}

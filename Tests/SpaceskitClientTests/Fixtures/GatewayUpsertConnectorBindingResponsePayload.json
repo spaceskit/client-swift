@@ -1,0 +1,22 @@
+{
+  "binding": {
+    "bindingId": "sample-bindingId",
+    "connectorId": "sample-connectorId",
+    "bindingType": null,
+    "selector": {
+      "key1": "value1"
+    },
+    "targetType": null,
+    "targetSpaceId": "sample-targetSpaceId",
+    "allowedActions": [
+      null
+    ],
+    "capabilityTypes": [
+      "sample-capabilityTypes"
+    ],
+    "priority": 3.14,
+    "enabled": true,
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

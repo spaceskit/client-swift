@@ -1,0 +1,6 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "jobId": "sample-jobId",
+  "limit": 3.14,
+  "offset": 3.14
+}

@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "remoteAgentId": "sample-remoteAgentId",
+  "displayName": "sample-displayName",
+  "agentId": "sample-agentId",
+  "profileId": "sample-profileId"
+}

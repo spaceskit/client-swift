@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "templateId": "sample-templateId",
+  "resourceId": "sample-resourceId",
+  "name": "sample-name",
+  "goal": "sample-goal"
+}

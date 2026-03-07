@@ -1,0 +1,6 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "sessionId": "sample-sessionId",
+  "command": "stop",
+  "reason": "sample-reason"
+}

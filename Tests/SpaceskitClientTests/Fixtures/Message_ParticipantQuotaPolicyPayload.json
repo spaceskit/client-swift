@@ -1,0 +1,15 @@
+{
+  "type": "test_participantquotapolicypayload",
+  "id": "msg-participantquotapolicypayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "principalId": "sample-principalId",
+    "maxStagingBytes": 3.14,
+    "maxUploadsPerDay": 3.14,
+    "maxOpenChangeSets": 3.14,
+    "maxToolCallsPerHour": 3.14,
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

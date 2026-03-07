@@ -1,0 +1,25 @@
+{
+  "sessionId": "sample-sessionId",
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "type": "sample-type",
+  "message": "sample-message",
+  "state": "idle",
+  "eventType": "sample-eventType",
+  "providerSource": null,
+  "providerId": "sample-providerId",
+  "fallbackReason": null,
+  "usage": {
+    "sttSeconds": 3.14,
+    "ttsChars": 3.14,
+    "ttsSeconds": 3.14
+  },
+  "lockReason": "sample-lockReason",
+  "transcript": "sample-transcript",
+  "turnId": "sample-turnId",
+  "sequence": 3.14,
+  "sequenceNo": 3.14,
+  "reason": "sample-reason",
+  "emittedAt": "sample-emittedAt",
+  "ts": "sample-ts"
+}

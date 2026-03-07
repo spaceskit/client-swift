@@ -1,0 +1,11 @@
+{
+  "eventId": "sample-eventId",
+  "seq": 42,
+  "eventType": "sample-eventType",
+  "eventSubtype": "sample-eventSubtype",
+  "agentId": "sample-agentId",
+  "createdAt": "sample-createdAt",
+  "payload": {
+    "key1": "value1"
+  }
+}

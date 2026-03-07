@@ -1,0 +1,13 @@
+{
+  "type": "test_syncannounceresponsepayload",
+  "id": "msg-syncannounceresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "peerId": "sample-peerId",
+    "resourceId": "sample-resourceId",
+    "gatewayVersion": "sample-gatewayVersion",
+    "syncEnabled": true,
+    "announcedAt": "sample-announcedAt",
+    "apiVersion": "sample-apiVersion"
+  }
+}

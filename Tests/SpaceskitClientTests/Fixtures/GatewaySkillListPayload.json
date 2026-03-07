@@ -1,0 +1,9 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "query": "sample-query",
+  "tags": [
+    "sample-tags"
+  ],
+  "status": "all",
+  "limit": 3.14
+}

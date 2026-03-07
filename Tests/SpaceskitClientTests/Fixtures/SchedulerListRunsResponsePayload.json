@@ -1,0 +1,22 @@
+{
+  "runs": [
+    {
+      "runId": "sample-runId",
+      "jobId": "sample-jobId",
+      "trigger": null,
+      "status": null,
+      "commandId": "sample-commandId",
+      "scheduledFor": "sample-scheduledFor",
+      "startedAt": "sample-startedAt",
+      "finishedAt": "sample-finishedAt",
+      "skipReason": "sample-skipReason",
+      "errorCode": "sample-errorCode",
+      "errorMessage": "sample-errorMessage",
+      "result": {
+        "key1": "value1"
+      }
+    }
+  ],
+  "total": 3.14,
+  "nextOffset": 3.14
+}

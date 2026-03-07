@@ -1,0 +1,21 @@
+{
+  "type": "test_spacepresetconfigpayload",
+  "id": "msg-spacepresetconfigpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "communicationMode": null,
+    "turnModel": "sample-turnModel",
+    "baseAgents": [
+      {
+        "agentId": "sample-agentId",
+        "profileId": "sample-profileId",
+        "role": "participant",
+        "turnOrder": 3.14,
+        "isPrimary": true
+      }
+    ],
+    "agentPresetIds": [
+      "sample-agentPresetIds"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "turnId": "sample-turnId",
+  "eventType": "started",
+  "data": {
+    "example": true
+  }
+}

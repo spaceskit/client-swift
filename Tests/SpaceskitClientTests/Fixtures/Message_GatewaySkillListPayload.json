@@ -1,0 +1,14 @@
+{
+  "type": "test_gatewayskilllistpayload",
+  "id": "msg-gatewayskilllistpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "query": "sample-query",
+    "tags": [
+      "sample-tags"
+    ],
+    "status": "all",
+    "limit": 3.14
+  }
+}

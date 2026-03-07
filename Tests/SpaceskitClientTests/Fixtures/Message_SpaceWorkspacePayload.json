@@ -1,0 +1,21 @@
+{
+  "type": "test_spaceworkspacepayload",
+  "id": "msg-spaceworkspacepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "spaceId": "space-1",
+    "spaceUid": "space-uid-1",
+    "mode": "folder_bound",
+    "explicitWorkspaceRoot": "/tmp/spaces/space-1",
+    "effectiveWorkspaceRoot": "/tmp/spaces/space-1",
+    "metaPath": "/tmp/spaces/space-1/.space",
+    "logsPath": "/tmp/spaces/space-1/.space/logs",
+    "workPath": "/tmp/spaces/space-1/.space/work",
+    "sharedContextPath": "/tmp/spaces/space-1/.space/shared-context",
+    "scratchpadsPath": "/tmp/spaces/space-1/.space/scratchpads",
+    "layoutVersion": 2,
+    "gitRepoDetected": true,
+    "metadataStatus": "ready",
+    "updatedAt": "2026-03-06T18:44:23.062Z"
+  }
+}

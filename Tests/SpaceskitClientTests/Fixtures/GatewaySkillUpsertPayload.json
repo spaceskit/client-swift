@@ -1,0 +1,12 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "skillId": "sample-skillId",
+  "name": "sample-name",
+  "description": "sample-description",
+  "contentMarkdown": "sample-contentMarkdown",
+  "sourceRef": "sample-sourceRef",
+  "tags": [
+    "sample-tags"
+  ],
+  "status": null
+}

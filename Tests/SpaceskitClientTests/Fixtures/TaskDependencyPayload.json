@@ -1,0 +1,6 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "blockedTurnId": "sample-blockedTurnId",
+  "dependsOnTurnId": "sample-dependsOnTurnId"
+}

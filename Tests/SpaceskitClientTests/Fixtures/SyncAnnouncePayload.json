@@ -1,0 +1,12 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "peerId": "sample-peerId",
+  "resourceId": "sample-resourceId",
+  "gatewayVersion": "sample-gatewayVersion",
+  "endpointUrl": "sample-endpointUrl",
+  "authSecretHash": "sample-authSecretHash",
+  "skillCount": 3.14,
+  "actionCount": 3.14,
+  "experienceCount": 3.14,
+  "profileCount": 3.14
+}

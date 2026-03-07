@@ -1,0 +1,17 @@
+{
+  "type": "test_gatewaylistknowledgebaseentriespayload",
+  "id": "msg-gatewaylistknowledgebaseentriespayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "query": "sample-query",
+    "tags": [
+      "sample-tags"
+    ],
+    "kinds": [
+      null
+    ],
+    "limit": 3.14
+  }
+}

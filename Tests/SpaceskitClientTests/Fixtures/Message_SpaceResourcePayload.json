@@ -1,0 +1,14 @@
+{
+  "type": "test_spaceresourcepayload",
+  "id": "msg-spaceresourcepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "resourceId": "sample-resourceId",
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "uri": "sample-uri",
+    "type": "folder",
+    "label": "sample-label",
+    "addedAt": "sample-addedAt"
+  }
+}

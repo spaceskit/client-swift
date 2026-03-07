@@ -1,0 +1,16 @@
+{
+  "type": "test_localusagesummarypayload",
+  "id": "msg-localusagesummarypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "windowDays": 3.14,
+    "sessionCount": 3.14,
+    "inputTokens": 3.14,
+    "cachedInputTokens": 3.14,
+    "outputTokens": 3.14,
+    "totalTokens": 3.14,
+    "estimatedCostUsd": 3.14,
+    "tokenAccuracy": "reported",
+    "usageSource": "ledger"
+  }
+}

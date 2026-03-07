@@ -1,0 +1,22 @@
+{
+  "type": "test_gatewaylistintegrationrequestsresponsepayload",
+  "id": "msg-gatewaylistintegrationrequestsresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "requests": [
+      {
+        "integrationRequestId": "sample-integrationRequestId",
+        "integrationClass": null,
+        "requestedName": "sample-requestedName",
+        "useCase": "sample-useCase",
+        "sourceURL": "sample-sourceURL",
+        "notes": "sample-notes",
+        "principalId": "sample-principalId",
+        "deviceId": "sample-deviceId",
+        "status": "sample-status",
+        "createdAt": "sample-createdAt",
+        "updatedAt": "sample-updatedAt"
+      }
+    ]
+  }
+}

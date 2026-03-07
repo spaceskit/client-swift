@@ -1,0 +1,15 @@
+{
+  "type": "test_externalagentruntimebindingpayload",
+  "id": "msg-externalagentruntimebindingpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "runtimeKind": null,
+    "spaceId": "sample-spaceId",
+    "agentId": "sample-agentId",
+    "endpointId": "sample-endpointId",
+    "remoteAgentId": "sample-remoteAgentId",
+    "displayName": "sample-displayName",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

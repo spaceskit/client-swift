@@ -1,0 +1,28 @@
+{
+  "type": "test_codexbarquotapayload",
+  "id": "msg-codexbarquotapayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "available": true,
+    "sourceLabel": "sample-sourceLabel",
+    "windows": [
+      {
+        "window": "primary",
+        "label": "session",
+        "usedPercent": 3.14,
+        "remainingPercent": 3.14,
+        "windowMinutes": 3.14,
+        "resetsAt": "sample-resetsAt",
+        "resetDescription": "sample-resetDescription"
+      }
+    ],
+    "creditsRemaining": 3.14,
+    "accountLabel": "sample-accountLabel",
+    "updatedAt": "sample-updatedAt",
+    "message": "sample-message",
+    "installHint": {
+      "command": "sample-command",
+      "docsUrl": "sample-docsUrl"
+    }
+  }
+}

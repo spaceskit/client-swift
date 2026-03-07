@@ -1,0 +1,16 @@
+{
+  "type": "test_turntraceeventpayload",
+  "id": "msg-turntraceeventpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "eventId": "sample-eventId",
+    "seq": 42,
+    "eventType": "sample-eventType",
+    "eventSubtype": "sample-eventSubtype",
+    "agentId": "sample-agentId",
+    "createdAt": "sample-createdAt",
+    "payload": {
+      "key1": "value1"
+    }
+  }
+}

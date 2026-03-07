@@ -1,0 +1,15 @@
+{
+  "connector": {
+    "connectorId": "sample-connectorId",
+    "familyId": "sample-familyId",
+    "displayName": "sample-displayName",
+    "accountFingerprintHash": "sample-accountFingerprintHash",
+    "labelSlug": "sample-labelSlug",
+    "status": null,
+    "metadata": {
+      "key1": "value1"
+    },
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "trace": {
+    "spaceId": "sample-spaceId",
+    "turnId": "sample-turnId",
+    "total": 3.14,
+    "events": [
+      {
+        "eventId": "sample-eventId",
+        "seq": 42,
+        "eventType": "sample-eventType",
+        "eventSubtype": "sample-eventSubtype",
+        "agentId": "sample-agentId",
+        "createdAt": "sample-createdAt",
+        "payload": {
+          "key1": "value1"
+        }
+      }
+    ],
+    "toolCalls": [
+      {
+        "toolCallId": "sample-toolCallId",
+        "toolName": "sample-toolName",
+        "status": "started",
+        "agentId": "sample-agentId",
+        "startedAt": "sample-startedAt",
+        "completedAt": "sample-completedAt"
+      }
+    ],
+    "artifactIds": [
+      "sample-artifactIds"
+    ]
+  }
+}

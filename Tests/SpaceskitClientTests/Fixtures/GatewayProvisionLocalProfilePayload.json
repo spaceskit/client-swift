@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "localClientId": "sample-localClientId",
+  "profileId": "sample-profileId",
+  "profileName": "sample-profileName",
+  "agentId": "sample-agentId",
+  "spaceId": "sample-spaceId"
+}

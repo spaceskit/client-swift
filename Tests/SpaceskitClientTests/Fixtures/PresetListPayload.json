@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "kind": "all",
+  "source": "all",
+  "tags": [
+    "sample-tags"
+  ]
+}

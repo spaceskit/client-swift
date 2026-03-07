@@ -1,0 +1,16 @@
+{
+  "type": "test_providerusagesnapshotpayload",
+  "id": "msg-providerusagesnapshotpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "providerId": "sample-providerId",
+    "status": "available",
+    "inputTokens": 3.14,
+    "outputTokens": 3.14,
+    "totalTokens": 3.14,
+    "spentUsd": 3.14,
+    "tokenAccuracy": "reported",
+    "usageSource": "ledger",
+    "message": "sample-message"
+  }
+}

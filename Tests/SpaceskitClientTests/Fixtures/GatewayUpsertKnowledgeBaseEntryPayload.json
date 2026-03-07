@@ -1,0 +1,13 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "entryId": "sample-entryId",
+  "name": "sample-name",
+  "kind": null,
+  "uri": "sample-uri",
+  "description": "sample-description",
+  "tags": [
+    "sample-tags"
+  ],
+  "scopeType": null,
+  "spaceId": "sample-spaceId"
+}

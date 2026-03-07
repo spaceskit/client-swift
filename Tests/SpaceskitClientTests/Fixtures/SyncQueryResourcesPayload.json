@@ -1,0 +1,14 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "peerId": "sample-peerId",
+  "resourceId": "sample-resourceId",
+  "types": [
+    "sample-types"
+  ],
+  "tags": [
+    "sample-tags"
+  ],
+  "updatedAfter": "sample-updatedAfter",
+  "cursor": "sample-cursor",
+  "limit": 3.14
+}

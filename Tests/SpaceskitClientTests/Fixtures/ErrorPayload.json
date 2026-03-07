@@ -1,0 +1,9 @@
+{
+  "code": "INVALID_ARGUMENT",
+  "message": "sample-message",
+  "details": {
+    "example": true
+  },
+  "retryable": true,
+  "correlationId": "sample-correlationId"
+}

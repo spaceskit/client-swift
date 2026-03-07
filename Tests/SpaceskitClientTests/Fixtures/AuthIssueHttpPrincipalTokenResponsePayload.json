@@ -1,0 +1,9 @@
+{
+  "token": "sample-token",
+  "tokenType": null,
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "issuedAt": "sample-issuedAt",
+  "expiresAt": "sample-expiresAt",
+  "ttlSeconds": 3.14
+}

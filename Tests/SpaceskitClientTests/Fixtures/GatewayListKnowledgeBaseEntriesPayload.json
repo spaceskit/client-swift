@@ -1,0 +1,12 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "query": "sample-query",
+  "tags": [
+    "sample-tags"
+  ],
+  "kinds": [
+    null
+  ],
+  "limit": 3.14
+}

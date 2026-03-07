@@ -1,0 +1,74 @@
+{
+  "applicationId": "sample-applicationId",
+  "presetId": "sample-presetId",
+  "spaceId": "sample-spaceId",
+  "createdSpace": true,
+  "appliedAgents": 3.14,
+  "skippedAgents": 3.14,
+  "appliedAt": "sample-appliedAt",
+  "space": {
+    "id": "sample-id",
+    "spaceUid": "sample-spaceUid",
+    "workspace": {
+      "spaceId": "space-1",
+      "spaceUid": "space-uid-1",
+      "mode": "folder_bound",
+      "explicitWorkspaceRoot": "/tmp/spaces/space-1",
+      "effectiveWorkspaceRoot": "/tmp/spaces/space-1",
+      "metaPath": "/tmp/spaces/space-1/.space",
+      "logsPath": "/tmp/spaces/space-1/.space/logs",
+      "workPath": "/tmp/spaces/space-1/.space/work",
+      "sharedContextPath": "/tmp/spaces/space-1/.space/shared-context",
+      "scratchpadsPath": "/tmp/spaces/space-1/.space/scratchpads",
+      "layoutVersion": 2,
+      "gitRepoDetected": true,
+      "metadataStatus": "ready",
+      "updatedAt": "2026-03-06T18:44:23.062Z"
+    },
+    "resourceId": "sample-resourceId",
+    "name": "sample-name",
+    "goal": "sample-goal",
+    "orchestratorProfileId": "sample-orchestratorProfileId",
+    "templateId": "sample-templateId",
+    "turnModel": "sample-turnModel",
+    "turnModelConfig": {
+      "key1": "value1"
+    },
+    "skillIds": [
+      "sample-skillIds"
+    ],
+    "agents": [
+      {
+        "spaceId": "sample-spaceId",
+        "agentId": "sample-agentId",
+        "profileId": "sample-profileId",
+        "securityScope": {
+          "key1": "value1"
+        },
+        "spawnContext": "sample-spawnContext",
+        "contextOverrides": {
+          "key1": "value1"
+        },
+        "role": "participant",
+        "turnOrder": 3.14,
+        "isPrimary": true,
+        "assignedAt": "sample-assignedAt",
+        "runtimeKind": "local",
+        "endpointId": "sample-endpointId",
+        "remoteAgentId": "sample-remoteAgentId",
+        "displayName": "sample-displayName"
+      }
+    ],
+    "capabilities": [
+      "sample-capabilities"
+    ],
+    "capabilityOverrides": {
+      "key1": "value1"
+    },
+    "maxTurns": 3.14,
+    "visibility": "shared",
+    "moderatorProfileId": "sample-moderatorProfileId",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

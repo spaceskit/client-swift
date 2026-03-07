@@ -1,0 +1,13 @@
+{
+  "type": "test_gatewaycreateintegrationrequestpayload",
+  "id": "msg-gatewaycreateintegrationrequestpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "integrationClass": null,
+    "requestedName": "sample-requestedName",
+    "useCase": "sample-useCase",
+    "sourceURL": "sample-sourceURL",
+    "notes": "sample-notes"
+  }
+}

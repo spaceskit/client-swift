@@ -1,0 +1,13 @@
+{
+  "spaceId": "sample-spaceId",
+  "stagingBytes": 3.14,
+  "openChangeSets": 3.14,
+  "appliedChangeSetsPerMonth": 3.14,
+  "inputTokens": 3.14,
+  "outputTokens": 3.14,
+  "totalTokens": 3.14,
+  "tokenSpendUsd": 3.14,
+  "tokenAccuracy": "reported",
+  "usageSource": "ledger",
+  "updatedAt": "sample-updatedAt"
+}

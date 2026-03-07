@@ -1,0 +1,8 @@
+{
+  "version": null,
+  "relayInviteId": "sample-relayInviteId",
+  "relayUrl": "sample-relayUrl",
+  "spaceIdHint": "sample-spaceIdHint",
+  "spaceUidHint": "sample-spaceUidHint",
+  "fallbackGatewayUrl": "sample-fallbackGatewayUrl"
+}

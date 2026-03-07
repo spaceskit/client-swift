@@ -1,0 +1,13 @@
+{
+  "type": "test_spacelistpayload",
+  "id": "msg-spacelistpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "statuses": [
+      "sample-statuses"
+    ],
+    "resourceId": "sample-resourceId",
+    "limit": 3.14
+  }
+}

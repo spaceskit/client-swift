@@ -1,0 +1,18 @@
+{
+  "type": "test_localusagesessionpayload",
+  "id": "msg-localusagesessionpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "sessionId": "sample-sessionId",
+    "model": "sample-model",
+    "startedAt": "sample-startedAt",
+    "lastActivityAt": "sample-lastActivityAt",
+    "inputTokens": 3.14,
+    "cachedInputTokens": 3.14,
+    "outputTokens": 3.14,
+    "totalTokens": 3.14,
+    "estimatedCostUsd": 3.14,
+    "tokenAccuracy": "reported",
+    "usageSource": "ledger"
+  }
+}

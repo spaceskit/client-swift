@@ -1,0 +1,18 @@
+{
+  "allowedCapabilityTypes": [
+    "sample-allowedCapabilityTypes"
+  ],
+  "deniedCapabilityTypes": [
+    "sample-deniedCapabilityTypes"
+  ],
+  "allowedSkillIds": [
+    "sample-allowedSkillIds"
+  ],
+  "deniedSkillIds": [
+    "sample-deniedSkillIds"
+  ],
+  "globalFlags": {
+    "key1": "value1"
+  },
+  "updatedAt": "sample-updatedAt"
+}

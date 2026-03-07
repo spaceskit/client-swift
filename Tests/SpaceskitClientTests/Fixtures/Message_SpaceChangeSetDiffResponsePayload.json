@@ -1,0 +1,12 @@
+{
+  "type": "test_spacechangesetdiffresponsepayload",
+  "id": "msg-spacechangesetdiffresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "changeSetId": "sample-changeSetId",
+    "unifiedDiff": "sample-unifiedDiff",
+    "files": null,
+    "changeType": "sample-changeType",
+    "sizeBytes": 3.14
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "test_effectivetooloperationpayload",
+  "id": "msg-effectivetooloperationpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "operationId": "sample-operationId",
+    "capability": "sample-capability",
+    "operation": "sample-operation",
+    "providerIds": [
+      "sample-providerIds"
+    ],
+    "allowed": true,
+    "denyReasons": [
+      {
+        "code": "sample-code",
+        "message": "sample-message"
+      }
+    ]
+  }
+}

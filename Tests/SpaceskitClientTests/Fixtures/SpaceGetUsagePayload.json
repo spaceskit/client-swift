@@ -1,0 +1,6 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "includeAgentSessions": true,
+  "includeGlobalLifetime": true
+}

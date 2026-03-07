@@ -1,0 +1,12 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "presetId": "sample-presetId",
+  "targetSpaceId": "sample-targetSpaceId",
+  "spaceId": "sample-spaceId",
+  "resourceId": "sample-resourceId",
+  "name": "sample-name",
+  "goal": "sample-goal",
+  "visibility": "shared",
+  "workspaceRoot": "sample-workspaceRoot"
+}

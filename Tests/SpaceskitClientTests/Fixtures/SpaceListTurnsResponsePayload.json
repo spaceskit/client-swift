@@ -1,0 +1,21 @@
+{
+  "spaceId": "sample-spaceId",
+  "spaceUid": "sample-spaceUid",
+  "turns": [
+    {
+      "turnId": "sample-turnId",
+      "agentId": "sample-agentId",
+      "status": "sample-status",
+      "inputText": "sample-inputText",
+      "outputText": "sample-outputText",
+      "promptTokens": 3.14,
+      "completionTokens": 3.14,
+      "totalTokens": 3.14,
+      "createdAt": "sample-createdAt",
+      "completedAt": "sample-completedAt",
+      "replyToTurnId": "sample-replyToTurnId"
+    }
+  ],
+  "total": 3.14,
+  "nextOffset": 3.14
+}

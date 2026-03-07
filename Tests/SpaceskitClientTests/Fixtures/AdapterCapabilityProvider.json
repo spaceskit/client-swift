@@ -1,0 +1,9 @@
+{
+  "id": "sample-id",
+  "name": "sample-name",
+  "source": null,
+  "capabilityType": "sample-capabilityType",
+  "operations": [
+    "sample-operations"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "invocationId": "sample-invocationId",
+  "providerId": "sample-providerId",
+  "code": "sample-code",
+  "message": "sample-message",
+  "details": {
+    "example": true
+  }
+}

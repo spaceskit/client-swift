@@ -1,0 +1,9 @@
+{
+  "type": "test_schedulerdeletejobresponsepayload",
+  "id": "msg-schedulerdeletejobresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "jobId": "sample-jobId",
+    "deleted": true
+  }
+}

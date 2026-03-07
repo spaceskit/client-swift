@@ -1,0 +1,26 @@
+{
+  "type": "test_voiceusagesnapshotpayload",
+  "id": "msg-voiceusagesnapshotpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "windows": null,
+    "last7d": {
+      "sttSeconds": 3.14,
+      "ttsChars": 3.14,
+      "ttsSeconds": 3.14,
+      "estimatedCostUsd": 3.14
+    },
+    "last30d": {
+      "sttSeconds": 3.14,
+      "ttsChars": 3.14,
+      "ttsSeconds": 3.14,
+      "estimatedCostUsd": 3.14
+    },
+    "lifetime": {
+      "sttSeconds": 3.14,
+      "ttsChars": 3.14,
+      "ttsSeconds": 3.14,
+      "estimatedCostUsd": 3.14
+    }
+  }
+}

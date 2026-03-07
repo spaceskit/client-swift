@@ -1,0 +1,8 @@
+{
+  "peerId": "sample-peerId",
+  "resourceId": "sample-resourceId",
+  "gatewayVersion": "sample-gatewayVersion",
+  "syncEnabled": true,
+  "announcedAt": "sample-announcedAt",
+  "apiVersion": "sample-apiVersion"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "test_agentusagesessionpayload",
+  "id": "msg-agentusagesessionpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "sessionId": "sample-sessionId",
+    "spaceId": "sample-spaceId",
+    "agentId": "sample-agentId",
+    "agentRole": "sample-agentRole",
+    "status": "active",
+    "startedAt": "sample-startedAt",
+    "endedAt": "sample-endedAt",
+    "lastActivityAt": "sample-lastActivityAt",
+    "turnCount": 42,
+    "inputTokens": 3.14,
+    "outputTokens": 3.14,
+    "totalTokens": 3.14,
+    "spentUsd": 3.14,
+    "tokenAccuracy": "reported",
+    "usageSource": "ledger"
+  }
+}

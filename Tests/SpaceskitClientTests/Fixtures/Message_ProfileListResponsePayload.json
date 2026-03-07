@@ -1,0 +1,38 @@
+{
+  "type": "test_profilelistresponsepayload",
+  "id": "msg-profilelistresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "profiles": [
+      {
+        "profileId": "sample-profileId",
+        "name": "sample-name",
+        "description": "sample-description",
+        "personalityPrompt": "sample-personalityPrompt",
+        "defaultSkillIds": [
+          "sample-defaultSkillIds"
+        ],
+        "providerHint": "sample-providerHint",
+        "modelHint": "sample-modelHint",
+        "modelConfig": {
+          "preferredModels": [
+            "sample-preferredModels"
+          ],
+          "fallbackModels": [
+            "sample-fallbackModels"
+          ],
+          "constraints": {
+            "key1": "value1"
+          }
+        },
+        "canModerate": true,
+        "isDefault": true,
+        "status": "active",
+        "activeRevision": 3.14,
+        "source": "sample-source",
+        "createdAt": "sample-createdAt",
+        "updatedAt": "sample-updatedAt"
+      }
+    ]
+  }
+}

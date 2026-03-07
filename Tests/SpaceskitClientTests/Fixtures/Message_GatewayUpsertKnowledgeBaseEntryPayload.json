@@ -1,0 +1,18 @@
+{
+  "type": "test_gatewayupsertknowledgebaseentrypayload",
+  "id": "msg-gatewayupsertknowledgebaseentrypayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "entryId": "sample-entryId",
+    "name": "sample-name",
+    "kind": null,
+    "uri": "sample-uri",
+    "description": "sample-description",
+    "tags": [
+      "sample-tags"
+    ],
+    "scopeType": null,
+    "spaceId": "sample-spaceId"
+  }
+}

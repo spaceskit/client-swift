@@ -1,0 +1,15 @@
+{
+  "type": "test_spacesharecontextresponsepayload",
+  "id": "msg-spacesharecontextresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "transfer": null,
+    "sourceSpaceId": "sample-sourceSpaceId",
+    "targetSpaceId": "sample-targetSpaceId",
+    "artifactId": "sample-artifactId",
+    "status": "shared",
+    "denialReason": "sample-denialReason",
+    "createdAt": "sample-createdAt",
+    "appliedAt": "sample-appliedAt"
+  }
+}

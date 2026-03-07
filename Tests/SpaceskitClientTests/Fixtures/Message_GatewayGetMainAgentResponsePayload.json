@@ -1,0 +1,21 @@
+{
+  "type": "test_gatewaygetmainagentresponsepayload",
+  "id": "msg-gatewaygetmainagentresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "state": {
+      "spaceId": "sample-spaceId",
+      "spaceUid": "sample-spaceUid",
+      "mainAgentId": "sample-mainAgentId",
+      "mainProfileId": "sample-mainProfileId",
+      "assignedProfileId": "sample-assignedProfileId",
+      "providerHint": "sample-providerHint",
+      "modelHint": "sample-modelHint",
+      "status": "healthy",
+      "repaired": true,
+      "fallbackApplied": true,
+      "fallbackReason": "sample-fallbackReason",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

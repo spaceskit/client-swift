@@ -1,0 +1,12 @@
+{
+  "type": "test_spacepreviewtemplatepayload",
+  "id": "msg-spacepreviewtemplatepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "templateId": "sample-templateId",
+    "resourceId": "sample-resourceId",
+    "name": "sample-name",
+    "goal": "sample-goal"
+  }
+}

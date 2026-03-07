@@ -1,0 +1,9 @@
+{
+  "type": "test_tooldenyreasonpayload",
+  "id": "msg-tooldenyreasonpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "code": "sample-code",
+    "message": "sample-message"
+  }
+}

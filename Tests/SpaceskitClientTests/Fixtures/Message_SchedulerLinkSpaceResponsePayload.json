@@ -1,0 +1,48 @@
+{
+  "type": "test_schedulerlinkspaceresponsepayload",
+  "id": "msg-schedulerlinkspaceresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "job": {
+      "jobId": "sample-jobId",
+      "name": "sample-name",
+      "status": null,
+      "enabled": true,
+      "cronExpression": "sample-cronExpression",
+      "schedulePreset": {
+        "kind": null,
+        "intervalHours": 3.14,
+        "minute": 3.14,
+        "hour": 3.14,
+        "daysOfWeek": [
+          3.14
+        ]
+      },
+      "timezone": "sample-timezone",
+      "action": {
+        "type": null,
+        "promptText": "sample-promptText",
+        "targetAgentId": "sample-targetAgentId"
+      },
+      "primarySpaceId": "sample-primarySpaceId",
+      "invalidReason": "sample-invalidReason",
+      "nextRunAt": "sample-nextRunAt",
+      "lastRunAt": "sample-lastRunAt",
+      "lastRunStatus": null,
+      "lastErrorCode": "sample-lastErrorCode",
+      "lastErrorMessage": "sample-lastErrorMessage",
+      "createdByPrincipalId": "sample-createdByPrincipalId",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt",
+      "linkedSpaces": [
+        {
+          "spaceId": "sample-spaceId",
+          "spaceUid": "sample-spaceUid",
+          "name": "sample-name",
+          "isPrimary": true,
+          "linkedAt": "sample-linkedAt"
+        }
+      ]
+    }
+  }
+}

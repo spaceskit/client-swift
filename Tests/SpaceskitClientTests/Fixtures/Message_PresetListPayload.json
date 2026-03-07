@@ -1,0 +1,13 @@
+{
+  "type": "test_presetlistpayload",
+  "id": "msg-presetlistpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "kind": "all",
+    "source": "all",
+    "tags": [
+      "sample-tags"
+    ]
+  }
+}

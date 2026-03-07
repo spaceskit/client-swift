@@ -1,0 +1,36 @@
+{
+  "type": "test_spacereviewchangesetresponsepayload",
+  "id": "msg-spacereviewchangesetresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "changeSet": {
+      "changeSetId": "sample-changeSetId",
+      "spaceId": "sample-spaceId",
+      "participantId": "sample-participantId",
+      "createdByPrincipalId": "sample-createdByPrincipalId",
+      "status": null,
+      "title": "sample-title",
+      "description": "sample-description",
+      "adapter": null,
+      "targetBranch": "sample-targetBranch",
+      "workspaceBasePath": "sample-workspaceBasePath",
+      "submittedAt": "sample-submittedAt",
+      "reviewedAt": "sample-reviewedAt",
+      "appliedAt": "sample-appliedAt",
+      "expiresAt": "sample-expiresAt",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    },
+    "review": {
+      "reviewId": "sample-reviewId",
+      "changeSetId": "sample-changeSetId",
+      "reviewerPrincipalId": "sample-reviewerPrincipalId",
+      "decision": "approved",
+      "comment": "sample-comment",
+      "diffSummary": {
+        "key1": "value1"
+      },
+      "createdAt": "sample-createdAt"
+    }
+  }
+}

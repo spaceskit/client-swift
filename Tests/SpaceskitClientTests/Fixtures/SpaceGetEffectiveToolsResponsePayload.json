@@ -1,0 +1,27 @@
+{
+  "matrix": {
+    "spaceId": "sample-spaceId",
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "agentId": "sample-agentId",
+    "policyVersion": "sample-policyVersion",
+    "operations": [
+      {
+        "operationId": "sample-operationId",
+        "capability": "sample-capability",
+        "operation": "sample-operation",
+        "providerIds": [
+          "sample-providerIds"
+        ],
+        "allowed": true,
+        "denyReasons": [
+          {
+            "code": "sample-code",
+            "message": "sample-message"
+          }
+        ]
+      }
+    ],
+    "generatedAt": "sample-generatedAt"
+  }
+}

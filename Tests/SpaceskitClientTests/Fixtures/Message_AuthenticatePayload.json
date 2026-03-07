@@ -1,0 +1,14 @@
+{
+  "type": "test_authenticatepayload",
+  "id": "msg-authenticatepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "publicKey": "sample-publicKey",
+    "signature": "sample-signature",
+    "clientType": "sample-clientType",
+    "clientVersion": "sample-clientVersion",
+    "deviceId": "sample-deviceId",
+    "devicePublicKey": "sample-devicePublicKey",
+    "deviceProofSignature": "sample-deviceProofSignature"
+  }
+}

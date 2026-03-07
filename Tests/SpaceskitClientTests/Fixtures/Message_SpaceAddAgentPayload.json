@@ -1,0 +1,22 @@
+{
+  "type": "test_spaceaddagentpayload",
+  "id": "msg-spaceaddagentpayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "spaceId": "sample-spaceId",
+    "agentId": "sample-agentId",
+    "profileId": "sample-profileId",
+    "securityScope": {
+      "key1": "value1"
+    },
+    "spawnContext": "sample-spawnContext",
+    "contextOverrides": {
+      "key1": "value1"
+    },
+    "role": "participant",
+    "turnOrder": 3.14,
+    "isPrimary": true
+  }
+}

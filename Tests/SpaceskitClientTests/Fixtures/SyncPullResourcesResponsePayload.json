@@ -1,0 +1,62 @@
+{
+  "resources": [
+    {
+      "ref": {
+        "type": "sample-type",
+        "id": "sample-id",
+        "versionHash": "sample-versionHash",
+        "resourceType": "sample-resourceType",
+        "resourceId": "sample-resourceId",
+        "title": "sample-title",
+        "updatedAt": "sample-updatedAt",
+        "tags": [
+          "sample-tags"
+        ]
+      },
+      "content": {
+        "key1": "value1"
+      }
+    }
+  ],
+  "denied": [
+    {
+      "ref": {
+        "type": "sample-type",
+        "id": "sample-id",
+        "versionHash": "sample-versionHash",
+        "resourceType": "sample-resourceType",
+        "resourceId": "sample-resourceId",
+        "title": "sample-title",
+        "updatedAt": "sample-updatedAt",
+        "tags": [
+          "sample-tags"
+        ]
+      },
+      "reason": "sample-reason"
+    }
+  ],
+  "provenance": [
+    {
+      "peerId": "sample-peerId",
+      "ref": {
+        "type": "sample-type",
+        "id": "sample-id",
+        "versionHash": "sample-versionHash",
+        "resourceType": "sample-resourceType",
+        "resourceId": "sample-resourceId",
+        "title": "sample-title",
+        "updatedAt": "sample-updatedAt",
+        "tags": [
+          "sample-tags"
+        ]
+      },
+      "action": "sample-action",
+      "status": "sample-status",
+      "reason": "sample-reason",
+      "pulledAt": "sample-pulledAt"
+    }
+  ],
+  "appliedCount": 3.14,
+  "skippedCount": 3.14,
+  "apiVersion": "sample-apiVersion"
+}

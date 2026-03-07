@@ -1,0 +1,11 @@
+{
+  "type": "test_spaceuploadchangesetfileinitpayload",
+  "id": "msg-spaceuploadchangesetfileinitpayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "changeSetId": "sample-changeSetId",
+    "relativePath": "sample-relativePath"
+  }
+}

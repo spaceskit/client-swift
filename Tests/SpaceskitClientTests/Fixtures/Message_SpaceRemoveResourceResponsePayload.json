@@ -1,0 +1,11 @@
+{
+  "type": "test_spaceremoveresourceresponsepayload",
+  "id": "msg-spaceremoveresourceresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "removed": true,
+    "spaceId": "sample-spaceId",
+    "spaceUid": "sample-spaceUid",
+    "resourceId": "sample-resourceId"
+  }
+}

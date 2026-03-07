@@ -1,0 +1,9 @@
+{
+  "scopeId": "sample-scopeId",
+  "scopeName": "sample-scopeName",
+  "window": "primary",
+  "usedPercent": 3.14,
+  "remainingPercent": 3.14,
+  "resetsAt": "sample-resetsAt",
+  "windowDurationMins": 3.14
+}

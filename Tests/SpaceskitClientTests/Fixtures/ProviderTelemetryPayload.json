@@ -1,0 +1,30 @@
+{
+  "providerId": "sample-providerId",
+  "status": null,
+  "source": null,
+  "fetchedAt": "sample-fetchedAt",
+  "message": "sample-message",
+  "accountLabel": "sample-accountLabel",
+  "windows": [
+    {
+      "scopeId": "sample-scopeId",
+      "scopeName": "sample-scopeName",
+      "window": "primary",
+      "usedPercent": 3.14,
+      "remainingPercent": 3.14,
+      "resetsAt": "sample-resetsAt",
+      "windowDurationMins": 3.14
+    }
+  ],
+  "usage": {
+    "providerId": "sample-providerId",
+    "status": "available",
+    "inputTokens": 3.14,
+    "outputTokens": 3.14,
+    "totalTokens": 3.14,
+    "spentUsd": 3.14,
+    "tokenAccuracy": "reported",
+    "usageSource": "ledger",
+    "message": "sample-message"
+  }
+}

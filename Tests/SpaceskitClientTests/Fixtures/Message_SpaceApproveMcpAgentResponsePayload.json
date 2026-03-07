@@ -1,0 +1,38 @@
+{
+  "type": "test_spaceapprovemcpagentresponsepayload",
+  "id": "msg-spaceapprovemcpagentresponsepayload-001",
+  "ts": "2026-03-07T07:22:02.373Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "assignment": {
+      "spaceId": "sample-spaceId",
+      "agentId": "sample-agentId",
+      "profileId": "sample-profileId",
+      "securityScope": {
+        "key1": "value1"
+      },
+      "spawnContext": "sample-spawnContext",
+      "contextOverrides": {
+        "key1": "value1"
+      },
+      "role": "participant",
+      "turnOrder": 3.14,
+      "isPrimary": true,
+      "assignedAt": "sample-assignedAt",
+      "runtimeKind": "local",
+      "endpointId": "sample-endpointId",
+      "remoteAgentId": "sample-remoteAgentId",
+      "displayName": "sample-displayName"
+    },
+    "binding": {
+      "runtimeKind": null,
+      "spaceId": "sample-spaceId",
+      "agentId": "sample-agentId",
+      "endpointId": "sample-endpointId",
+      "remoteAgentId": "sample-remoteAgentId",
+      "displayName": "sample-displayName",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

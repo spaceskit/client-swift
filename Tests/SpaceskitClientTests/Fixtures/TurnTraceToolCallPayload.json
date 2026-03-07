@@ -1,0 +1,8 @@
+{
+  "toolCallId": "sample-toolCallId",
+  "toolName": "sample-toolName",
+  "status": "started",
+  "agentId": "sample-agentId",
+  "startedAt": "sample-startedAt",
+  "completedAt": "sample-completedAt"
+}

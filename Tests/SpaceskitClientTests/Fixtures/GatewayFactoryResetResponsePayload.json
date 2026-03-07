@@ -1,0 +1,7 @@
+{
+  "gatewayId": "sample-gatewayId",
+  "gatewayUuid": "sample-gatewayUuid",
+  "resetAt": "sample-resetAt",
+  "tablesCleared": 3.14,
+  "rowsDeleted": 3.14
+}

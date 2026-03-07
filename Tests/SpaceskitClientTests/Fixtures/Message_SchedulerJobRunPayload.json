@@ -1,0 +1,21 @@
+{
+  "type": "test_schedulerjobrunpayload",
+  "id": "msg-schedulerjobrunpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "runId": "sample-runId",
+    "jobId": "sample-jobId",
+    "trigger": null,
+    "status": null,
+    "commandId": "sample-commandId",
+    "scheduledFor": "sample-scheduledFor",
+    "startedAt": "sample-startedAt",
+    "finishedAt": "sample-finishedAt",
+    "skipReason": "sample-skipReason",
+    "errorCode": "sample-errorCode",
+    "errorMessage": "sample-errorMessage",
+    "result": {
+      "key1": "value1"
+    }
+  }
+}

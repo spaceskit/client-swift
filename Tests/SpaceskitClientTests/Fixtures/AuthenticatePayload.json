@@ -1,0 +1,9 @@
+{
+  "publicKey": "sample-publicKey",
+  "signature": "sample-signature",
+  "clientType": "sample-clientType",
+  "clientVersion": "sample-clientVersion",
+  "deviceId": "sample-deviceId",
+  "devicePublicKey": "sample-devicePublicKey",
+  "deviceProofSignature": "sample-deviceProofSignature"
+}

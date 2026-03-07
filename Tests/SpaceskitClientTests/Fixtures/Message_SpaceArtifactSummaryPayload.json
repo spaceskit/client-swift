@@ -1,0 +1,21 @@
+{
+  "type": "test_spaceartifactsummarypayload",
+  "id": "msg-spaceartifactsummarypayload-001",
+  "ts": "2026-03-07T07:22:02.375Z",
+  "payload": {
+    "artifactId": "sample-artifactId",
+    "spaceId": "sample-spaceId",
+    "turnId": "sample-turnId",
+    "agentId": "sample-agentId",
+    "type": "sample-type",
+    "title": "sample-title",
+    "mimeType": "sample-mimeType",
+    "sizeBytes": 3.14,
+    "tags": [
+      "sample-tags"
+    ],
+    "visibility": "shared",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

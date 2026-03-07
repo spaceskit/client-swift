@@ -1,0 +1,19 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "connectorId": "sample-connectorId",
+  "familyId": "sample-familyId",
+  "displayName": "sample-displayName",
+  "accountFingerprint": "sample-accountFingerprint",
+  "label": "sample-label",
+  "status": null,
+  "metadata": {
+    "key1": "value1"
+  },
+  "secretRefs": [
+    {
+      "key": "sample-key",
+      "ref": "sample-ref",
+      "backend": "sample-backend"
+    }
+  ]
+}

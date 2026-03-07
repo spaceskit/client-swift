@@ -1,0 +1,10 @@
+{
+  "type": "test_schedulerrunnowpayload",
+  "id": "msg-schedulerrunnowpayload-001",
+  "ts": "2026-03-07T07:22:02.374Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "jobId": "sample-jobId"
+  }
+}

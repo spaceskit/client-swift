@@ -1,0 +1,11 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "inviteToken": "sample-inviteToken",
+  "deviceId": "sample-deviceId",
+  "devicePublicKey": "sample-devicePublicKey",
+  "identityModeHint": "device_key",
+  "appleIdAssertion": "sample-appleIdAssertion",
+  "joinRoute": null,
+  "relaySessionToken": "sample-relaySessionToken"
+}

@@ -1,0 +1,4 @@
+module SpaceskitClient {
+header "SpaceskitClient-Swift.h"
+export *
+}
