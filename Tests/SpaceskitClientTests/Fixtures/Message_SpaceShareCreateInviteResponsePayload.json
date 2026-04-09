@@ -1,21 +1,21 @@
 {
   "type": "test_spacesharecreateinviteresponsepayload",
   "id": "msg-spacesharecreateinviteresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "invite": {
       "inviteId": "sample-inviteId",
       "spaceId": "sample-spaceId",
       "spaceUid": "sample-spaceUid",
       "issuedByPrincipalId": "sample-issuedByPrincipalId",
-      "mode": "collaborator",
+      "mode": "read_only",
       "status": "active",
       "expiresAt": "sample-expiresAt",
       "createdAt": "sample-createdAt",
       "updatedAt": "sample-updatedAt",
       "inviteToken": "sample-inviteToken",
       "inviteLink": {
-        "version": null,
+        "version": "v2",
         "relayInviteId": "sample-relayInviteId",
         "relayUrl": "sample-relayUrl",
         "spaceIdHint": "sample-spaceIdHint",

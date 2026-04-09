@@ -1,0 +1,17 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "rules": [
+    {
+      "selectorKind": "capability",
+      "selectorId": "sample-selectorId",
+      "state": "enabled"
+    }
+  ],
+  "dangerousCapabilities": [
+    {
+      "capabilityId": "managed_shell",
+      "state": "enabled"
+    }
+  ]
+}

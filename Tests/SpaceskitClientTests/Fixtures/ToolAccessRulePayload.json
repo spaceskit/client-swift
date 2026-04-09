@@ -1,0 +1,5 @@
+{
+  "selectorKind": "capability",
+  "selectorId": "sample-selectorId",
+  "state": "enabled"
+}

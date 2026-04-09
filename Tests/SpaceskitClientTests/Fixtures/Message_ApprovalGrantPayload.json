@@ -1,0 +1,9 @@
+{
+  "type": "test_approvalgrantpayload",
+  "id": "msg-approvalgrantpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "mode": "once",
+    "ttlSeconds": 3.14
+  }
+}

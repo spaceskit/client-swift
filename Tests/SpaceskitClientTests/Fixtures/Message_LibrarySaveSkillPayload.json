@@ -1,0 +1,21 @@
+{
+  "type": "test_librarysaveskillpayload",
+  "id": "msg-librarysaveskillpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "entryId": "sample-entryId",
+    "skillId": "sample-skillId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "contentMarkdown": "sample-contentMarkdown",
+    "tags": [
+      "sample-tags"
+    ],
+    "sourceKind": "installed",
+    "sourceRef": "sample-sourceRef",
+    "status": "enabled",
+    "enabled": true
+  }
+}

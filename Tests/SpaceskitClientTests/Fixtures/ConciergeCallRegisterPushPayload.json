@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "deviceId": "sample-deviceId",
+  "platform": "sample-platform",
+  "pushToken": "sample-pushToken",
+  "voipTopic": "sample-voipTopic",
+  "proactiveOptIn": true
+}

@@ -6,6 +6,7 @@
   "defaultAgents": [
     {
       "agentId": "sample-agentId",
+      "agentDefinitionId": "sample-agentDefinitionId",
       "profileId": "sample-profileId",
       "role": "participant",
       "turnOrder": 3.14,

@@ -1,0 +1,27 @@
+{
+  "type": "test_identitypreviewsystempromptmatrixresponsepayload",
+  "id": "msg-identitypreviewsystempromptmatrixresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "matrix": {
+      "agentDefinitionId": "sample-agentDefinitionId",
+      "personaId": "sample-personaId",
+      "generatedAt": "sample-generatedAt",
+      "variants": [
+        {
+          "budgetClass": "full",
+          "label": "sample-label",
+          "tokenEstimate": 3.14,
+          "sections": [
+            {
+              "key": "system_scaffold",
+              "title": "sample-title",
+              "content": "sample-content"
+            }
+          ],
+          "compiledText": "sample-compiledText"
+        }
+      ]
+    }
+  }
+}

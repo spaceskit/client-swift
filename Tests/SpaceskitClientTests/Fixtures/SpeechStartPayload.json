@@ -9,7 +9,7 @@
   "enablePlayback": true,
   "agentId": "sample-agentId",
   "autoSubmitTurns": true,
-  "preferredSource": null,
+  "preferredSource": "managed",
   "preferredProviderId": "sample-preferredProviderId",
   "byokProviderId": "sample-byokProviderId",
   "localModelProviderId": "sample-localModelProviderId",

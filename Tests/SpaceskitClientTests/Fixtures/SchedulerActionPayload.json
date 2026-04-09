@@ -1,5 +1,5 @@
 {
-  "type": null,
+  "type": "space_prompt",
   "promptText": "sample-promptText",
   "targetAgentId": "sample-targetAgentId"
 }

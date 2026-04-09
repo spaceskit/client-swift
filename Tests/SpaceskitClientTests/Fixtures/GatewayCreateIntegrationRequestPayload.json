@@ -1,6 +1,6 @@
 {
   "apiVersion": "sample-apiVersion",
-  "integrationClass": null,
+  "integrationClass": "cloud",
   "requestedName": "sample-requestedName",
   "useCase": "sample-useCase",
   "sourceURL": "sample-sourceURL",

@@ -2,7 +2,14 @@
   "spaceId": "sample-spaceId",
   "spaceUid": "sample-spaceUid",
   "turnId": "sample-turnId",
+  "rootTurnId": "sample-rootTurnId",
+  "conversationTopology": "direct",
+  "transcriptVisibility": "visible",
+  "summaryTurnId": "sample-summaryTurnId",
   "eventType": "started",
+  "agentId": "sample-agentId",
+  "seq": 42,
+  "timestamp": "sample-timestamp",
   "data": {
     "example": true
   }

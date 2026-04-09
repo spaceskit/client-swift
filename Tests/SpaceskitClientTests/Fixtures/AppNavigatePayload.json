@@ -1,0 +1,7 @@
+{
+  "destination": "overview",
+  "gatewayId": "sample-gatewayId",
+  "spaceId": "sample-spaceId",
+  "jobId": "sample-jobId",
+  "promptText": "sample-promptText"
+}

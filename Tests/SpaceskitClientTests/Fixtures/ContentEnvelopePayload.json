@@ -1,0 +1,24 @@
+{
+  "schemaVersion": null,
+  "kind": "rich_content",
+  "primaryMimeType": "sample-primaryMimeType",
+  "previewText": "sample-previewText",
+  "supportsInline": true,
+  "parts": [
+    {
+      "type": "text",
+      "mimeType": "sample-mimeType",
+      "text": "sample-text",
+      "data": "sample-data",
+      "uri": "sample-uri",
+      "title": "sample-title",
+      "previewText": "sample-previewText",
+      "metadata": {
+        "key1": "value1"
+      }
+    }
+  ],
+  "metadata": {
+    "key1": "value1"
+  }
+}

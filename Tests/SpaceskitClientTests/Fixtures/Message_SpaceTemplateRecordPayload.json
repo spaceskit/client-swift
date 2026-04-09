@@ -1,0 +1,29 @@
+{
+  "type": "test_spacetemplaterecordpayload",
+  "id": "msg-spacetemplaterecordpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "templateId": "sample-templateId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "status": "active",
+    "activeRevision": 3.14,
+    "communicationMode": "async_notes",
+    "conversationTopology": "direct",
+    "promptPackId": "sample-promptPackId",
+    "turnModel": "sample-turnModel",
+    "agentDefinitions": [
+      {
+        "agentId": "sample-agentId",
+        "agentDefinitionId": "sample-agentDefinitionId",
+        "profileId": "sample-profileId",
+        "role": "participant",
+        "turnOrder": 3.14,
+        "isPrimary": true
+      }
+    ],
+    "createdBy": "sample-createdBy",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

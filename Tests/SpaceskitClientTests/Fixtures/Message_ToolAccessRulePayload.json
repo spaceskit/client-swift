@@ -1,0 +1,10 @@
+{
+  "type": "test_toolaccessrulepayload",
+  "id": "msg-toolaccessrulepayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "selectorKind": "capability",
+    "selectorId": "sample-selectorId",
+    "state": "enabled"
+  }
+}

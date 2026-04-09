@@ -1,11 +1,17 @@
 {
   "type": "test_executeturnpayload",
   "id": "msg-executeturnpayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.233Z",
   "payload": {
     "spaceUid": "sample-spaceUid",
     "input": "sample-input",
     "targetAgentId": "sample-targetAgentId",
-    "replyToTurnId": "sample-replyToTurnId"
+    "targetAgentIds": [
+      "sample-targetAgentIds"
+    ],
+    "replyToTurnId": "sample-replyToTurnId",
+    "conversationTopology": "direct",
+    "mode": "ask",
+    "effort": "low"
   }
 }

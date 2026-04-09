@@ -1,0 +1,202 @@
+{
+  "type": "test_gatewayintegrationssnapshotpayload",
+  "id": "msg-gatewayintegrationssnapshotpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "groups": [
+      {
+        "groupId": "built_in_integrations",
+        "title": "sample-title",
+        "summary": "sample-summary",
+        "entries": [
+          {
+            "entryId": "sample-entryId",
+            "kind": "built_in_integration",
+            "title": "sample-title",
+            "subtitle": "sample-subtitle",
+            "badges": [
+              {
+                "text": "sample-text",
+                "tone": "green"
+              }
+            ],
+            "builtinIntegration": {
+              "integrationId": "sample-integrationId",
+              "displayName": "sample-displayName",
+              "description": "sample-description",
+              "enabled": true,
+              "capabilityTypes": [
+                "sample-capabilityTypes"
+              ],
+              "managementSummary": "sample-managementSummary",
+              "runtimeAvailable": true,
+              "runtimeStatus": "available",
+              "runtimeStatusMessage": "sample-runtimeStatusMessage",
+              "providerIds": [
+                "sample-providerIds"
+              ]
+            },
+            "builtinMcpAdmin": {
+              "enabled": true,
+              "allowTargetSpaceOverride": true,
+              "allowedTools": [
+                "sample-allowedTools"
+              ],
+              "runtimeState": {
+                "endpointPath": "sample-endpointPath",
+                "effectiveEnabled": true,
+                "bootstrapDefaultEnabled": true,
+                "authMode": "strict",
+                "tokenIssuerAvailable": true,
+                "defaultTargetSpaceId": "sample-defaultTargetSpaceId"
+              }
+            },
+            "mcpServer": {
+              "spaceId": "sample-spaceId",
+              "spaceName": "sample-spaceName",
+              "endpoint": {
+                "endpointId": "sample-endpointId",
+                "spaceId": "sample-spaceId",
+                "transport": "sse",
+                "endpoint": "sample-endpoint",
+                "args": [
+                  "sample-args"
+                ],
+                "secretRef": "sample-secretRef",
+                "enabled": true,
+                "healthStatus": "unknown",
+                "healthMessage": "sample-healthMessage",
+                "lastConnectedAt": "sample-lastConnectedAt",
+                "lastErrorAt": "sample-lastErrorAt",
+                "createdAt": "sample-createdAt",
+                "updatedAt": "sample-updatedAt"
+              }
+            },
+            "cliTool": {
+              "tool": {
+                "schemaVersion": 3.14,
+                "id": "sample-id",
+                "providerId": "sample-providerId",
+                "displayName": "sample-displayName",
+                "description": "sample-description",
+                "bundleId": "sample-bundleId",
+                "bundleDisplayName": "sample-bundleDisplayName",
+                "bundleDescription": "sample-bundleDescription",
+                "toolGroupId": "sample-toolGroupId",
+                "toolGroupDisplayName": "sample-toolGroupDisplayName",
+                "executable": "sample-executable",
+                "resolvedExecutable": "sample-resolvedExecutable",
+                "argsTemplate": [
+                  "sample-argsTemplate"
+                ],
+                "inputSchema": {
+                  "key1": "value1"
+                },
+                "instructions": "sample-instructions",
+                "examples": [
+                  {
+                    "name": "sample-name",
+                    "description": "sample-description",
+                    "arguments": {
+                      "key1": "value1"
+                    },
+                    "expectedOutput": "sample-expectedOutput"
+                  }
+                ],
+                "timeoutMs": 3.14,
+                "maxOutputBytes": 3.14,
+                "cwdMode": "space_root",
+                "fixedCwd": "sample-fixedCwd",
+                "outputMode": "text",
+                "dangerLevel": "standard",
+                "available": true,
+                "healthStatus": "unknown",
+                "healthMessage": "sample-healthMessage",
+                "manifestPath": "sample-manifestPath",
+                "readmePath": "sample-readmePath",
+                "readmeContent": "sample-readmeContent",
+                "requiresApproval": true,
+                "createdAt": "sample-createdAt",
+                "updatedAt": "sample-updatedAt"
+              },
+              "activeApprovalGrantCount": 3.14
+            },
+            "connectorFamily": {
+              "family": {
+                "familyId": "sample-familyId",
+                "displayName": "sample-displayName",
+                "kind": "channel",
+                "runtime": "adapter",
+                "trustClass": "embedded_safe",
+                "embeddedEnabled": true,
+                "capabilityTypes": [
+                  "sample-capabilityTypes"
+                ],
+                "features": {
+                  "key1": "value1"
+                },
+                "createdAt": "sample-createdAt",
+                "updatedAt": "sample-updatedAt"
+              },
+              "configuredConnectorCount": 3.14
+            },
+            "connector": {
+              "connector": {
+                "connectorId": "sample-connectorId",
+                "familyId": "sample-familyId",
+                "displayName": "sample-displayName",
+                "accountFingerprintHash": "sample-accountFingerprintHash",
+                "labelSlug": "sample-labelSlug",
+                "status": "active",
+                "metadata": {
+                  "key1": "value1"
+                },
+                "createdAt": "sample-createdAt",
+                "updatedAt": "sample-updatedAt"
+              },
+              "family": {
+                "familyId": "sample-familyId",
+                "displayName": "sample-displayName",
+                "kind": "channel",
+                "runtime": "adapter",
+                "trustClass": "embedded_safe",
+                "embeddedEnabled": true,
+                "capabilityTypes": [
+                  "sample-capabilityTypes"
+                ],
+                "features": {
+                  "key1": "value1"
+                },
+                "createdAt": "sample-createdAt",
+                "updatedAt": "sample-updatedAt"
+              },
+              "bindings": [
+                {
+                  "bindingId": "sample-bindingId",
+                  "connectorId": "sample-connectorId",
+                  "bindingType": "inbound_route",
+                  "selector": {
+                    "key1": "value1"
+                  },
+                  "targetType": "main_orchestrator",
+                  "targetSpaceId": "sample-targetSpaceId",
+                  "allowedActions": [
+                    "notify"
+                  ],
+                  "capabilityTypes": [
+                    "sample-capabilityTypes"
+                  ],
+                  "priority": 3.14,
+                  "enabled": true,
+                  "createdAt": "sample-createdAt",
+                  "updatedAt": "sample-updatedAt"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "generatedAt": "sample-generatedAt"
+  }
+}

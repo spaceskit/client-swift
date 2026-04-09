@@ -1,17 +1,71 @@
 {
   "type": "test_spacelistturnsresponsepayload",
   "id": "msg-spacelistturnsresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.233Z",
   "payload": {
     "spaceId": "sample-spaceId",
     "spaceUid": "sample-spaceUid",
     "turns": [
       {
         "turnId": "sample-turnId",
+        "rootTurnId": "sample-rootTurnId",
         "agentId": "sample-agentId",
         "status": "sample-status",
         "inputText": "sample-inputText",
         "outputText": "sample-outputText",
+        "inputContent": {
+          "schemaVersion": null,
+          "kind": "rich_content",
+          "primaryMimeType": "sample-primaryMimeType",
+          "previewText": "sample-previewText",
+          "supportsInline": true,
+          "parts": [
+            {
+              "type": "text",
+              "mimeType": "sample-mimeType",
+              "text": "sample-text",
+              "data": "sample-data",
+              "uri": "sample-uri",
+              "title": "sample-title",
+              "previewText": "sample-previewText",
+              "metadata": {
+                "key1": "value1"
+              }
+            }
+          ],
+          "metadata": {
+            "key1": "value1"
+          }
+        },
+        "outputContent": {
+          "schemaVersion": null,
+          "kind": "rich_content",
+          "primaryMimeType": "sample-primaryMimeType",
+          "previewText": "sample-previewText",
+          "supportsInline": true,
+          "parts": [
+            {
+              "type": "text",
+              "mimeType": "sample-mimeType",
+              "text": "sample-text",
+              "data": "sample-data",
+              "uri": "sample-uri",
+              "title": "sample-title",
+              "previewText": "sample-previewText",
+              "metadata": {
+                "key1": "value1"
+              }
+            }
+          ],
+          "metadata": {
+            "key1": "value1"
+          }
+        },
+        "conversationTopology": "direct",
+        "transcriptVisibility": "visible",
+        "summaryTurnId": "sample-summaryTurnId",
+        "mode": "ask",
+        "effort": "low",
         "promptTokens": 3.14,
         "completionTokens": 3.14,
         "totalTokens": 3.14,

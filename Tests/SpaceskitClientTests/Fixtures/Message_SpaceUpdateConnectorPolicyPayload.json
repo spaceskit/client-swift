@@ -1,0 +1,17 @@
+{
+  "type": "test_spaceupdateconnectorpolicypayload",
+  "id": "msg-spaceupdateconnectorpolicypayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "mode": "all_enabled",
+    "entries": [
+      {
+        "sourceKind": "builtin_integration",
+        "sourceId": "sample-sourceId",
+        "state": "enabled"
+      }
+    ]
+  }
+}

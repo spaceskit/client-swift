@@ -1,0 +1,23 @@
+{
+  "memories": [
+    {
+      "memoryId": "mem-1",
+      "spaceId": "space-1",
+      "sourceType": "experience",
+      "sourceId": "exp-1",
+      "status": "active",
+      "scopeType": "space",
+      "scopeId": "space-1",
+      "category": "semantic",
+      "textPreview": "Reviewer should surface tests before summaries.",
+      "importance": 0.8,
+      "createdAt": "2026-03-17T08:12:00.000Z",
+      "updatedAt": "2026-03-17T08:12:00.000Z",
+      "metadata": {
+        "redacted": true
+      }
+    }
+  ],
+  "total": 1,
+  "nextOffset": null
+}

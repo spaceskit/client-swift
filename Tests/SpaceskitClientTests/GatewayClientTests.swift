@@ -37,6 +37,26 @@ final class GatewayClientTests: XCTestCase {
         return await client.hasPendingRequestForTesting(messageId)
     }
 
+    private func waitForNextEvent(
+        from stream: AsyncStream<GatewayEvent>,
+        timeoutNanoseconds: UInt64 = 500_000_000
+    ) async -> GatewayEvent? {
+        await withTaskGroup(of: GatewayEvent?.self) { group in
+            group.addTask {
+                var iterator = stream.makeAsyncIterator()
+                return await iterator.next()
+            }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: timeoutNanoseconds)
+                return nil
+            }
+
+            let first = await group.next() ?? nil
+            group.cancelAll()
+            return first
+        }
+    }
+
     // MARK: - Auth Key Pair
 
     func testAuthKeyPairGeneration() throws {
@@ -111,7 +131,9 @@ final class GatewayClientTests: XCTestCase {
             "turnId": "turn-123",
             "spaceId": "space-456",
             "output": "Hello from agent",
-            "status": "completed"
+            "status": "completed",
+            "mode": "assistant",
+            "effort": "high"
         }
         """
         let data = json.data(using: .utf8)!
@@ -122,6 +144,8 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(result.output, "Hello from agent")
         XCTAssertEqual(result.status, .completed)
         XCTAssertNil(result.error)
+        XCTAssertEqual(result.mode, "assistant")
+        XCTAssertEqual(result.effort, "high")
     }
 
     func testTurnStreamDecoding() throws {
@@ -194,6 +218,189 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(event.timestamp, "2026-02-25T14:00:00Z")
     }
 
+    func testTurnEventCompatibilityMapsStateChangedLifecycleType() throws {
+        let json = """
+        {
+            "type": "space.turn_event",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "turnId": "turn-1",
+            "event": {
+                "type": "state_changed",
+                "state": "needs_feedback"
+            },
+            "timestamp": "2026-02-25T14:00:01Z"
+        }
+        """
+        let event = try JSONDecoder().decode(TurnEvent.self, from: Data(json.utf8))
+
+        XCTAssertEqual(event.eventType, "state_changed")
+        XCTAssertEqual(event.timestamp, "2026-02-25T14:00:01Z")
+    }
+
+    func testTypedTurnEventPayloadDecodesCanonicalActivityState() throws {
+        let json = """
+        {
+            "kind": "state.changed",
+            "state": "acting"
+        }
+        """
+
+        let payload = try JSONDecoder().decode(TypedTurnEventPayload.self, from: Data(json.utf8))
+
+        guard case .stateChanged(let statePayload) = payload else {
+            return XCTFail("Expected state.changed payload")
+        }
+        XCTAssertEqual(statePayload.state, .acting)
+    }
+
+    func testTurnEventResolvedAgentActivityStateFallsBackToLegacyEventPayload() throws {
+        let json = """
+        {
+            "type": "space.turn_event",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "turnId": "turn-1",
+            "event": {
+                "type": "state_changed",
+                "state": "needs_feedback"
+            }
+        }
+        """
+
+        let event = try JSONDecoder().decode(TurnEvent.self, from: Data(json.utf8))
+
+        XCTAssertEqual(event.resolvedAgentActivityState, .needsFeedback)
+        XCTAssertEqual(event.resolvedAgentState, AgentActivityState.needsFeedback.rawValue)
+    }
+
+    func testTurnEventCompatibilityMapsReasoningDeltaToStreamingLifecycleType() throws {
+        let json = """
+        {
+            "type": "space.turn_event",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "turnId": "turn-1",
+            "event": {
+                "type": "reasoning_delta",
+                "text": "Thinking..."
+            }
+        }
+        """
+        let event = try JSONDecoder().decode(TurnEvent.self, from: Data(json.utf8))
+
+        XCTAssertEqual(event.eventType, "streaming")
+    }
+
+    func testTurnEventCompatibilityMapsToolAndRateLimitLifecycleTypes() throws {
+        let toolJson = """
+        {
+            "type": "space.turn_event",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "turnId": "turn-1",
+            "event": {
+                "type": "tool_result",
+                "toolResult": {
+                    "toolCallId": "call-1",
+                    "result": { "ok": true }
+                }
+            }
+        }
+        """
+        let rateLimitJson = """
+        {
+            "type": "space.turn_event",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "turnId": "turn-1",
+            "event": {
+                "type": "rate_limited",
+                "retryAfterMs": 1200
+            }
+        }
+        """
+
+        let toolEvent = try JSONDecoder().decode(TurnEvent.self, from: Data(toolJson.utf8))
+        let rateLimitEvent = try JSONDecoder().decode(TurnEvent.self, from: Data(rateLimitJson.utf8))
+
+        XCTAssertEqual(toolEvent.eventType, "tool_call")
+        XCTAssertEqual(rateLimitEvent.eventType, "rate_limited")
+    }
+
+    func testGatewayIntegrationsSnapshotDecodesSupportedInterconnectors() throws {
+        let json = """
+        {
+            "groups": [],
+            "supportedInterconnectors": [
+                {
+                    "bundleId": "jira-cli",
+                    "bundleDisplayName": "Jira CLI",
+                    "bundleDescription": "Gateway-managed Jira CLI bundle.",
+                    "availabilityStatus": "inactive",
+                    "detected": false,
+                    "executablePath": null,
+                    "installHint": "Install `jira` on the gateway host and make it resolvable, then rescan CLI Tools.",
+                    "toolIds": ["jira.issue.view"],
+                    "toolCount": 1,
+                    "managedEnabled": true,
+                    "healthStatus": "unknown",
+                    "healthMessage": "Jira CLI is not detected on this gateway.",
+                    "updatedAt": "2026-03-09T10:00:00Z"
+                }
+            ],
+            "generatedAt": "2026-03-09T10:00:00Z"
+        }
+        """
+        let snapshot = try JSONDecoder().decode(GatewayIntegrationsSnapshot.self, from: Data(json.utf8))
+
+        XCTAssertEqual(snapshot.supportedInterconnectors?.first?.bundleId, "jira-cli")
+        XCTAssertEqual(snapshot.supportedInterconnectors?.first?.availabilityStatus, .inactive)
+        XCTAssertEqual(snapshot.supportedInterconnectors?.first?.toolCount, 1)
+    }
+
+    func testGatewayNotificationDecodingUsesBodyAndData() throws {
+        let json = """
+        {
+            "notificationId": "notif-1",
+            "category": "feedback.requested",
+            "severity": "warning",
+            "title": "Approval needed",
+            "body": "Agent needs your input",
+            "spaceId": "space-1",
+            "spaceUid": "space-uid-1",
+            "agentId": "agent-1",
+            "data": {
+                "requestId": "request-1"
+            },
+            "createdAt": "2026-03-14T10:00:00Z"
+        }
+        """
+        let notification = try JSONDecoder().decode(GatewayNotification.self, from: Data(json.utf8))
+
+        XCTAssertEqual(notification.notificationId, "notif-1")
+        XCTAssertEqual(notification.body, "Agent needs your input")
+        XCTAssertEqual(notification.spaceId, "space-1")
+        XCTAssertEqual(notification.data?["requestId"]?.value as? String, "request-1")
+    }
+
+    func testGatewayNotificationDecodingFallsBackToLegacyMessageField() throws {
+        let json = """
+        {
+            "notificationId": "notif-2",
+            "category": "feedback.requested",
+            "severity": "warning",
+            "title": "Approval needed",
+            "message": "Legacy notification body",
+            "createdAt": "2026-03-14T10:00:00Z"
+        }
+        """
+        let notification = try JSONDecoder().decode(GatewayNotification.self, from: Data(json.utf8))
+
+        XCTAssertEqual(notification.notificationId, "notif-2")
+        XCTAssertEqual(notification.body, "Legacy notification body")
+    }
+
     func testGatewayErrorDecoding() throws {
         let json = """
         {
@@ -208,10 +415,172 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(error.message, "Invalid signature")
     }
 
+    func testSpaceCreateResponsePayloadDecodesWrappedAndLegacyRawShapes() throws {
+        let wrapped = """
+        {
+            "space": {
+                "id": "space-1",
+                "spaceUid": "space-uid-1",
+                "workspace": {
+                    "spaceId": "space-1",
+                    "spaceUid": "space-uid-1",
+                    "mode": "managed",
+                    "effectiveWorkspaceRoot": "/tmp/spaces/space-uid-1",
+                    "metaPath": "/tmp/spaces/space-uid-1/.space",
+                    "logsPath": "/tmp/spaces/space-uid-1/.space/logs",
+                    "workPath": "/tmp/spaces/space-uid-1/.space/work",
+                    "sharedContextPath": "/tmp/spaces/space-uid-1/.space/shared-context",
+                    "scratchpadsPath": "/tmp/spaces/space-uid-1/.space/scratchpads",
+                    "updatedAt": "2026-03-14T17:00:00.000Z"
+                },
+                "resourceId": "resource:main",
+                "name": "Main",
+                "turnModel": "primary_only",
+                "createdAt": "2026-03-14T17:00:00.000Z",
+                "updatedAt": "2026-03-14T17:00:00.000Z"
+            }
+        }
+        """
+        let legacyRaw = """
+        {
+            "id": "space-2",
+            "spaceUid": "space-uid-2",
+            "resourceId": "resource:main",
+            "name": "Legacy",
+            "turnModel": "primary_only",
+            "createdAt": "2026-03-14T17:00:00.000Z",
+            "updatedAt": "2026-03-14T17:00:00.000Z"
+        }
+        """
+
+        let wrappedDecoded = try JSONDecoder().decode(
+            SpaceCreateResponsePayload.self,
+            from: Data(wrapped.utf8)
+        )
+        XCTAssertEqual(wrappedDecoded.space.id, "space-1")
+        XCTAssertEqual(wrappedDecoded.space.name, "Main")
+        XCTAssertEqual(
+            wrappedDecoded.space.workspace?.artifactsPath,
+            "/tmp/spaces/space-uid-1/.space/artifacts"
+        )
+
+        let legacyDecoded = try JSONDecoder().decode(
+            SpaceCreateResponsePayload.self,
+            from: Data(legacyRaw.utf8)
+        )
+        XCTAssertEqual(legacyDecoded.space.id, "space-2")
+        XCTAssertEqual(legacyDecoded.space.name, "Legacy")
+    }
+
+    func testSpaceGetResponsePayloadDecodesWrappedAndLegacyRawShapes() throws {
+        let wrapped = """
+        {
+            "space": {
+                "id": "space-3",
+                "spaceUid": "space-uid-3",
+                "resourceId": "resource:main",
+                "name": "Wrapped",
+                "turnModel": "primary_only",
+                "createdAt": "2026-03-14T17:00:00.000Z",
+                "updatedAt": "2026-03-14T17:00:00.000Z"
+            }
+        }
+        """
+        let legacyRaw = """
+        {
+            "id": "space-4",
+            "spaceUid": "space-uid-4",
+            "resourceId": "resource:main",
+            "name": "Raw",
+            "turnModel": "primary_only",
+            "createdAt": "2026-03-14T17:00:00.000Z",
+            "updatedAt": "2026-03-14T17:00:00.000Z"
+        }
+        """
+
+        let wrappedDecoded = try JSONDecoder().decode(
+            SpaceGetResponsePayload.self,
+            from: Data(wrapped.utf8)
+        )
+        XCTAssertEqual(wrappedDecoded.space.id, "space-3")
+
+        let legacyDecoded = try JSONDecoder().decode(
+            SpaceGetResponsePayload.self,
+            from: Data(legacyRaw.utf8)
+        )
+        XCTAssertEqual(legacyDecoded.space.id, "space-4")
+    }
+
+    func testSpaceListResponsePayloadDecodesWrappedAndLegacyRawArrayShapes() throws {
+        let wrapped = """
+        {
+            "spaces": [
+                {
+                    "id": "space-5",
+                    "spaceUid": "space-uid-5",
+                    "workspace": {
+                        "spaceId": "space-5",
+                        "mode": "managed",
+                        "effectiveWorkspaceRoot": "/tmp/spaces/space-uid-5",
+                        "metaPath": "/tmp/spaces/space-uid-5/.space",
+                        "logsPath": "/tmp/spaces/space-uid-5/.space/logs",
+                        "workPath": "/tmp/spaces/space-uid-5/.space/work",
+                        "scratchpadsPath": "/tmp/spaces/space-uid-5/.space/scratchpads",
+                        "updatedAt": "2026-03-14T17:00:00.000Z"
+                    },
+                    "resourceId": "resource:main",
+                    "name": "Wrapped List",
+                    "turnModel": "primary_only",
+                    "createdAt": "2026-03-14T17:00:00.000Z",
+                    "updatedAt": "2026-03-14T17:00:00.000Z"
+                }
+            ]
+        }
+        """
+        let legacyRawArray = """
+        [
+            {
+                "id": "space-6",
+                "spaceUid": "space-uid-6",
+                "resourceId": "resource:main",
+                "name": "Raw List",
+                "turnModel": "primary_only",
+                "createdAt": "2026-03-14T17:00:00.000Z",
+                "updatedAt": "2026-03-14T17:00:00.000Z"
+            }
+        ]
+        """
+
+        let wrappedDecoded = try JSONDecoder().decode(
+            SpaceListResponsePayload.self,
+            from: Data(wrapped.utf8)
+        )
+        XCTAssertEqual(wrappedDecoded.spaces.count, 1)
+        XCTAssertEqual(wrappedDecoded.spaces.first?.id, "space-5")
+        XCTAssertEqual(
+            wrappedDecoded.spaces.first?.workspace?.sharedContextPath,
+            "/tmp/spaces/space-uid-5/.space/shared-context"
+        )
+
+        let legacyDecoded = try JSONDecoder().decode(
+            SpaceListResponsePayload.self,
+            from: Data(legacyRawArray.utf8)
+        )
+        XCTAssertEqual(legacyDecoded.spaces.count, 1)
+        XCTAssertEqual(legacyDecoded.spaces.first?.id, "space-6")
+    }
+
     // MARK: - Protocol Message Encoding
 
     func testGatewayMessageEncoding() throws {
-        let payload = ExecuteTurnPayload(spaceUid: "11111111-2222-3333-4444-555555555555", input: "Hello")
+        let payload = ExecuteTurnPayload(
+            spaceUid: "11111111-2222-3333-4444-555555555555",
+            input: "Hello",
+            targetAgentId: "agent-1",
+            replyToTurnId: "turn-0",
+            mode: "assistant",
+            effort: "medium"
+        )
         let message = GatewayMessage(
             type: MessageType.executeTurn,
             id: "msg-1",
@@ -228,6 +597,53 @@ final class GatewayClientTests: XCTestCase {
         let payloadDict = json["payload"] as! [String: Any]
         XCTAssertEqual(payloadDict["spaceUid"] as? String, "11111111-2222-3333-4444-555555555555")
         XCTAssertEqual(payloadDict["input"] as? String, "Hello")
+        XCTAssertEqual(payloadDict["targetAgentId"] as? String, "agent-1")
+        XCTAssertEqual(payloadDict["replyToTurnId"] as? String, "turn-0")
+        XCTAssertEqual(payloadDict["mode"] as? String, "assistant")
+        XCTAssertEqual(payloadDict["effort"] as? String, "medium")
+    }
+
+    func testExecuteTurnOptionsPayloadEncoding() throws {
+        let options = ExecuteTurnOptions(
+            spaceUid: "space-1",
+            input: "Draft a plan",
+            targetAgentId: "agent-7",
+            replyToTurnId: "turn-6",
+            mode: "planner",
+            effort: "high"
+        )
+        let payload = ExecuteTurnPayload(options)
+        let json = try encodeJSONObject(payload)
+
+        XCTAssertEqual(json["spaceUid"] as? String, "space-1")
+        XCTAssertEqual(json["input"] as? String, "Draft a plan")
+        XCTAssertEqual(json["targetAgentId"] as? String, "agent-7")
+        XCTAssertEqual(json["replyToTurnId"] as? String, "turn-6")
+        XCTAssertEqual(json["mode"] as? String, "planner")
+        XCTAssertEqual(json["effort"] as? String, "high")
+    }
+
+    func testResumeFeedbackPayloadEncodingIncludesApprovalGrant() throws {
+        let payload = ResumeFeedbackPayload(
+            spaceUid: "space-1",
+            turnId: "turn-7",
+            response: .approve,
+            revision: "rev-2",
+            approvalGrant: ApprovalGrantPayload(
+                mode: .timeWindow,
+                ttlSeconds: 900
+            )
+        )
+        let json = try encodeJSONObject(payload)
+
+        XCTAssertEqual(json["spaceUid"] as? String, "space-1")
+        XCTAssertEqual(json["turnId"] as? String, "turn-7")
+        XCTAssertEqual(json["response"] as? String, "approve")
+        XCTAssertEqual(json["revision"] as? String, "rev-2")
+
+        let approvalGrant = try XCTUnwrap(json["approvalGrant"] as? [String: Any])
+        XCTAssertEqual(approvalGrant["mode"] as? String, "time_window")
+        XCTAssertEqual(approvalGrant["ttlSeconds"] as? Int, 900)
     }
 
     func testConnectorListPayloadEncoding() throws {
@@ -237,6 +653,133 @@ final class GatewayClientTests: XCTestCase {
 
         XCTAssertEqual(json?["apiVersion"] as? String, "v1")
         XCTAssertEqual(json?["familyId"] as? String, "apple-calendar-eventkit")
+    }
+
+    func testGatewayRegisterToolPayloadEncodingIncludesBundleMetadata() throws {
+        let payload = GatewayRegisterToolPayload(
+            apiVersion: "v1",
+            schemaVersion: 1,
+            id: "tool.rg_search",
+            displayName: "Ripgrep Search",
+            description: "Search the workspace with ripgrep.",
+            bundleId: "search-cli",
+            bundleDisplayName: "Search CLI",
+            bundleDescription: "Repository search helpers.",
+            toolGroupId: "workspace",
+            toolGroupDisplayName: "Workspace",
+            executable: "/usr/bin/rg",
+            argsTemplate: ["--json", "{{query}}"],
+            inputSchema: [
+                "type": "object",
+                "properties": [
+                    "query": [
+                        "type": "string"
+                    ]
+                ]
+            ],
+            instructions: "Use this for repository text search only.",
+            examples: [
+                GatewayToolExample(
+                    name: "Find TODO comments",
+                    description: "Search for TODO markers.",
+                    arguments: ["query": "TODO"],
+                    expectedOutput: "JSON lines from ripgrep."
+                )
+            ],
+            timeoutMs: 5_000,
+            maxOutputBytes: 131_072,
+            cwdMode: "space_root",
+            outputMode: "json",
+            dangerLevel: .standard,
+            readme: "# Ripgrep Search",
+            enabled: false
+        )
+        let json = try encodeJSONObject(payload)
+
+        XCTAssertEqual(json["schemaVersion"] as? Int, 1)
+        XCTAssertEqual(json["instructions"] as? String, "Use this for repository text search only.")
+        XCTAssertEqual(json["maxOutputBytes"] as? Int, 131_072)
+        XCTAssertEqual(json["dangerLevel"] as? String, "standard")
+        XCTAssertEqual(json["bundleId"] as? String, "search-cli")
+        XCTAssertEqual(json["bundleDisplayName"] as? String, "Search CLI")
+        XCTAssertEqual(json["bundleDescription"] as? String, "Repository search helpers.")
+        XCTAssertEqual(json["toolGroupId"] as? String, "workspace")
+        XCTAssertEqual(json["toolGroupDisplayName"] as? String, "Workspace")
+        XCTAssertEqual(json["enabled"] as? Bool, false)
+
+        let examples = try XCTUnwrap(json["examples"] as? [[String: Any]])
+        XCTAssertEqual(examples.count, 1)
+        let firstExample = try XCTUnwrap(examples.first)
+        XCTAssertEqual(firstExample["name"] as? String, "Find TODO comments")
+    }
+
+    func testGatewaySetToolEnabledPayloadEncodingIncludesEnabledFlag() throws {
+        let payload = GatewaySetToolEnabledPayload(
+            apiVersion: "v1",
+            toolId: "tool.rg_search",
+            enabled: false
+        )
+        let json = try encodeJSONObject(payload)
+
+        XCTAssertEqual(json["apiVersion"] as? String, "v1")
+        XCTAssertEqual(json["toolId"] as? String, "tool.rg_search")
+        XCTAssertEqual(json["enabled"] as? Bool, false)
+    }
+
+    func testGatewaySetToolEnabledResponseDecodingPreservesEnabledFlag() throws {
+        let json = """
+        {
+            "tools": [
+                {
+                    "schemaVersion": 1,
+                    "id": "tool.rg_search",
+                    "providerId": "cli-tool-service",
+                    "displayName": "Ripgrep Search",
+                    "description": "Search the workspace with ripgrep.",
+                    "bundleId": "search-cli",
+                    "bundleDisplayName": "Search CLI",
+                    "bundleDescription": "Repository search helpers.",
+                    "toolGroupId": "workspace",
+                    "toolGroupDisplayName": "Workspace",
+                    "executable": "rg",
+                    "resolvedExecutable": "/usr/bin/rg",
+                    "argsTemplate": ["--json", "{{query}}"],
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "query": { "type": "string" }
+                        }
+                    },
+                    "instructions": "Use this for repository text search only.",
+                    "examples": [],
+                    "timeoutMs": 5000,
+                    "maxOutputBytes": 131072,
+                    "cwdMode": "space_root",
+                    "fixedCwd": null,
+                    "outputMode": "json",
+                    "dangerLevel": "standard",
+                    "enabled": false,
+                    "available": true,
+                    "healthStatus": "unknown",
+                    "healthMessage": null,
+                    "manifestPath": "/tmp/tools/tool.rg_search/manifest.json",
+                    "readmePath": null,
+                    "readmeContent": null,
+                    "requiresApproval": true,
+                    "createdAt": "2026-03-09T10:00:00Z",
+                    "updatedAt": "2026-03-09T10:00:00Z"
+                }
+            ]
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(
+            GatewaySetToolEnabledResponsePayload.self,
+            from: Data(json.utf8)
+        )
+        XCTAssertEqual(decoded.tools.count, 1)
+        XCTAssertEqual(decoded.tools.first?.id, "tool.rg_search")
+        XCTAssertFalse(decoded.tools.first?.enabled ?? true)
     }
 
     func testSpaceListTurnsPayloadEncoding() throws {
@@ -288,6 +831,8 @@ final class GatewayClientTests: XCTestCase {
                     "status": "completed",
                     "inputText": "Hello",
                     "outputText": "Hi there",
+                    "mode": "assistant",
+                    "effort": "medium",
                     "createdAt": "2026-02-26T12:00:00.000Z",
                     "completedAt": "2026-02-26T12:00:01.000Z"
                 }
@@ -302,6 +847,8 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(decoded.spaceUid, "space-uid-main")
         XCTAssertEqual(decoded.turns.count, 1)
         XCTAssertEqual(decoded.turns.first?.turnId, "turn-1")
+        XCTAssertEqual(decoded.turns.first?.mode, "assistant")
+        XCTAssertEqual(decoded.turns.first?.effort, "medium")
         XCTAssertEqual(decoded.total, 1)
         XCTAssertNil(decoded.nextOffset)
     }
@@ -400,6 +947,156 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(revokeResponse.grant?.revokedAt, "2026-02-24T00:10:00.000Z")
     }
 
+    func testGatewayToolResponseDecoding() throws {
+        let json = """
+        {
+            "tool": {
+                "schemaVersion": 1,
+                "id": "tool.rg_search",
+                "providerId": "cli-tool-service",
+                "displayName": "Ripgrep Search",
+                "description": "Search the workspace with ripgrep.",
+                "bundleId": "search-cli",
+                "bundleDisplayName": "Search CLI",
+                "bundleDescription": "Repository search helpers.",
+                "toolGroupId": "workspace",
+                "toolGroupDisplayName": "Workspace",
+                "executable": "rg",
+                "resolvedExecutable": "/usr/bin/rg",
+                "argsTemplate": ["--json", "{{query}}"],
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "query": { "type": "string" }
+                    }
+                },
+                "instructions": "Use this for repository text search only.",
+                "examples": [
+                    {
+                        "name": "Find TODO comments",
+                        "description": "Search for TODO markers.",
+                        "arguments": { "query": "TODO" },
+                        "expectedOutput": "JSON lines from ripgrep."
+                    }
+                ],
+                "timeoutMs": 5000,
+                "maxOutputBytes": 131072,
+                "cwdMode": "space_root",
+                "fixedCwd": null,
+                "outputMode": "json",
+                "dangerLevel": "standard",
+                "available": true,
+                "healthStatus": "degraded",
+                "healthMessage": "Jira auth is unavailable on this gateway.",
+                "manifestPath": "/tmp/tools/tool.rg_search/manifest.json",
+                "readmePath": "/tmp/tools/tool.rg_search/README.md",
+                "readmeContent": "# Ripgrep Search\\n\\nUse responsibly.",
+                "requiresApproval": true,
+                "createdAt": "2026-03-09T10:00:00Z",
+                "updatedAt": "2026-03-09T10:00:00Z"
+            }
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(GatewayGetToolResponsePayload.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.tool?.schemaVersion, 1)
+        XCTAssertEqual(decoded.tool?.dangerLevel, .standard)
+        XCTAssertEqual(decoded.tool?.healthStatus, .degraded)
+        XCTAssertEqual(decoded.tool?.healthMessage, "Jira auth is unavailable on this gateway.")
+        XCTAssertEqual(decoded.tool?.bundleId, "search-cli")
+        XCTAssertEqual(decoded.tool?.bundleDisplayName, "Search CLI")
+        XCTAssertEqual(decoded.tool?.bundleDescription, "Repository search helpers.")
+        XCTAssertEqual(decoded.tool?.toolGroupId, "workspace")
+        XCTAssertEqual(decoded.tool?.toolGroupDisplayName, "Workspace")
+        XCTAssertEqual(decoded.tool?.examples.first?.arguments["query"]?.value as? String, "TODO")
+        XCTAssertEqual(decoded.tool?.readmeContent, "# Ripgrep Search\n\nUse responsibly.")
+        XCTAssertTrue(decoded.tool?.enabled ?? false)
+    }
+
+    func testGatewayRescanJiraCliToolsResponseDecoding() throws {
+        let json = """
+        {
+            "detected": true,
+            "toolCount": 22,
+            "toolIds": ["jira.me", "jira.issue.view"],
+            "removedToolIds": [],
+            "healthStatus": "ok",
+            "healthMessage": null,
+            "executablePath": "/opt/homebrew/bin/jira"
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(
+            GatewayRescanJiraCliToolsResponsePayload.self,
+            from: Data(json.utf8)
+        )
+        XCTAssertTrue(decoded.detected)
+        XCTAssertEqual(decoded.toolCount, 22)
+        XCTAssertEqual(decoded.toolIds, ["jira.me", "jira.issue.view"])
+        XCTAssertEqual(decoded.removedToolIds, [])
+        XCTAssertEqual(decoded.healthStatus, .ok)
+        XCTAssertNil(decoded.healthMessage)
+        XCTAssertEqual(decoded.executablePath, "/opt/homebrew/bin/jira")
+    }
+
+    func testGatewayToolApprovalGrantResponseDecoding() throws {
+        let json = """
+        {
+            "grants": [
+                {
+                    "principalId": "principal-1",
+                    "deviceId": "device-1",
+                    "spaceId": "space-1",
+                    "toolId": "tool.rg_search",
+                    "mode": "durable",
+                    "source": "runtime",
+                    "reason": "Approved from review sheet.",
+                    "grantedBy": "admin",
+                    "grantedAt": "2026-03-09T10:05:00Z",
+                    "expiresAt": null,
+                    "revokedAt": null,
+                    "updatedAt": "2026-03-09T10:05:00Z"
+                }
+            ]
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(GatewayListToolApprovalGrantsResponsePayload.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.grants.count, 1)
+        XCTAssertEqual(decoded.grants.first?.mode, .durable)
+        XCTAssertEqual(decoded.grants.first?.toolId, "tool.rg_search")
+    }
+
+    func testSpaceGetMcpEndpointResponseDecoding() throws {
+        let json = """
+        {
+            "spaceId": "space-1",
+            "endpoint": {
+                "endpointId": "mcp-endpoint-1",
+                "spaceId": "space-1",
+                "transport": "stdio",
+                "endpoint": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-filesystem"],
+                "secretRef": null,
+                "enabled": true,
+                "healthStatus": "ok",
+                "healthMessage": "Connected",
+                "lastConnectedAt": "2026-03-09T10:04:00Z",
+                "lastErrorAt": null,
+                "createdAt": "2026-03-09T10:00:00Z",
+                "updatedAt": "2026-03-09T10:04:00Z"
+            },
+            "fallbackEnabled": false
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(SpaceGetMcpEndpointResponsePayload.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.endpoint?.transport, .stdio)
+        XCTAssertEqual(decoded.endpoint?.healthStatus, .ok)
+        XCTAssertEqual(decoded.endpoint?.args.count, 2)
+        XCTAssertFalse(decoded.fallbackEnabled)
+    }
+
     func testProviderConfigAndSecretRefDecoding() throws {
         let providerConfigJSON = """
         {
@@ -410,7 +1107,6 @@ final class GatewayClientTests: XCTestCase {
             "apiKeySecretRef": "secretref-openrouter-primary",
             "allowedModels": ["openrouter/openai/gpt-4.1-mini"],
             "allowCustomModel": false,
-            "nativeCliToolsEnabled": false,
             "updatedAt": "2026-02-24T00:00:00.000Z",
             "source": "runtime"
         }
@@ -419,7 +1115,6 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(providerConfig.apiKeySecretRef, "secretref-openrouter-primary")
         XCTAssertEqual(providerConfig.allowedModels, ["openrouter/openai/gpt-4.1-mini"])
         XCTAssertFalse(providerConfig.allowCustomModel)
-        XCTAssertFalse(providerConfig.nativeCliToolsEnabled)
 
         let putSecretRefJSON = """
         {
@@ -457,10 +1152,73 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(localAgent.availableModels?.count, 2)
     }
 
+    func testProviderAuthModeAndCatalogAuthMetadataDecoding() throws {
+        let providerConfigJSON = """
+        {
+            "providerId": "claude-agent-sdk",
+            "model": "claude-agent-sdk/claude-sonnet-4-5",
+            "baseURL": null,
+            "hasApiKey": false,
+            "apiKeySecretRef": null,
+            "authMode": "host_login",
+            "allowedModels": ["claude-agent-sdk/claude-sonnet-4-5"],
+            "allowCustomModel": false,
+            "updatedAt": "2026-04-08T09:00:00.000Z",
+            "source": "runtime"
+        }
+        """
+
+        let providerConfig = try JSONDecoder().decode(GatewayProviderRuntimeConfig.self, from: Data(providerConfigJSON.utf8))
+        XCTAssertEqual(providerConfig.authMode, .hostLogin)
+        XCTAssertFalse(providerConfig.hasApiKey)
+
+        let catalogJSON = """
+        {
+            "providerId": "claude-agent-sdk",
+            "displayName": "Claude Agent SDK",
+            "group": "executor",
+            "integrationClass": "executor",
+            "status": "needs_auth",
+            "hasApiKey": false,
+            "requiresApiKey": false,
+            "supportedAuthModes": ["api_key", "host_login"],
+            "authMode": "host_login",
+            "authStatus": "needs_auth",
+            "authAccount": {
+                "email": "agent@example.com",
+                "organization": "Acme",
+                "subscriptionType": "max",
+                "apiProvider": "firstParty",
+                "tokenSource": "oauth"
+            },
+            "detectionStatus": "available",
+            "models": [
+                {
+                    "id": "claude-agent-sdk/claude-sonnet-4-6",
+                    "displayName": "Claude Sonnet 4.6",
+                    "source": "detected",
+                    "available": true
+                }
+            ],
+            "recommended": false,
+            "supportsHostedBilling": false,
+            "configAllowed": true
+        }
+        """
+
+        let catalog = try JSONDecoder().decode(GatewayModelProviderCatalog.self, from: Data(catalogJSON.utf8))
+        XCTAssertEqual(catalog.supportedAuthModes, [.apiKey, .hostLogin])
+        XCTAssertEqual(catalog.authMode, .hostLogin)
+        XCTAssertEqual(catalog.authStatus, .needsAuth)
+        XCTAssertEqual(catalog.authAccount?.email, "agent@example.com")
+        XCTAssertEqual(catalog.authAccount?.subscriptionType, "max")
+    }
+
     func testListAvailableModelsPayloadAndResponseDecoding() throws {
-        let payload = GatewayListAvailableModelsPayload(apiVersion: "v1", providerId: "openai")
+        let payload = GatewayListAvailableModelsPayload(apiVersion: "v1", providerId: "openai", refresh: true)
         let payloadJSON = try encodeJSONObject(payload)
         XCTAssertEqual(payloadJSON["providerId"] as? String, "openai")
+        XCTAssertEqual(payloadJSON["refresh"] as? Bool, true)
 
         let responseJSON = """
         {
@@ -500,9 +1258,14 @@ final class GatewayClientTests: XCTestCase {
     }
 
     func testProviderSettingsPayloadAndResponseDecoding() throws {
-        let listCatalogsPayload = GatewayListProviderCatalogsPayload(apiVersion: "v1", providerId: "openai")
+        let listCatalogsPayload = GatewayListProviderCatalogsPayload(
+            apiVersion: "v1",
+            providerId: "openai",
+            refresh: true
+        )
         let listCatalogsJSON = try encodeJSONObject(listCatalogsPayload)
         XCTAssertEqual(listCatalogsJSON["providerId"] as? String, "openai")
+        XCTAssertEqual(listCatalogsJSON["refresh"] as? Bool, true)
 
         let getSettingsPayload = GatewayGetProviderSettingsPayload(apiVersion: "v1", providerId: "openai")
         let getSettingsJSON = try encodeJSONObject(getSettingsPayload)
@@ -510,36 +1273,39 @@ final class GatewayClientTests: XCTestCase {
 
         let setConfigPayload = GatewaySetProviderConfigPayload(
             apiVersion: "v1",
-            providerId: "claude",
-            model: "claude/sonnet",
+            providerId: "claude-agent-sdk",
+            model: "claude-agent-sdk/claude-sonnet-4-5",
             apiKey: nil,
             apiKeySecretRef: "secretref-claude-primary",
+            authMode: .hostLogin,
             baseURL: nil,
-            allowedModels: ["claude/sonnet"],
-            allowCustomModel: false,
-            nativeCliToolsEnabled: true
+            allowedModels: ["claude-agent-sdk/claude-sonnet-4-5"],
+            allowCustomModel: false
         )
         let setConfigJSON = try encodeJSONObject(setConfigPayload)
-        XCTAssertEqual(setConfigJSON["providerId"] as? String, "claude")
+        XCTAssertEqual(setConfigJSON["providerId"] as? String, "claude-agent-sdk")
+        XCTAssertEqual(setConfigJSON["authMode"] as? String, "host_login")
         XCTAssertEqual(setConfigJSON["allowCustomModel"] as? Bool, false)
-        XCTAssertEqual(setConfigJSON["allowedModels"] as? [String], ["claude/sonnet"])
-        XCTAssertEqual(setConfigJSON["nativeCliToolsEnabled"] as? Bool, true)
+        XCTAssertEqual(
+            setConfigJSON["allowedModels"] as? [String],
+            ["claude-agent-sdk/claude-sonnet-4-5"]
+        )
 
         let updateSettingsPayload = GatewayUpdateProviderSettingsPayload(
             apiVersion: "v1",
-            providerId: "claude",
-            model: "claude/sonnet",
+            providerId: "claude-agent-sdk",
+            model: "claude-agent-sdk/claude-sonnet-4-5",
             apiKey: nil,
             apiKeySecretRef: "secretref-claude-primary",
+            authMode: .hostLogin,
             baseURL: nil,
-            allowedModels: ["claude/sonnet"],
-            allowCustomModel: false,
-            nativeCliToolsEnabled: true
+            allowedModels: ["claude-agent-sdk/claude-sonnet-4-5"],
+            allowCustomModel: false
         )
         let updateSettingsJSON = try encodeJSONObject(updateSettingsPayload)
-        XCTAssertEqual(updateSettingsJSON["providerId"] as? String, "claude")
+        XCTAssertEqual(updateSettingsJSON["providerId"] as? String, "claude-agent-sdk")
+        XCTAssertEqual(updateSettingsJSON["authMode"] as? String, "host_login")
         XCTAssertEqual(updateSettingsJSON["allowCustomModel"] as? Bool, false)
-        XCTAssertEqual(updateSettingsJSON["nativeCliToolsEnabled"] as? Bool, true)
 
         let listCatalogsResponseJSON = """
         {
@@ -583,7 +1349,6 @@ final class GatewayClientTests: XCTestCase {
                 "apiKeySecretRef": "secretref-openai-primary",
                 "allowedModels": ["openai/qwen2.5-coder"],
                 "allowCustomModel": false,
-                "nativeCliToolsEnabled": false,
                 "updatedAt": "2026-02-24T00:00:00.000Z",
                 "source": "runtime"
             }
@@ -595,14 +1360,12 @@ final class GatewayClientTests: XCTestCase {
         )
         XCTAssertEqual(getSettingsResponse.settings.providerId, "openai")
         XCTAssertFalse(getSettingsResponse.settings.allowCustomModel)
-        XCTAssertFalse(getSettingsResponse.settings.nativeCliToolsEnabled)
 
         let updateSettingsResponse = try JSONDecoder().decode(
             GatewayUpdateProviderSettingsResponsePayload.self,
             from: Data(settingsJSON.utf8)
         )
         XCTAssertEqual(updateSettingsResponse.settings.allowedModels, ["openai/qwen2.5-coder"])
-        XCTAssertFalse(updateSettingsResponse.settings.nativeCliToolsEnabled)
     }
 
     func testSpaceUsageDecodesAccuracyMetadata() throws {
@@ -725,6 +1488,76 @@ final class GatewayClientTests: XCTestCase {
         )
         XCTAssertEqual(result.spaceId, "space-reset-target")
         XCTAssertEqual(result.rowsDeleted, 128)
+    }
+
+    func testSpaceListActivityLogResultDecoding() throws {
+        let decoded = try JSONDecoder().decode(
+            SpaceListActivityLogResult.self,
+            from: loadFixture("SpaceListActivityLogResult")
+        )
+
+        XCTAssertEqual(decoded.spaceId, "space-1")
+        XCTAssertEqual(decoded.entries.count, 2)
+        XCTAssertEqual(decoded.entries.first?.eventType, "turn.started")
+        XCTAssertEqual(decoded.entries.last?.category, "memory")
+        XCTAssertEqual(decoded.total, 2)
+        XCTAssertEqual(decoded.nextOffset, 2)
+    }
+
+    func testTurnTraceDecodingDefaultsActivitiesWhenMissing() throws {
+        let json = """
+        {
+          "trace": {
+            "spaceId": "space-1",
+            "turnId": "turn-1",
+            "total": 1,
+            "events": [
+              {
+                "eventId": "evt-1",
+                "seq": 1,
+                "eventType": "turn.completed",
+                "createdAt": "2026-03-17T08:01:00.000Z",
+                "payload": {}
+              }
+            ],
+            "toolCalls": [],
+            "artifactIds": []
+          }
+        }
+        """
+        let result = try JSONDecoder().decode(SpaceGetTurnTraceResult.self, from: Data(json.utf8))
+        XCTAssertEqual(result.trace.turnId, "turn-1")
+        XCTAssertEqual(result.trace.activities.count, 0)
+    }
+
+    func testMemoryLifecycleResultDecoding() throws {
+        let experiences = try JSONDecoder().decode(
+            SpaceListExperiencesResult.self,
+            from: loadFixture("SpaceListExperiencesResult")
+        )
+        XCTAssertEqual(experiences.experiences.count, 1)
+        XCTAssertEqual(experiences.experiences.first?.experienceId, "exp-1")
+
+        let insights = try JSONDecoder().decode(
+            SpaceListInsightsResult.self,
+            from: loadFixture("SpaceListInsightsResult")
+        )
+        XCTAssertEqual(insights.insights.count, 1)
+        XCTAssertEqual(insights.insights.first?.insightId, "insight-1")
+
+        let profile = try JSONDecoder().decode(
+            SpaceUserProfileResult.self,
+            from: loadFixture("SpaceUserProfileResult")
+        )
+        XCTAssertEqual(profile.profile?.principalId, "principal:local")
+        XCTAssertEqual(profile.profile?.facts.first, "prefers concise summaries")
+
+        let memories = try JSONDecoder().decode(
+            SpaceListMemoriesResult.self,
+            from: loadFixture("SpaceListMemoriesResult")
+        )
+        XCTAssertEqual(memories.memories.count, 1)
+        XCTAssertEqual(memories.memories.first?.memoryId, "mem-1")
     }
 
     func testExtractPayloadDataHandlesObjectPayload() throws {
@@ -1202,8 +2035,8 @@ final class GatewayClientTests: XCTestCase {
             selectionMode: .providerModel,
             providerId: "openai",
             modelId: "gpt-4.1",
-            sourceProfileId: nil,
-            copyPersonality: nil
+            sourceAgentDefinitionId: nil,
+            applyPersonaInstructions: nil
         )
         let setJSON = try encodeJSONObject(setPayload)
         XCTAssertEqual(setJSON["selectionMode"] as? String, "provider_model")
@@ -1216,14 +2049,16 @@ final class GatewayClientTests: XCTestCase {
                 "spaceId": "main-space",
                 "spaceUid": "11111111-2222-3333-4444-555555555555",
                 "mainAgentId": "main-agent",
+                "mainAgentDefinitionId": "main-agent-definition",
                 "mainProfileId": "main-profile",
+                "assignedAgentDefinitionId": "main-agent-definition",
                 "assignedProfileId": "main-profile",
                 "providerHint": "openai",
                 "modelHint": "openai/gpt-4.1",
-                "status": "fallback",
-                "repaired": true,
-                "fallbackApplied": true,
-                "fallbackReason": "Configured provider unavailable: missing-provider",
+                "status": "degraded",
+                "repaired": false,
+                "fallbackApplied": false,
+                "runtimeIssueReason": "Configured provider unavailable: missing-provider",
                 "updatedAt": "2026-03-02T12:00:00.000Z"
             }
         }
@@ -1233,8 +2068,339 @@ final class GatewayClientTests: XCTestCase {
             from: Data(responseJSON.utf8)
         )
         XCTAssertEqual(decoded.state.mainAgentId, "main-agent")
+        XCTAssertEqual(decoded.state.mainAgentDefinitionId, "main-agent-definition")
+        XCTAssertEqual(decoded.state.assignedAgentDefinitionId, "main-agent-definition")
+        XCTAssertEqual(decoded.state.status, .degraded)
+        XCTAssertEqual(decoded.state.fallbackApplied, false)
+        XCTAssertEqual(decoded.state.runtimeIssueReason, "Configured provider unavailable: missing-provider")
+    }
+
+    func testConciergeAgentPayloadEncodingAndResponseDecoding() throws {
+        let getPayload = GatewayGetConciergeAgentPayload(
+            apiVersion: "v1",
+            spaceId: "concierge-space",
+            repairIfMissing: true
+        )
+        let getJSON = try encodeJSONObject(getPayload)
+        XCTAssertEqual(getJSON["apiVersion"] as? String, "v1")
+        XCTAssertEqual(getJSON["spaceId"] as? String, "concierge-space")
+        XCTAssertEqual(getJSON["repairIfMissing"] as? Bool, true)
+
+        let setPayload = GatewaySetConciergeAgentPayload(
+            apiVersion: "v1",
+            spaceId: "concierge-space",
+            selectionMode: .providerModel,
+            providerId: "openai",
+            modelId: "gpt-4.1",
+            sourceAgentDefinitionId: nil,
+            applyPersonaInstructions: nil
+        )
+        let setJSON = try encodeJSONObject(setPayload)
+        XCTAssertEqual(setJSON["selectionMode"] as? String, "provider_model")
+        XCTAssertEqual(setJSON["providerId"] as? String, "openai")
+        XCTAssertEqual(setJSON["modelId"] as? String, "gpt-4.1")
+
+        let responseJSON = """
+        {
+            "state": {
+                "spaceId": "concierge-space",
+                "spaceUid": "aaaa1111-2222-3333-4444-555555555555",
+                "conciergeAgentId": "concierge-agent",
+                "conciergeAgentDefinitionId": "concierge-profile",
+                "conciergeProfileId": "concierge-profile",
+                "assignedAgentDefinitionId": "concierge-profile",
+                "assignedProfileId": "concierge-profile",
+                "providerHint": "openai",
+                "modelHint": "openai/gpt-4.1",
+                "status": "fallback",
+                "repaired": true,
+                "fallbackApplied": true,
+                "fallbackReason": "Configured provider unavailable: missing-provider",
+                "runtimeIssueReason": "Configured provider unavailable: missing-provider",
+                "updatedAt": "2026-03-29T12:00:00.000Z"
+            }
+        }
+        """
+        let decoded = try JSONDecoder().decode(
+            GatewayGetConciergeAgentResponsePayload.self,
+            from: Data(responseJSON.utf8)
+        )
+        XCTAssertEqual(decoded.state.conciergeAgentId, "concierge-agent")
+        XCTAssertEqual(decoded.state.conciergeAgentDefinitionId, "concierge-profile")
+        XCTAssertEqual(decoded.state.assignedAgentDefinitionId, "concierge-profile")
         XCTAssertEqual(decoded.state.status, .fallback)
-        XCTAssertEqual(decoded.state.fallbackApplied, true)
+        XCTAssertTrue(decoded.state.fallbackApplied)
+        XCTAssertEqual(decoded.state.runtimeIssueReason, "Configured provider unavailable: missing-provider")
+    }
+
+    func testAssignmentAndTemplateAliasesRoundTrip() throws {
+        let assignmentJSON = """
+        {
+            "spaceId": "space-1",
+            "agentId": "agent-1",
+            "agentDefinitionId": "agent-definition-1",
+            "role": "participant",
+            "turnOrder": 1,
+            "isPrimary": true,
+            "assignedAt": "2026-03-07T12:00:00.000Z"
+        }
+        """
+        let decodedAssignment = try JSONDecoder().decode(
+            SpaceAgentAssignment.self,
+            from: Data(assignmentJSON.utf8)
+        )
+        XCTAssertEqual(decodedAssignment.agentDefinitionId, "agent-definition-1")
+        XCTAssertEqual(decodedAssignment.profileId, "agent-definition-1")
+
+        let templateAgent = TemplateAgentDefinition(
+            agentId: "agent-1",
+            agentDefinitionId: "agent-definition-1",
+            role: .participant,
+            turnOrder: 1,
+            isPrimary: true
+        )
+        let templateJSON = try encodeJSONObject(templateAgent)
+        XCTAssertEqual(templateJSON["agentDefinitionId"] as? String, "agent-definition-1")
+        XCTAssertEqual(templateJSON["profileId"] as? String, "agent-definition-1")
+
+        let updatePayload = SpaceUpdateAgentAssignmentPayload(
+            apiVersion: "v1",
+            idempotencyKey: "idem-1",
+            spaceId: "space-1",
+            agentId: "agent-1",
+            agentDefinitionId: "agent-definition-1",
+            profileId: nil,
+            role: "participant",
+            turnOrder: 1,
+            isPrimary: true,
+            resetSession: true
+        )
+        let updateJSON = try encodeJSONObject(updatePayload)
+        XCTAssertEqual(updateJSON["agentDefinitionId"] as? String, "agent-definition-1")
+        XCTAssertEqual(updateJSON["profileId"] as? String, "agent-definition-1")
+    }
+
+    func testSpaceConfigDecodesOrchestratorAgentDefinitionAlias() throws {
+        let json = """
+        {
+            "id": "space-1",
+            "spaceUid": "space-uid-1",
+            "resourceId": "resource:space-1",
+            "name": "Space One",
+            "orchestratorAgentDefinitionId": "agent-definition-1",
+            "turnModel": "primary_only",
+            "agents": [],
+            "capabilities": [],
+            "capabilityOverrides": {},
+            "visibility": "shared",
+            "createdAt": "2026-03-07T12:00:00.000Z",
+            "updatedAt": "2026-03-07T12:05:00.000Z"
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(SpaceConfig.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.orchestratorAgentDefinitionId, "agent-definition-1")
+        XCTAssertEqual(decoded.orchestratorProfileId, "agent-definition-1")
+    }
+
+    func testHardCutIdentityLibraryAndTemplatePayloads() throws {
+        let createAgentDefinitionPayload = IdentityCreateAgentDefinitionPayload(
+            apiVersion: "v1",
+            idempotencyKey: "idem-1",
+            agentDefinitionId: "agent-definition-1",
+            personaId: "persona-1",
+            name: "Builder",
+            description: "Build things",
+            instructions: "Be precise.",
+            defaultSkillIds: ["skill-1"],
+            providerHint: "openai",
+            modelHint: "gpt-4.1",
+            modelConfig: ProfileModelConfig(preferredModels: ["gpt-4.1"]),
+            isDefault: true
+        )
+        let agentDefinitionJSON = try encodeJSONObject(createAgentDefinitionPayload)
+        XCTAssertEqual(agentDefinitionJSON["agentDefinitionId"] as? String, "agent-definition-1")
+        XCTAssertEqual(agentDefinitionJSON["personaId"] as? String, "persona-1")
+
+        let saveSkillPayload = LibrarySaveSkillPayload(
+            apiVersion: "v1",
+            idempotencyKey: "idem-2",
+            entryId: "entry-1",
+            skillId: "skill-1",
+            name: "Formatter",
+            description: "Format output",
+            contentMarkdown: "# Formatter",
+            tags: ["formatting"],
+            sourceKind: .installed,
+            sourceRef: "local",
+            enabled: true
+        )
+        let saveSkillJSON = try encodeJSONObject(saveSkillPayload)
+        XCTAssertEqual(saveSkillJSON["entryId"] as? String, "entry-1")
+        XCTAssertEqual(saveSkillJSON["sourceKind"] as? String, "installed")
+        XCTAssertEqual(saveSkillJSON["enabled"] as? Bool, true)
+
+        let templatePayload = SpaceTemplateSavePayload(
+            apiVersion: "v1",
+            idempotencyKey: "idem-3",
+            templateId: "template-1",
+            name: "Research Team",
+            description: "Managed template",
+            communicationMode: CommunicationMode.chatFirst.rawValue,
+            baseAgents: [
+                TemplateAgentDefinition(
+                    agentId: "agent-1",
+                    agentDefinitionId: "agent-definition-1",
+                    role: .participant,
+                    turnOrder: 1,
+                    isPrimary: true
+                )
+            ],
+            sourceSpaceId: "space-1"
+        )
+        let templatePayloadJSON = try encodeJSONObject(templatePayload)
+        XCTAssertEqual(templatePayloadJSON["name"] as? String, "Research Team")
+        let baseAgents = templatePayloadJSON["baseAgents"] as? [[String: Any]]
+        XCTAssertEqual(baseAgents?.first?["agentDefinitionId"] as? String, "agent-definition-1")
+        XCTAssertEqual(baseAgents?.first?["profileId"] as? String, "agent-definition-1")
+
+        let previewResponseJSON = """
+        {
+            "preview": {
+                "agentDefinitionId": "agent-definition-1",
+                "personaId": "persona-1",
+                "sections": [
+                    {
+                        "key": "agent_definition",
+                        "title": "Agent Definition",
+                        "content": "Be precise."
+                    }
+                ],
+                "compiledText": "Be precise.",
+                "generatedAt": "2026-03-07T12:10:00.000Z"
+            }
+        }
+        """
+        let preview = try JSONDecoder().decode(
+            IdentityPreviewCompiledInstructionsResponsePayload.self,
+            from: Data(previewResponseJSON.utf8)
+        )
+        XCTAssertEqual(preview.preview.sections.first?.key, .agentDefinition)
+
+        let matrixResponseJSON = """
+        {
+            "matrix": {
+                "agentDefinitionId": "agent-definition-1",
+                "personaId": "persona-1",
+                "generatedAt": "2026-03-14T10:20:00.000Z",
+                "variants": [
+                    {
+                        "budgetClass": "full",
+                        "label": "Cloud",
+                        "tokenEstimate": 321,
+                        "sections": [
+                            {
+                                "key": "conversation_prompt",
+                                "title": "Conversation Prompt",
+                                "content": "Keep responses concise."
+                            },
+                            {
+                                "key": "assignment_context",
+                                "title": "Assignment Context",
+                                "content": "Focus on synthesis."
+                            }
+                        ],
+                        "compiledText": "Keep responses concise. Focus on synthesis."
+                    }
+                ]
+            }
+        }
+        """
+        let matrixResponse = try JSONDecoder().decode(
+            IdentityPreviewSystemPromptMatrixResponsePayload.self,
+            from: Data(matrixResponseJSON.utf8)
+        )
+        XCTAssertEqual(matrixResponse.matrix.variants.first?.sections.first?.key, .conversationPrompt)
+        XCTAssertEqual(matrixResponse.matrix.variants.first?.sections.last?.key, .assignmentContext)
+
+        let libraryResponseJSON = """
+        {
+            "entries": [
+                {
+                    "entryId": "entry-1",
+                    "skillId": "skill-1",
+                    "name": "Formatter",
+                    "description": "Format output",
+                    "contentMarkdown": "# Formatter",
+                    "sourceKind": "installed",
+                    "sourceRef": "local",
+                    "provenance": {"publisher": "OpenAI"},
+                    "tags": ["formatting"],
+                    "status": "enabled",
+                    "importable": false,
+                    "importedSkillId": "skill-1",
+                    "createdAt": "2026-03-07T12:00:00.000Z",
+                    "updatedAt": "2026-03-07T12:05:00.000Z"
+                }
+            ]
+        }
+        """
+        let libraryResponse = try JSONDecoder().decode(
+            LibraryListEntriesResponsePayload.self,
+            from: Data(libraryResponseJSON.utf8)
+        )
+        XCTAssertEqual(libraryResponse.entries.first?.sourceKind, .installed)
+        XCTAssertEqual(libraryResponse.entries.first?.status, .enabled)
+
+        let managedTemplateResponseJSON = """
+        {
+            "template": {
+                "templateId": "template-1",
+                "name": "Research Team",
+                "description": "Managed template",
+                "status": "active",
+                "activeRevision": 2,
+                "communicationMode": "chat_first",
+                "turnModel": "sequential_all",
+                "agentDefinitions": [
+                    {
+                        "agentId": "agent-1",
+                        "agentDefinitionId": "agent-definition-1",
+                        "role": "participant",
+                        "turnOrder": 1,
+                        "isPrimary": true
+                    }
+                ],
+                "createdBy": "principal-1",
+                "createdAt": "2026-03-07T12:00:00.000Z",
+                "updatedAt": "2026-03-07T12:05:00.000Z"
+            },
+            "resolved": {
+                "templateId": "template-1",
+                "templateRevision": 2,
+                "name": "Research Team",
+                "resourceId": "resource:space-1",
+                "communicationMode": "chat_first",
+                "turnModel": "sequential_all",
+                "initialAgents": [
+                    {
+                        "agentId": "agent-1",
+                        "agentDefinitionId": "agent-definition-1",
+                        "role": "participant",
+                        "turnOrder": 1,
+                        "isPrimary": true
+                    }
+                ]
+            },
+            "warnings": []
+        }
+        """
+        let managedTemplateResponse = try JSONDecoder().decode(
+            SpaceTemplatePreviewResponsePayload.self,
+            from: Data(managedTemplateResponseJSON.utf8)
+        )
+        XCTAssertEqual(managedTemplateResponse.template.name, "Research Team")
+        XCTAssertEqual(managedTemplateResponse.template.agentDefinitions.first?.agentDefinitionId, "agent-definition-1")
     }
 
     func testAdminFixturesRemainLoadable() throws {
@@ -1243,6 +2409,10 @@ final class GatewayClientTests: XCTestCase {
             "GatewaySetMainAgentPayload",
             "GatewayGetMainAgentResponsePayload",
             "GatewaySetMainAgentResponsePayload",
+            "GatewayGetConciergeAgentPayload",
+            "GatewaySetConciergeAgentPayload",
+            "GatewayGetConciergeAgentResponsePayload",
+            "GatewaySetConciergeAgentResponsePayload",
             "GatewayListAvailableModelsPayload",
             "GatewayListAvailableModelsResponsePayload",
             "GatewayFactoryResetPayload",
@@ -1281,6 +2451,34 @@ final class GatewayClientTests: XCTestCase {
             "GatewayGrantCapabilityResponsePayload",
             "GatewayRevokeCapabilityPayload",
             "GatewayRevokeCapabilityResponsePayload",
+            "GatewayGetWorkspaceDefaultsPayload",
+            "GatewayGetWorkspaceDefaultsResponsePayload",
+            "GatewaySetWorkspaceDefaultsPayload",
+            "GatewaySetWorkspaceDefaultsResponsePayload",
+            "GatewayGetMemoryDefaultsPayload",
+            "GatewayGetMemoryDefaultsResponsePayload",
+            "GatewaySetMemoryDefaultsPayload",
+            "GatewaySetMemoryDefaultsResponsePayload",
+            "GatewayGetExternalConnectivityPayload",
+            "GatewayGetExternalConnectivityResponsePayload",
+            "GatewaySetExternalConnectivityPayload",
+            "GatewaySetExternalConnectivityResponsePayload",
+            "SpaceGetMemoryPolicyPayload",
+            "SpaceGetMemoryPolicyResponsePayload",
+            "SpaceSetMemoryPolicyPayload",
+            "SpaceSetMemoryPolicyResponsePayload",
+            "SpaceEndIncognitoSessionPayload",
+            "SpaceEndIncognitoSessionResponsePayload",
+            "SpaceListActivityLogPayload",
+            "SpaceListActivityLogResult",
+            "SpaceListExperiencesPayload",
+            "SpaceListExperiencesResult",
+            "SpaceListInsightsPayload",
+            "SpaceListInsightsResult",
+            "SpaceGetUserProfilePayload",
+            "SpaceUserProfileResult",
+            "SpaceListMemoriesPayload",
+            "SpaceListMemoriesResult",
         ]
 
         for name in fixtureNames {
@@ -1315,8 +2513,33 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(decoded.explicitWorkspaceRoot, "/tmp/spaces/space-1")
         XCTAssertEqual(decoded.sharedContextPath, "/tmp/spaces/space-1/.space/shared-context")
         XCTAssertEqual(decoded.scratchpadsPath, "/tmp/spaces/space-1/.space/scratchpads")
+        XCTAssertEqual(decoded.artifactsPath, "/tmp/spaces/space-1/.space/artifacts")
         XCTAssertEqual(decoded.metaPath, "/tmp/spaces/space-1/.space")
+        XCTAssertEqual(decoded.layoutVersion, 3)
         XCTAssertEqual(decoded.metadataStatus, .ready)
+    }
+
+    func testSpaceWorkspaceDecodingFallsBackForLegacyPartialPayload() throws {
+        let json = """
+        {
+            "spaceId": "space-legacy",
+            "mode": "managed",
+            "effectiveWorkspaceRoot": "/tmp/spaces/space-legacy",
+            "metaPath": "/tmp/spaces/space-legacy/.space",
+            "logsPath": "/tmp/spaces/space-legacy/.space/logs",
+            "workPath": "/tmp/spaces/space-legacy/.space/work",
+            "scratchpadsPath": "/tmp/spaces/space-legacy/.space/scratchpads"
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(SpaceWorkspace.self, from: Data(json.utf8))
+        XCTAssertEqual(decoded.spaceId, "space-legacy")
+        XCTAssertEqual(decoded.spaceUid, "space-legacy")
+        XCTAssertEqual(decoded.sharedContextPath, "/tmp/spaces/space-legacy/.space/shared-context")
+        XCTAssertEqual(decoded.scratchpadsPath, "/tmp/spaces/space-legacy/.space/scratchpads")
+        XCTAssertEqual(decoded.artifactsPath, "/tmp/spaces/space-legacy/.space/artifacts")
+        XCTAssertEqual(decoded.layoutVersion, 2)
+        XCTAssertEqual(decoded.metadataStatus, .unknown)
     }
 
     func testSpaceConfigDecodingIncludesWorkspace() throws {
@@ -1334,7 +2557,8 @@ final class GatewayClientTests: XCTestCase {
                 "workPath": "/tmp/spaces/space-uid-1/.space/work",
                 "sharedContextPath": "/tmp/spaces/space-uid-1/.space/shared-context",
                 "scratchpadsPath": "/tmp/spaces/space-uid-1/.space/scratchpads",
-                "layoutVersion": 2,
+                "artifactsPath": "/tmp/spaces/space-uid-1/.space/artifacts",
+                "layoutVersion": 3,
                 "gitRepoDetected": false,
                 "metadataStatus": "ready",
                 "updatedAt": "2026-02-28T09:05:00.000Z"
@@ -1355,7 +2579,163 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(decoded.id, "space-1")
         XCTAssertEqual(decoded.workspace?.mode, "managed")
         XCTAssertEqual(decoded.workspace?.effectiveWorkspaceRoot, "/tmp/spaces/space-uid-1")
+        XCTAssertEqual(decoded.workspace?.artifactsPath, "/tmp/spaces/space-uid-1/.space/artifacts")
         XCTAssertEqual(decoded.workspace?.metadataStatus, .ready)
+    }
+
+    func testSpaceOpenWorkspacePayloadEncodesWorkspaceRoot() throws {
+        let payload = SpaceOpenWorkspacePayload(apiVersion: "v1", workspaceRoot: "/tmp/repo")
+        let json = try encodeJSONObject(payload)
+        XCTAssertEqual(json["workspaceRoot"] as? String, "/tmp/repo")
+    }
+
+    func testGatewayWorkspaceDefaultsPayloadEncodesOptionalRoot() throws {
+        let payload = GatewaySetWorkspaceDefaultsPayload(apiVersion: "v1", spaceHomeRoot: "/tmp/spaces-home")
+        let json = try encodeJSONObject(payload)
+        XCTAssertEqual(json["spaceHomeRoot"] as? String, "/tmp/spaces-home")
+    }
+
+    func testSpaceMemoryPolicyPayloadEncodingAndResponseDecoding() throws {
+        let payload = SpaceSetMemoryPolicyPayload(
+            apiVersion: "v1",
+            idempotencyKey: "idem-memory-policy",
+            spaceId: "space-1",
+            memoryPolicy: SpaceMemoryPolicy(
+                experienceCapture: .disabled,
+                privacyMode: .incognitoSession
+            )
+        )
+        let json = try encodeJSONObject(payload)
+        XCTAssertEqual(json["spaceId"] as? String, "space-1")
+        XCTAssertEqual(json["idempotencyKey"] as? String, "idem-memory-policy")
+        let memoryPolicy = json["memoryPolicy"] as? [String: Any]
+        XCTAssertEqual(memoryPolicy?["experienceCapture"] as? String, "DISABLED")
+        XCTAssertEqual(memoryPolicy?["privacyMode"] as? String, "INCOGNITO_SESSION")
+
+        let getResponse = try JSONDecoder().decode(
+            SpaceGetMemoryPolicyResponsePayload.self,
+            from: loadFixture("SpaceGetMemoryPolicyResponsePayload")
+        )
+        XCTAssertEqual(getResponse.spaceId, "sample-spaceId")
+        XCTAssertEqual(getResponse.memoryPolicy.experienceCapture, .inherit)
+        XCTAssertEqual(getResponse.memoryPolicy.privacyMode, .standard)
+
+        let spaceResponseJSON = """
+        {
+            "space": {
+                "id": "space-1",
+                "spaceUid": "space-uid-1",
+                "resourceId": "resource:space-1",
+                "name": "Incognito Space",
+                "turnModel": "primary_only",
+                "agents": [],
+                "capabilities": [],
+                "capabilityOverrides": {},
+                "visibility": "shared",
+                "thinkingCapturePolicy": "OFF",
+                "memoryPolicy": {
+                    "experienceCapture": "INHERIT",
+                    "privacyMode": "STANDARD"
+                },
+                "createdAt": "2026-03-11T10:00:00.000Z",
+                "updatedAt": "2026-03-11T10:05:00.000Z"
+            }
+        }
+        """
+
+        let setResponse = try JSONDecoder().decode(
+            SpaceSetMemoryPolicyResponsePayload.self,
+            from: Data(spaceResponseJSON.utf8)
+        )
+        XCTAssertEqual(setResponse.space.memoryPolicy.experienceCapture, .inherit)
+        XCTAssertEqual(setResponse.space.memoryPolicy.privacyMode, .standard)
+
+        let endResponseJSON = """
+        {
+            "space": {
+                "id": "space-1",
+                "spaceUid": "space-uid-1",
+                "resourceId": "resource:space-1",
+                "name": "Incognito Space",
+                "turnModel": "primary_only",
+                "agents": [],
+                "capabilities": [],
+                "capabilityOverrides": {},
+                "visibility": "shared",
+                "thinkingCapturePolicy": "OFF",
+                "memoryPolicy": {
+                    "experienceCapture": "INHERIT",
+                    "privacyMode": "STANDARD"
+                },
+                "createdAt": "2026-03-11T10:00:00.000Z",
+                "updatedAt": "2026-03-11T10:05:00.000Z"
+            },
+            "ended": true,
+            "reason": "manual",
+            "purgedAt": "2026-03-11T10:06:00.000Z",
+            "sessionId": "sample-sessionId"
+        }
+        """
+
+        let endResponse = try JSONDecoder().decode(
+            SpaceEndIncognitoSessionResponsePayload.self,
+            from: Data(endResponseJSON.utf8)
+        )
+        XCTAssertTrue(endResponse.ended)
+        XCTAssertEqual(endResponse.reason, "manual")
+        XCTAssertEqual(endResponse.sessionId, "sample-sessionId")
+    }
+
+    func testGatewayMemoryDefaultsPayloadEncodingAndResponseDecoding() throws {
+        let payload = GatewaySetMemoryDefaultsPayload(
+            apiVersion: "v1",
+            defaultExperienceCapture: .enabled,
+            defaultSpacePrivacyMode: .standard
+        )
+        let json = try encodeJSONObject(payload)
+        XCTAssertEqual(json["apiVersion"] as? String, "v1")
+        XCTAssertEqual(json["defaultExperienceCapture"] as? String, "ENABLED")
+        XCTAssertEqual(json["defaultSpacePrivacyMode"] as? String, "STANDARD")
+
+        let responseJSON = """
+        {
+            "defaults": {
+                "defaultExperienceCapture": "DISABLED",
+                "defaultSpacePrivacyMode": "STANDARD",
+                "updatedAt": "2026-03-11T10:00:00.000Z"
+            }
+        }
+        """
+
+        let getResponse = try JSONDecoder().decode(
+            GatewayGetMemoryDefaultsResponsePayload.self,
+            from: Data(responseJSON.utf8)
+        )
+        XCTAssertEqual(getResponse.defaults.defaultExperienceCapture, .disabled)
+        XCTAssertEqual(getResponse.defaults.defaultSpacePrivacyMode, .standard)
+        XCTAssertEqual(getResponse.defaults.updatedAt, "2026-03-11T10:00:00.000Z")
+
+        let setResponse = try JSONDecoder().decode(
+            GatewaySetMemoryDefaultsResponsePayload.self,
+            from: Data(responseJSON.utf8)
+        )
+        XCTAssertEqual(setResponse.defaults.defaultExperienceCapture, .disabled)
+        XCTAssertEqual(setResponse.defaults.defaultSpacePrivacyMode, .standard)
+    }
+
+    func testGatewayExternalConnectivityPayloadEncodesMode() throws {
+        let payload = GatewaySetExternalConnectivityPayload(apiVersion: "v1", mode: "TAILSCALE")
+        let json = try encodeJSONObject(payload)
+        XCTAssertEqual(json["mode"] as? String, "TAILSCALE")
+    }
+
+    func testSpaceOpenWorkspaceResponseDecoding() throws {
+        let decoded = try JSONDecoder().decode(
+            SpaceOpenWorkspaceResponsePayload.self,
+            from: loadFixture("SpaceOpenWorkspaceResponsePayload")
+        )
+        XCTAssertEqual(decoded.result.status, .openedExisting)
+        XCTAssertFalse(decoded.result.workspaceRoot.isEmpty)
     }
 
     func testAdapterPayloadEncoding() throws {
@@ -1363,7 +2743,7 @@ final class GatewayClientTests: XCTestCase {
             id: "apple-reminders-eventkit",
             name: "Apple Reminders (EventKit)",
             capabilityType: "lists",
-            operations: ["listLists", "listItems", "createItem"]
+            operations: ["listLists", "createList", "updateList", "deleteList", "listItems", "createItem", "updateItem", "completeItem", "deleteItem"]
         )
 
         let registerPayload = CapabilitiesRegisterPayload(providers: [provider])
@@ -1439,6 +2819,58 @@ final class GatewayClientTests: XCTestCase {
 
         XCTAssertEqual(decoded.targetProvider, "apple-reminders-eventkit")
         XCTAssertEqual(decoded.args["title"]?.value as? String, "Buy milk")
+    }
+
+    func testGatewayEventConciergeCallCase() throws {
+        let payload = ConciergeCallEvent(
+            callId: "call-1",
+            state: "active",
+            platform: "ios",
+            deviceId: "device-1",
+            displayName: "Spaces Concierge",
+            ttsMode: "apple_native",
+            muted: false,
+            targetGatewayId: "gateway-main",
+            transcriptDelta: nil,
+            assistantTextDelta: "How can I help?",
+            urgency: "important",
+            handoffToken: nil,
+            metrics: ConciergeCallMetrics(
+                callSetupMs: 42,
+                sttFirstPartialMs: nil,
+                llmFirstTokenMs: nil,
+                ttsFirstAudioMs: 120,
+                routeChangeCount: 0,
+                handoffCount: 0,
+                providerFallbackCount: 0,
+                interruptCount: 0,
+                playbackUnderrunCount: 0,
+                reconnectCount: 0
+            ),
+            reason: "call_answered",
+            emittedAt: "2026-03-12T10:00:00.000Z",
+            mediaEventType: "assistant_text_final",
+            sequence: 1,
+            transcriptFinal: nil,
+            assistantTextFinal: true,
+            activeTurnId: "turn-1",
+            providerSource: nil,
+            providerId: nil,
+            fallbackReason: nil,
+            assistantAudioBase64: nil,
+            assistantAudioDurationSeconds: nil,
+            ts: "2026-03-12T10:00:00.000Z"
+        )
+
+        let event = GatewayEvent.conciergeCallEvent(payload)
+        guard case .conciergeCallEvent(let decoded) = event else {
+            XCTFail("Expected conciergeCallEvent gateway event")
+            return
+        }
+
+        XCTAssertEqual(decoded.callId, "call-1")
+        XCTAssertEqual(decoded.assistantTextDelta, "How can I help?")
+        XCTAssertEqual(decoded.metrics?.ttsFirstAudioMs, 120)
     }
 
     // MARK: - Client Options
@@ -1631,5 +3063,191 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(secondPayload?["rowsDeleted"] as? Int, 42)
         let finalPendingCount = await client.pendingRequestCountForTesting()
         XCTAssertEqual(finalPendingCount, 0)
+    }
+
+    func testAppNavigateEventIsDecodedAndEmitted() async {
+        let client = GatewayClient(options: .init(
+            url: URL(string: "ws://127.0.0.1:65530")!,
+            reconnect: false,
+            requestTimeoutSec: 1
+        ))
+
+        let events = client.events
+        let waitTask = Task {
+            await self.waitForNextEvent(from: events)
+        }
+
+        let payload = """
+        {
+            "type": "app.navigate",
+            "id": "evt-app-navigate",
+            "ts": "2026-03-08T12:00:00.000Z",
+            "payload": {
+                "destination": "space",
+                "gatewayId": "gateway-1",
+                "spaceId": "space-123",
+                "promptText": "Pick up the refactor."
+            }
+        }
+        """
+        await client.handleMessageForTesting(Data(payload.utf8))
+
+        guard let event = await waitTask.value else {
+            XCTFail("Expected app.navigate to emit an event.")
+            return
+        }
+
+        guard case .appNavigate(let navigate) = event else {
+            XCTFail("Expected appNavigate event, got \(event)")
+            return
+        }
+
+        XCTAssertEqual(navigate.destination, "space")
+        XCTAssertEqual(navigate.gatewayId, "gateway-1")
+        XCTAssertEqual(navigate.spaceId, "space-123")
+        XCTAssertEqual(navigate.promptText, "Pick up the refactor.")
+    }
+
+    func testAppConciergeActionRequestEventIsDecodedAndEmitted() async {
+        let client = GatewayClient(options: .init(
+            url: URL(string: "ws://127.0.0.1:65530")!,
+            reconnect: false,
+            requestTimeoutSec: 1
+        ))
+
+        let events = client.events
+        let waitTask = Task {
+            await self.waitForNextEvent(from: events)
+        }
+
+        let payload = """
+        {
+            "type": "app.concierge_action_request",
+            "id": "evt-concierge-action",
+            "ts": "2026-03-11T12:00:00.000Z",
+            "payload": {
+                "requestId": "request-1",
+                "action": "update_space",
+                "gatewayId": "gateway-2",
+                "params": {
+                    "spaceId": "space-456",
+                    "name": "Refinement Space"
+                }
+            }
+        }
+        """
+        await client.handleMessageForTesting(Data(payload.utf8))
+
+        guard let event = await waitTask.value else {
+            XCTFail("Expected app.concierge_action_request to emit an event.")
+            return
+        }
+
+        guard case .conciergeActionRequest(let request) = event else {
+            XCTFail("Expected conciergeActionRequest event, got \(event)")
+            return
+        }
+
+        XCTAssertEqual(request.requestId, "request-1")
+        XCTAssertEqual(request.action, .updateSpace)
+        XCTAssertEqual(request.gatewayId, "gateway-2")
+        XCTAssertEqual(request.params?["spaceId"]?.value as? String, "space-456")
+        XCTAssertEqual(request.params?["name"]?.value as? String, "Refinement Space")
+    }
+
+    func testSpaceTurnTraceDecodingDefaultsExecutionRunsWhenMissing() throws {
+        let json = """
+        {
+            "spaceId": "space-1",
+            "turnId": "turn-1",
+            "total": 0,
+            "events": [],
+            "toolCalls": [],
+            "activities": [],
+            "artifactIds": []
+        }
+        """
+
+        let trace = try JSONDecoder().decode(SpaceTurnTrace.self, from: Data(json.utf8))
+
+        XCTAssertEqual(trace.spaceId, "space-1")
+        XCTAssertEqual(trace.turnId, "turn-1")
+        XCTAssertTrue(trace.executionRuns.isEmpty)
+    }
+
+    func testSpaceTurnTraceDecodingIncludesExecutionRunsWhenPresent() throws {
+        let json = """
+        {
+            "spaceId": "space-1",
+            "turnId": "turn-1",
+            "total": 2,
+            "events": [],
+            "toolCalls": [],
+            "activities": [],
+            "executionRuns": [
+                {
+                    "executionId": "exec-1",
+                    "stepIndex": 0,
+                    "agentId": "agent-1",
+                    "providerId": "claude",
+                    "modelId": "sonnet",
+                    "status": "completed",
+                    "startedAt": "2026-03-29T10:00:00Z",
+                    "completedAt": "2026-03-29T10:00:03Z",
+                    "durationMs": 3000,
+                    "workingDirectory": "/tmp/workspace",
+                    "exitCode": 0,
+                    "commandPreview": "claude --output-format stream-json",
+                    "transcriptArtifactId": "artifact-debug-1",
+                    "transcriptTruncated": false
+                }
+            ],
+            "artifactIds": ["artifact-debug-1"]
+        }
+        """
+
+        let trace = try JSONDecoder().decode(SpaceTurnTrace.self, from: Data(json.utf8))
+
+        XCTAssertEqual(trace.executionRuns.count, 1)
+        XCTAssertEqual(trace.executionRuns.first?.executionId, "exec-1")
+        XCTAssertEqual(trace.executionRuns.first?.workingDirectory, "/tmp/workspace")
+        XCTAssertEqual(trace.executionRuns.first?.transcriptArtifactId, "artifact-debug-1")
+    }
+
+    func testSpaceGetDebugArtifactPayloadEncodingAndResultDecoding() throws {
+        let payload = try encodeJSONObject(
+            SpaceGetDebugArtifactPayload(
+                spaceId: "space-1",
+                artifactId: "artifact-debug-1"
+            )
+        )
+        XCTAssertEqual(payload["spaceId"] as? String, "space-1")
+        XCTAssertEqual(payload["artifactId"] as? String, "artifact-debug-1")
+
+        let json = """
+        {
+            "artifact": {
+                "artifactId": "artifact-debug-1",
+                "spaceId": "space-1",
+                "turnId": "turn-1",
+                "agentId": "agent-1",
+                "type": "cli_execution_transcript",
+                "title": "CLI transcript",
+                "mimeType": "application/x-ndjson",
+                "sizeBytes": 24,
+                "tags": ["debug", "cli_execution", "transcript"],
+                "visibility": "private",
+                "createdAt": "2026-03-29T10:00:00Z",
+                "updatedAt": "2026-03-29T10:00:04Z",
+                "content": "{\\"event\\":\\"started\\"}\\n"
+            }
+        }
+        """
+
+        let result = try JSONDecoder().decode(SpaceGetDebugArtifactResult.self, from: Data(json.utf8))
+
+        XCTAssertEqual(result.artifact.artifactId, "artifact-debug-1")
+        XCTAssertEqual(result.artifact.type, "cli_execution_transcript")
+        XCTAssertEqual(result.artifact.content.value as? String, "{\"event\":\"started\"}\n")
     }
 }

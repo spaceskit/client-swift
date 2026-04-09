@@ -1,0 +1,7 @@
+{
+  "apiVersion": "v1",
+  "spaceId": "space-1",
+  "status": "proposed",
+  "limit": 20,
+  "offset": 0
+}

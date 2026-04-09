@@ -2,5 +2,11 @@
   "spaceUid": "sample-spaceUid",
   "input": "sample-input",
   "targetAgentId": "sample-targetAgentId",
-  "replyToTurnId": "sample-replyToTurnId"
+  "targetAgentIds": [
+    "sample-targetAgentIds"
+  ],
+  "replyToTurnId": "sample-replyToTurnId",
+  "conversationTopology": "direct",
+  "mode": "ask",
+  "effort": "low"
 }

@@ -1,13 +1,13 @@
 {
   "type": "test_schedulerrunnowresponsepayload",
   "id": "msg-schedulerrunnowresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "run": {
       "runId": "sample-runId",
       "jobId": "sample-jobId",
-      "trigger": null,
-      "status": null,
+      "trigger": "scheduled",
+      "status": "running",
       "commandId": "sample-commandId",
       "scheduledFor": "sample-scheduledFor",
       "startedAt": "sample-startedAt",
@@ -22,11 +22,11 @@
     "job": {
       "jobId": "sample-jobId",
       "name": "sample-name",
-      "status": null,
+      "status": "active",
       "enabled": true,
       "cronExpression": "sample-cronExpression",
       "schedulePreset": {
-        "kind": null,
+        "kind": "hourly",
         "intervalHours": 3.14,
         "minute": 3.14,
         "hour": 3.14,
@@ -36,7 +36,7 @@
       },
       "timezone": "sample-timezone",
       "action": {
-        "type": null,
+        "type": "space_prompt",
         "promptText": "sample-promptText",
         "targetAgentId": "sample-targetAgentId"
       },
@@ -44,7 +44,7 @@
       "invalidReason": "sample-invalidReason",
       "nextRunAt": "sample-nextRunAt",
       "lastRunAt": "sample-lastRunAt",
-      "lastRunStatus": null,
+      "lastRunStatus": "running",
       "lastErrorCode": "sample-lastErrorCode",
       "lastErrorMessage": "sample-lastErrorMessage",
       "createdByPrincipalId": "sample-createdByPrincipalId",
@@ -58,7 +58,19 @@
           "isPrimary": true,
           "linkedAt": "sample-linkedAt"
         }
-      ]
+      ],
+      "executionTarget": {
+        "mode": "existing_space"
+      },
+      "calendarBinding": {
+        "providerId": "sample-providerId",
+        "calendarId": "sample-calendarId",
+        "eventId": "sample-eventId",
+        "syncStatus": "pending",
+        "driftStatus": "none",
+        "driftMessage": "sample-driftMessage",
+        "lastSyncedAt": "sample-lastSyncedAt"
+      }
     }
   }
 }

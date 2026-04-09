@@ -1,0 +1,22 @@
+{
+  "type": "test_gatewayupdatetoolpolicypayload",
+  "id": "msg-gatewayupdatetoolpolicypayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "rules": [
+      {
+        "selectorKind": "capability",
+        "selectorId": "sample-selectorId",
+        "state": "enabled"
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "state": "enabled"
+      }
+    ],
+    "updatedBy": "sample-updatedBy"
+  }
+}

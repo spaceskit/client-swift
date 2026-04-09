@@ -1,0 +1,11 @@
+{
+  "token": "sample-token",
+  "callId": "sample-callId",
+  "sourceDeviceId": "sample-sourceDeviceId",
+  "destinationPlatform": "sample-destinationPlatform",
+  "destinationDeviceId": "sample-destinationDeviceId",
+  "destinationClientId": "sample-destinationClientId",
+  "resumeUrl": "sample-resumeUrl",
+  "expiresAt": "sample-expiresAt",
+  "signature": "sample-signature"
+}

@@ -1,0 +1,20 @@
+{
+  "type": "test_conciergecallstartpayload",
+  "id": "msg-conciergecallstartpayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "callId": "sample-callId",
+    "deviceId": "sample-deviceId",
+    "platform": "sample-platform",
+    "ttsMode": "apple_native",
+    "targetGatewayId": "sample-targetGatewayId",
+    "displayName": "sample-displayName",
+    "handoffContext": {
+      "destinationPlatform": "sample-destinationPlatform",
+      "destinationDeviceId": "sample-destinationDeviceId",
+      "destinationClientId": "sample-destinationClientId",
+      "resumeUrl": "sample-resumeUrl"
+    }
+  }
+}

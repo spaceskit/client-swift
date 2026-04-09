@@ -1,0 +1,18 @@
+{
+  "grants": [
+    {
+      "principalId": "sample-principalId",
+      "deviceId": "sample-deviceId",
+      "spaceId": "sample-spaceId",
+      "toolId": "sample-toolId",
+      "mode": null,
+      "source": "sample-source",
+      "reason": "sample-reason",
+      "grantedBy": "sample-grantedBy",
+      "grantedAt": "sample-grantedAt",
+      "expiresAt": "sample-expiresAt",
+      "revokedAt": "sample-revokedAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  ]
+}

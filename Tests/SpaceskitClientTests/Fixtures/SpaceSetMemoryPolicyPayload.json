@@ -1,0 +1,9 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "spaceId": "sample-spaceId",
+  "memoryPolicy": {
+    "experienceCapture": "INHERIT",
+    "privacyMode": "STANDARD"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "test_gatewaybuiltinmcpadminruntimestatepayload",
+  "id": "msg-gatewaybuiltinmcpadminruntimestatepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "endpointPath": "sample-endpointPath",
+    "effectiveEnabled": true,
+    "bootstrapDefaultEnabled": true,
+    "authMode": "strict",
+    "tokenIssuerAvailable": true,
+    "defaultTargetSpaceId": "sample-defaultTargetSpaceId"
+  }
+}

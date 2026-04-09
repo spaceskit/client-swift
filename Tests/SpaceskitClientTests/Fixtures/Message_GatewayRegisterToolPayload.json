@@ -1,0 +1,42 @@
+{
+  "type": "test_gatewayregistertoolpayload",
+  "id": "msg-gatewayregistertoolpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "schemaVersion": 3.14,
+    "id": "sample-id",
+    "displayName": "sample-displayName",
+    "description": "sample-description",
+    "bundleId": "sample-bundleId",
+    "bundleDisplayName": "sample-bundleDisplayName",
+    "bundleDescription": "sample-bundleDescription",
+    "toolGroupId": "sample-toolGroupId",
+    "toolGroupDisplayName": "sample-toolGroupDisplayName",
+    "executable": "sample-executable",
+    "argsTemplate": [
+      "sample-argsTemplate"
+    ],
+    "inputSchema": {
+      "key1": "value1"
+    },
+    "instructions": "sample-instructions",
+    "examples": [
+      {
+        "name": "sample-name",
+        "description": "sample-description",
+        "arguments": {
+          "key1": "value1"
+        },
+        "expectedOutput": "sample-expectedOutput"
+      }
+    ],
+    "timeoutMs": 3.14,
+    "maxOutputBytes": 3.14,
+    "cwdMode": "space_root",
+    "fixedCwd": "sample-fixedCwd",
+    "outputMode": "text",
+    "dangerLevel": "standard",
+    "readme": "sample-readme"
+  }
+}

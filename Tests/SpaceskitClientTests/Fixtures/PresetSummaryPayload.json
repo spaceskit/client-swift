@@ -1,9 +1,9 @@
 {
   "presetId": "sample-presetId",
-  "kind": null,
+  "kind": "agent",
   "title": "sample-title",
   "description": "sample-description",
-  "source": null,
+  "source": "system",
   "version": 3.14,
   "tags": [
     "sample-tags"

@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "id": "sample-id",
+  "displayName": "sample-displayName",
+  "description": "sample-description",
+  "outputMode": "text"
+}

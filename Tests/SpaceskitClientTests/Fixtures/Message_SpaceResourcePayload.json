@@ -1,7 +1,7 @@
 {
   "type": "test_spaceresourcepayload",
   "id": "msg-spaceresourcepayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.233Z",
   "payload": {
     "resourceId": "sample-resourceId",
     "spaceId": "sample-spaceId",

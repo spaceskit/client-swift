@@ -1,0 +1,14 @@
+{
+  "type": "test_gatewaylisttoolapprovalgrantspayload",
+  "id": "msg-gatewaylisttoolapprovalgrantspayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "spaceId": "sample-spaceId",
+    "toolId": "sample-toolId",
+    "includeRevoked": true,
+    "includeExpired": true
+  }
+}

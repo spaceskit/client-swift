@@ -1,0 +1,19 @@
+{
+  "type": "test_librarylistentriespayload",
+  "id": "msg-librarylistentriespayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "query": "sample-query",
+    "tags": [
+      "sample-tags"
+    ],
+    "status": "all",
+    "sourceKinds": [
+      "installed"
+    ],
+    "includeArchived": true,
+    "includeContent": true,
+    "limit": 3.14
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "type": "test_gatewaygetexternalconnectivityresponsepayload",
+  "id": "msg-gatewaygetexternalconnectivityresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "settings": {
+      "mode": "DISABLED",
+      "updatedAt": "sample-updatedAt"
+    },
+    "status": {
+      "state": "disabled",
+      "summary": "sample-summary",
+      "remediation": "sample-remediation",
+      "advertisedEndpoints": [
+        {
+          "provider": "tailscale",
+          "label": "sample-label",
+          "host": "sample-host",
+          "port": 42,
+          "websocketUrl": "sample-websocketUrl",
+          "healthUrl": "sample-healthUrl"
+        }
+      ],
+      "tailscaleStatus": {
+        "cliAvailable": true,
+        "version": "sample-version",
+        "backendState": "sample-backendState",
+        "health": [
+          "sample-health"
+        ],
+        "hostName": "sample-hostName",
+        "dnsName": "sample-dnsName",
+        "magicDnsSuffix": "sample-magicDnsSuffix",
+        "tailscaleIps": [
+          "sample-tailscaleIps"
+        ],
+        "serveConfigured": true,
+        "serveTarget": "sample-serveTarget",
+        "servePort": 42
+      }
+    }
+  }
+}

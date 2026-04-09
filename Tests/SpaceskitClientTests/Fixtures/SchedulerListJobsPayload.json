@@ -1,7 +1,7 @@
 {
   "apiVersion": "sample-apiVersion",
   "statuses": [
-    null
+    "active"
   ],
   "gatewayId": "sample-gatewayId",
   "limit": 3.14

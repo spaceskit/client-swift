@@ -1,0 +1,17 @@
+{
+  "type": "test_contentpartpayload",
+  "id": "msg-contentpartpayload-001",
+  "ts": "2026-03-13T22:07:19.233Z",
+  "payload": {
+    "type": "text",
+    "mimeType": "sample-mimeType",
+    "text": "sample-text",
+    "data": "sample-data",
+    "uri": "sample-uri",
+    "title": "sample-title",
+    "previewText": "sample-previewText",
+    "metadata": {
+      "key1": "value1"
+    }
+  }
+}

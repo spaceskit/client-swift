@@ -1,0 +1,15 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "callId": "sample-callId",
+  "deviceId": "sample-deviceId",
+  "platform": "sample-platform",
+  "ttsMode": "apple_native",
+  "targetGatewayId": "sample-targetGatewayId",
+  "displayName": "sample-displayName",
+  "handoffContext": {
+    "destinationPlatform": "sample-destinationPlatform",
+    "destinationDeviceId": "sample-destinationDeviceId",
+    "destinationClientId": "sample-destinationClientId",
+    "resumeUrl": "sample-resumeUrl"
+  }
+}

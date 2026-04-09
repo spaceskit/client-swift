@@ -7,7 +7,7 @@
     "displayName": "sample-displayName",
     "accountFingerprintHash": "sample-accountFingerprintHash",
     "labelSlug": "sample-labelSlug",
-    "status": null,
+    "status": "active",
     "metadata": {
       "key1": "value1"
     },
@@ -15,7 +15,7 @@
     "updatedAt": "sample-updatedAt"
   },
   "inboundRoute": "binding",
-  "targetType": null,
+  "targetType": "main_orchestrator",
   "targetSpaceId": "sample-targetSpaceId",
   "bindingId": "sample-bindingId",
   "matchedScore": 3.14

@@ -4,5 +4,6 @@
   "remoteAgentId": "sample-remoteAgentId",
   "displayName": "sample-displayName",
   "agentId": "sample-agentId",
+  "agentDefinitionId": "sample-agentDefinitionId",
   "profileId": "sample-profileId"
 }

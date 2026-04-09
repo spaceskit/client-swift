@@ -1,0 +1,58 @@
+{
+  "type": "test_gatewayintegrationconnectorentrypayload",
+  "id": "msg-gatewayintegrationconnectorentrypayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "connector": {
+      "connectorId": "sample-connectorId",
+      "familyId": "sample-familyId",
+      "displayName": "sample-displayName",
+      "accountFingerprintHash": "sample-accountFingerprintHash",
+      "labelSlug": "sample-labelSlug",
+      "status": "active",
+      "metadata": {
+        "key1": "value1"
+      },
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    },
+    "family": {
+      "familyId": "sample-familyId",
+      "displayName": "sample-displayName",
+      "kind": "channel",
+      "runtime": "adapter",
+      "trustClass": "embedded_safe",
+      "embeddedEnabled": true,
+      "capabilityTypes": [
+        "sample-capabilityTypes"
+      ],
+      "features": {
+        "key1": "value1"
+      },
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    },
+    "bindings": [
+      {
+        "bindingId": "sample-bindingId",
+        "connectorId": "sample-connectorId",
+        "bindingType": "inbound_route",
+        "selector": {
+          "key1": "value1"
+        },
+        "targetType": "main_orchestrator",
+        "targetSpaceId": "sample-targetSpaceId",
+        "allowedActions": [
+          "notify"
+        ],
+        "capabilityTypes": [
+          "sample-capabilityTypes"
+        ],
+        "priority": 3.14,
+        "enabled": true,
+        "createdAt": "sample-createdAt",
+        "updatedAt": "sample-updatedAt"
+      }
+    ]
+  }
+}

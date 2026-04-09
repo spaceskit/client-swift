@@ -1,13 +1,13 @@
 {
   "type": "test_spacecreatechangesetpayload",
   "id": "msg-spacecreatechangesetpayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "apiVersion": "sample-apiVersion",
     "spaceId": "sample-spaceId",
     "title": "sample-title",
     "description": "sample-description",
-    "adapter": null,
+    "adapter": "filesystem",
     "targetBranch": "sample-targetBranch",
     "expiresInSeconds": 3.14
   }

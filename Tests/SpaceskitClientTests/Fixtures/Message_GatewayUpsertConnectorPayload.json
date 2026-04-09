@@ -1,7 +1,7 @@
 {
   "type": "test_gatewayupsertconnectorpayload",
   "id": "msg-gatewayupsertconnectorpayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "apiVersion": "sample-apiVersion",
     "connectorId": "sample-connectorId",
@@ -9,7 +9,7 @@
     "displayName": "sample-displayName",
     "accountFingerprint": "sample-accountFingerprint",
     "label": "sample-label",
-    "status": null,
+    "status": "active",
     "metadata": {
       "key1": "value1"
     },

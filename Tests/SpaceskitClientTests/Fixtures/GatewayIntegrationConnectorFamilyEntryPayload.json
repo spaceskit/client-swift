@@ -1,0 +1,19 @@
+{
+  "family": {
+    "familyId": "sample-familyId",
+    "displayName": "sample-displayName",
+    "kind": "channel",
+    "runtime": "adapter",
+    "trustClass": "embedded_safe",
+    "embeddedEnabled": true,
+    "capabilityTypes": [
+      "sample-capabilityTypes"
+    ],
+    "features": {
+      "key1": "value1"
+    },
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  },
+  "configuredConnectorCount": 3.14
+}

@@ -1,0 +1,9 @@
+{
+  "type": "test_gatewayexternalconnectivitysettingspayload",
+  "id": "msg-gatewayexternalconnectivitysettingspayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "mode": "DISABLED",
+    "updatedAt": "sample-updatedAt"
+  }
+}

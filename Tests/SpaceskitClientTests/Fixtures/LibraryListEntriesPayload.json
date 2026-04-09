@@ -1,0 +1,14 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "query": "sample-query",
+  "tags": [
+    "sample-tags"
+  ],
+  "status": "all",
+  "sourceKinds": [
+    "installed"
+  ],
+  "includeArchived": true,
+  "includeContent": true,
+  "limit": 3.14
+}

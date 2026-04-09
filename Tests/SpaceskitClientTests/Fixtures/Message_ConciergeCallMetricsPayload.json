@@ -1,0 +1,14 @@
+{
+  "type": "test_conciergecallmetricspayload",
+  "id": "msg-conciergecallmetricspayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "callSetupMs": 3.14,
+    "sttFirstPartialMs": 3.14,
+    "llmFirstTokenMs": 3.14,
+    "ttsFirstAudioMs": 3.14,
+    "routeChangeCount": 3.14,
+    "handoffCount": 3.14,
+    "providerFallbackCount": 3.14
+  }
+}

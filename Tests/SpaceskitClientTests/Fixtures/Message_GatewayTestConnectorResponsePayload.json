@@ -1,7 +1,7 @@
 {
   "type": "test_gatewaytestconnectorresponsepayload",
   "id": "msg-gatewaytestconnectorresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "ok": true,
     "reason": "sample-reason",
@@ -11,7 +11,7 @@
       "displayName": "sample-displayName",
       "accountFingerprintHash": "sample-accountFingerprintHash",
       "labelSlug": "sample-labelSlug",
-      "status": null,
+      "status": "active",
       "metadata": {
         "key1": "value1"
       },
@@ -19,7 +19,7 @@
       "updatedAt": "sample-updatedAt"
     },
     "inboundRoute": "binding",
-    "targetType": null,
+    "targetType": "main_orchestrator",
     "targetSpaceId": "sample-targetSpaceId",
     "bindingId": "sample-bindingId",
     "matchedScore": 3.14

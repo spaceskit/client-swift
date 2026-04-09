@@ -1,0 +1,7 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "callId": "sample-callId",
+  "handoffToken": "sample-handoffToken",
+  "deviceId": "sample-deviceId",
+  "platform": "sample-platform"
+}

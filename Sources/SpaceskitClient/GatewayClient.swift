@@ -39,6 +39,9 @@ public struct GatewayClientOptions: Sendable {
     /// Maximum reconnection attempts. Default: 10.
     public let maxReconnectAttempts: Int
 
+    /// Maximum reconnect delay in seconds (caps exponential backoff). Default: 30.
+    public let maxReconnectDelaySec: TimeInterval
+
     /// Request timeout in seconds. Default: 30.
     public let requestTimeoutSec: TimeInterval
 
@@ -53,6 +56,7 @@ public struct GatewayClientOptions: Sendable {
         reconnect: Bool = true,
         reconnectIntervalSec: TimeInterval = 3,
         maxReconnectAttempts: Int = 10,
+        maxReconnectDelaySec: TimeInterval = 30,
         requestTimeoutSec: TimeInterval = 30
     ) {
         self.url = url
@@ -65,6 +69,7 @@ public struct GatewayClientOptions: Sendable {
         self.reconnect = reconnect
         self.reconnectIntervalSec = reconnectIntervalSec
         self.maxReconnectAttempts = maxReconnectAttempts
+        self.maxReconnectDelaySec = maxReconnectDelaySec
         self.requestTimeoutSec = requestTimeoutSec
     }
 }
@@ -79,12 +84,15 @@ public enum GatewayEvent: Sendable {
     case spaceAgentUpdated(SpaceAgentUpdatedEvent)
     case capabilityInvoke(AdapterCapabilityInvokePayload)
     case notification(GatewayNotification)
+    case appNavigate(AppNavigateEvent)
+    case conciergeActionRequest(AppConciergeActionRequestPayload)
     case agentMessage(AgentMessage)
     case agentPoke(AgentPoke)
     case agentIdle(AgentIdle)
     case taskDependencyResolved(TaskDependencyResolved)
     case orchestratorEvent(OrchestratorEvent)
     case speechEvent(SpeechSessionEvent)
+    case conciergeCallEvent(ConciergeCallEvent)
     case error(GatewayError)
     case connectionStateChanged(ConnectionState)
 }
@@ -111,7 +119,10 @@ private struct PendingRequest: Sendable {
 /// let events = client.events
 /// try await client.connect()
 ///
-/// let result = try await client.executeTurn(spaceUid: "11111111-2222-3333-4444-555555555555", input: "Hello!")
+/// let result = try await client.executeTurn(.init(
+///     spaceUid: "11111111-2222-3333-4444-555555555555",
+///     input: "Hello!"
+/// ))
 /// print(result.output ?? "No output")
 ///
 /// for await event in events {
@@ -237,30 +248,50 @@ public actor GatewayClient {
 
     /// Execute a turn in a space.
     public func executeTurn(
-        spaceUid: String,
-        input: String,
-        targetAgentId: String? = nil
+        _ options: ExecuteTurnOptions
     ) async throws -> TurnResult {
-        let payload = ExecuteTurnPayload(
-            spaceUid: spaceUid,
-            input: input,
-            targetAgentId: targetAgentId
-        )
+        let payload = ExecuteTurnPayload(options)
         let data = try await sendAndWait(type: MessageType.executeTurn, payload: payload)
         return try decoder.decode(TurnResult.self, from: data)
     }
 
-    /// Execute a turn and return the immediate lifecycle event ack.
-    public func executeTurnEvent(
+    /// Cancel an active or paused turn.
+    public func cancelTurn(
+        spaceUid: String,
+        turnId: String
+    ) async throws {
+        let payload: [String: String] = ["spaceUid": spaceUid, "turnId": turnId]
+        _ = try await sendAndWait(type: MessageType.cancelTurn, payload: payload)
+    }
+
+    /// Execute a turn in a space.
+    public func executeTurn(
         spaceUid: String,
         input: String,
-        targetAgentId: String? = nil
-    ) async throws -> TurnEvent {
-        let payload = ExecuteTurnPayload(
-            spaceUid: spaceUid,
-            input: input,
-            targetAgentId: targetAgentId
+        targetAgentId: String? = nil,
+        replyToTurnId: String? = nil,
+        mode: String? = nil,
+        effort: String? = nil,
+        accessMode: String? = nil
+    ) async throws -> TurnResult {
+        try await executeTurn(
+            ExecuteTurnOptions(
+                spaceUid: spaceUid,
+                input: input,
+                targetAgentId: targetAgentId,
+                replyToTurnId: replyToTurnId,
+                mode: mode,
+                effort: effort,
+                accessMode: accessMode
+            )
         )
+    }
+
+    /// Execute a turn and return the immediate lifecycle event ack.
+    public func executeTurnEvent(
+        _ options: ExecuteTurnOptions
+    ) async throws -> TurnEvent {
+        let payload = ExecuteTurnPayload(options)
         let data = try await sendAndWait(type: MessageType.executeTurn, payload: payload)
         do {
             return try decoder.decode(TurnEvent.self, from: data)
@@ -269,7 +300,7 @@ public actor GatewayClient {
             // ack shape lacking full TurnEvent fields.
             if let compat = try? decoder.decode(ExecuteTurnAckCompat.self, from: data),
                !compat.turnId.isEmpty {
-                let ackSpaceUid = compat.spaceUid ?? spaceUid
+                let ackSpaceUid = compat.spaceUid ?? options.spaceUid
                 let ackSpaceId = compat.spaceId ?? ackSpaceUid
                 return TurnEvent(
                     spaceId: ackSpaceId,
@@ -283,18 +314,43 @@ public actor GatewayClient {
         }
     }
 
+    /// Execute a turn and return the immediate lifecycle event ack.
+    public func executeTurnEvent(
+        spaceUid: String,
+        input: String,
+        targetAgentId: String? = nil,
+        replyToTurnId: String? = nil,
+        mode: String? = nil,
+        effort: String? = nil,
+        accessMode: String? = nil
+    ) async throws -> TurnEvent {
+        try await executeTurnEvent(
+            ExecuteTurnOptions(
+                spaceUid: spaceUid,
+                input: input,
+                targetAgentId: targetAgentId,
+                replyToTurnId: replyToTurnId,
+                mode: mode,
+                effort: effort,
+                accessMode: accessMode
+            )
+        )
+    }
+
     /// Resume a paused turn with feedback.
     public func resumeFeedback(
         spaceUid: String,
         turnId: String,
         response: FeedbackResponse,
-        revision: String? = nil
+        revision: String? = nil,
+        approvalGrant: ApprovalGrantPayload? = nil
     ) async throws {
         let payload = ResumeFeedbackPayload(
             spaceUid: spaceUid,
             turnId: turnId,
             response: response,
-            revision: revision
+            revision: revision,
+            approvalGrant: approvalGrant
         )
         _ = try await sendAndWait(type: MessageType.resumeFeedback, payload: payload)
     }
@@ -312,23 +368,12 @@ public actor GatewayClient {
             return
         }
 
-        let normalizedSubscribed: Set<String>
-        if let response = try? decoder.decode(GeneratedSubscribeResponsePayload.self, from: data) {
-            normalizedSubscribed = Set(
-                response.subscribedSpaceUids
-                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                    .filter { !$0.isEmpty }
-            )
-        } else if let response = try? decoder.decode(SubscribeResponseCompat.self, from: data) {
-            normalizedSubscribed = Set(
-                response.subscribedIdentifiers()
-                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-                    .filter { !$0.isEmpty }
-            )
-        } else {
-            // Older gateways may ack with an empty payload. Keep compatibility.
-            return
-        }
+        let response = try decoder.decode(SubscribeResponsePayload.self, from: data)
+        let normalizedSubscribed = Set(
+            response.subscribedSpaceUids
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        )
 
         if normalizedRequested.isDisjoint(with: normalizedSubscribed) {
             throw GatewayError(
@@ -337,6 +382,25 @@ public actor GatewayClient {
                 details: nil
             )
         }
+    }
+
+    public func subscribeNotifications(categories: [String]) async throws -> [String] {
+        let payload = SubscribeNotificationsPayload(categories: categories)
+        let data = try await sendAndWait(type: MessageType.subscribeNotifications, payload: payload)
+        let response = try decoder.decode(NotificationSubscriptionResponsePayload.self, from: data)
+        return response.categories
+    }
+
+    public func unsubscribeNotifications(categories: [String]) async throws -> [String] {
+        let payload = UnsubscribeNotificationsPayload(categories: categories)
+        let data = try await sendAndWait(type: MessageType.unsubscribeNotifications, payload: payload)
+        let response = try decoder.decode(NotificationSubscriptionResponsePayload.self, from: data)
+        return response.categories
+    }
+
+    public func sendConciergeActionResult(_ payload: ConciergeActionResultPayload) async throws {
+        let data = try await sendAndWait(type: MessageType.conciergeActionResult, payload: payload)
+        _ = try decoder.decode(ConciergeActionResultAckPayload.self, from: data)
     }
 
     /// Invoke a capability on the gateway.
@@ -411,6 +475,25 @@ public actor GatewayClient {
         return response.spaces
     }
 
+    /// Archive a space on the gateway.
+    public func archiveSpace(_ payload: SpaceArchivePayload) async throws -> SpaceArchiveResponsePayload {
+        let data = try await sendAndWait(type: MessageType.spaceArchive, payload: payload)
+        return try decoder.decode(SpaceArchiveResponsePayload.self, from: data)
+    }
+
+    /// Soft-delete a space on the gateway.
+    public func deleteSpace(_ payload: SpaceDeletePayload) async throws -> SpaceDeleteResponsePayload {
+        let data = try await sendAndWait(type: MessageType.spaceDelete, payload: payload)
+        return try decoder.decode(SpaceDeleteResponsePayload.self, from: data)
+    }
+
+    /// Update the editable metadata for a space.
+    public func updateSpaceMetadata(_ payload: SpaceUpdateMetadataPayload) async throws -> SpaceConfig {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateMetadata, payload: payload)
+        let response = try decoder.decode(SpaceUpdateMetadataResponsePayload.self, from: data)
+        return response.space
+    }
+
     /// Add an agent assignment to a space.
     public func addAgent(_ payload: SpaceAddAgentPayload) async throws -> SpaceAddAgentResult {
         let data = try await sendAndWait(type: MessageType.spaceAddAgent, payload: payload)
@@ -447,6 +530,38 @@ public actor GatewayClient {
         return response.space
     }
 
+    /// Set the thinking-capture persistence policy for a space.
+    public func setThinkingCapturePolicy(_ payload: SpaceSetThinkingCapturePolicyPayload) async throws -> SpaceConfig {
+        let data = try await sendAndWait(type: MessageType.spaceSetThinkingCapturePolicy, payload: payload)
+        let response = try decoder.decode(SpaceSetThinkingCapturePolicyResponsePayload.self, from: data)
+        return response.space
+    }
+
+    public func getSpaceMemoryPolicy(
+        spaceId: String,
+        apiVersion: String? = nil
+    ) async throws -> SpaceMemoryPolicy {
+        let payload = SpaceGetMemoryPolicyPayload(apiVersion: apiVersion, spaceId: spaceId)
+        let data = try await sendAndWait(type: MessageType.spaceGetMemoryPolicy, payload: payload)
+        let response = try decoder.decode(SpaceGetMemoryPolicyResponsePayload.self, from: data)
+        return response.memoryPolicy
+    }
+
+    public func setSpaceMemoryPolicy(_ payload: SpaceSetMemoryPolicyPayload) async throws -> SpaceConfig {
+        let data = try await sendAndWait(type: MessageType.spaceSetMemoryPolicy, payload: payload)
+        let response = try decoder.decode(SpaceSetMemoryPolicyResponsePayload.self, from: data)
+        return response.space
+    }
+
+    public func endIncognitoSession(
+        spaceId: String,
+        apiVersion: String? = nil
+    ) async throws -> SpaceEndIncognitoSessionResponsePayload {
+        let payload = SpaceEndIncognitoSessionPayload(apiVersion: apiVersion, spaceId: spaceId)
+        let data = try await sendAndWait(type: MessageType.spaceEndIncognitoSession, payload: payload)
+        return try decoder.decode(SpaceEndIncognitoSessionResponsePayload.self, from: data)
+    }
+
     /// List all agent assignments for a space.
     public func listAgentAssignments(
         spaceId: String,
@@ -456,6 +571,35 @@ public actor GatewayClient {
         let data = try await sendAndWait(type: MessageType.spaceListAgentAssignments, payload: payload)
         let response = try decoder.decode(SpaceListAgentAssignmentsResponsePayload.self, from: data)
         return response.assignments
+    }
+
+    /// Fetch the configured MCP endpoint for one space, if any.
+    public func getMcpEndpoint(
+        spaceId: String,
+        apiVersion: String? = nil
+    ) async throws -> SpaceMcpEndpoint? {
+        let payload = SpaceGetMcpEndpointPayload(apiVersion: apiVersion, spaceId: spaceId)
+        let data = try await sendAndWait(type: MessageType.spaceGetMcpEndpoint, payload: payload)
+        let response = try decoder.decode(SpaceGetMcpEndpointResponsePayload.self, from: data)
+        return response.endpoint
+    }
+
+    /// Create or update the MCP endpoint configuration for one space.
+    public func setMcpEndpoint(_ payload: SpaceSetMcpEndpointPayload) async throws -> SpaceMcpEndpoint {
+        let data = try await sendAndWait(type: MessageType.spaceSetMcpEndpoint, payload: payload)
+        let response = try decoder.decode(SpaceSetMcpEndpointResponsePayload.self, from: data)
+        return response.endpoint
+    }
+
+    /// Remove the MCP endpoint configuration for one space.
+    public func clearMcpEndpoint(
+        spaceId: String,
+        apiVersion: String? = nil
+    ) async throws -> Bool {
+        let payload = SpaceClearMcpEndpointPayload(apiVersion: apiVersion, spaceId: spaceId)
+        let data = try await sendAndWait(type: MessageType.spaceClearMcpEndpoint, payload: payload)
+        let response = try decoder.decode(SpaceClearMcpEndpointResponsePayload.self, from: data)
+        return response.cleared
     }
 
     /// Add one skill assignment to a space.
@@ -497,6 +641,13 @@ public actor GatewayClient {
         let data = try await sendAndWait(type: MessageType.spaceSetWorkspace, payload: payload)
         let response = try decoder.decode(SpaceSetWorkspaceResponsePayload.self, from: data)
         return response.workspace
+    }
+
+    /// Open an existing folder/repo on the gateway host and resolve it to a space binding.
+    public func openSpaceWorkspace(_ payload: SpaceOpenWorkspacePayload) async throws -> SpaceOpenWorkspaceResult {
+        let data = try await sendAndWait(type: MessageType.spaceOpenWorkspace, payload: payload)
+        let response = try decoder.decode(SpaceOpenWorkspaceResponsePayload.self, from: data)
+        return response.result
     }
 
     /// Add one resource assignment to a space.
@@ -643,11 +794,97 @@ public actor GatewayClient {
         return try decoder.decode(SpaceGetUsageResult.self, from: data)
     }
 
+    /// Read merged activity-log entries for one space, optionally scoped to one turn.
+    public func listActivityLog(_ payload: SpaceListActivityLogPayload) async throws -> SpaceListActivityLogResult {
+        let data = try await sendAndWait(type: MessageType.spaceListActivityLog, payload: payload)
+        return try decoder.decode(SpaceListActivityLogResult.self, from: data)
+    }
+
     /// Read sanitized turn trace for one turn.
     public func getTurnTrace(_ payload: SpaceGetTurnTracePayload) async throws -> SpaceTurnTrace {
         let data = try await sendAndWait(type: MessageType.spaceGetTurnTrace, payload: payload)
         let response = try decoder.decode(SpaceGetTurnTraceResult.self, from: data)
         return response.trace
+    }
+
+    public func listExperiences(_ payload: SpaceListExperiencesPayload) async throws -> SpaceListExperiencesResult {
+        let data = try await sendAndWait(type: MessageType.spaceListExperiences, payload: payload)
+        return try decoder.decode(SpaceListExperiencesResult.self, from: data)
+    }
+
+    public func getExperience(_ payload: SpaceGetExperiencePayload) async throws -> SpaceExperienceRecord {
+        let data = try await sendAndWait(type: MessageType.spaceGetExperience, payload: payload)
+        let response = try decoder.decode(SpaceGetExperienceResult.self, from: data)
+        return response.experience
+    }
+
+    public func listInsights(_ payload: SpaceListInsightsPayload) async throws -> SpaceListInsightsResult {
+        let data = try await sendAndWait(type: MessageType.spaceListInsights, payload: payload)
+        return try decoder.decode(SpaceListInsightsResult.self, from: data)
+    }
+
+    public func getInsight(_ payload: SpaceGetInsightPayload) async throws -> SpacePersonalityInsightRecord {
+        let data = try await sendAndWait(type: MessageType.spaceGetInsight, payload: payload)
+        let response = try decoder.decode(SpaceGetInsightResult.self, from: data)
+        return response.insight
+    }
+
+    public func acceptInsight(_ payload: SpaceAcceptInsightPayload) async throws -> SpacePersonalityInsightRecord {
+        let data = try await sendAndWait(type: MessageType.spaceAcceptInsight, payload: payload)
+        let response = try decoder.decode(SpaceInsightActionResult.self, from: data)
+        return response.insight
+    }
+
+    public func rejectInsight(_ payload: SpaceRejectInsightPayload) async throws -> SpacePersonalityInsightRecord {
+        let data = try await sendAndWait(type: MessageType.spaceRejectInsight, payload: payload)
+        let response = try decoder.decode(SpaceInsightActionResult.self, from: data)
+        return response.insight
+    }
+
+    public func dismissInsight(_ payload: SpaceDismissInsightPayload) async throws -> SpacePersonalityInsightRecord {
+        let data = try await sendAndWait(type: MessageType.spaceDismissInsight, payload: payload)
+        let response = try decoder.decode(SpaceInsightActionResult.self, from: data)
+        return response.insight
+    }
+
+    public func getSpaceAgentNotes(_ payload: SpaceGetSpaceAgentNotesPayload) async throws -> SpaceAgentNotesRecord? {
+        let data = try await sendAndWait(type: MessageType.spaceGetSpaceAgentNotes, payload: payload)
+        let response = try decoder.decode(SpaceAgentNotesResult.self, from: data)
+        return response.notes
+    }
+
+    public func updateSpaceAgentNotes(_ payload: SpaceUpdateSpaceAgentNotesPayload) async throws -> SpaceAgentNotesRecord? {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateSpaceAgentNotes, payload: payload)
+        let response = try decoder.decode(SpaceAgentNotesResult.self, from: data)
+        return response.notes
+    }
+
+    public func getUserProfile(_ payload: SpaceGetUserProfilePayload = SpaceGetUserProfilePayload()) async throws -> SpaceUserProfileRecord? {
+        let data = try await sendAndWait(type: MessageType.spaceGetUserProfile, payload: payload)
+        let response = try decoder.decode(SpaceUserProfileResult.self, from: data)
+        return response.profile
+    }
+
+    public func updateUserProfile(_ payload: SpaceUpdateUserProfilePayload) async throws -> SpaceUserProfileRecord? {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateUserProfile, payload: payload)
+        let response = try decoder.decode(SpaceUserProfileResult.self, from: data)
+        return response.profile
+    }
+
+    public func listMemories(_ payload: SpaceListMemoriesPayload) async throws -> SpaceListMemoriesResult {
+        let data = try await sendAndWait(type: MessageType.spaceListMemories, payload: payload)
+        return try decoder.decode(SpaceListMemoriesResult.self, from: data)
+    }
+
+    public func deleteMemory(_ payload: SpaceDeleteMemoryPayload) async throws -> SpaceDeleteMemoryResult {
+        let data = try await sendAndWait(type: MessageType.spaceDeleteMemory, payload: payload)
+        return try decoder.decode(SpaceDeleteMemoryResult.self, from: data)
+    }
+
+    public func updateMemoryImportance(_ payload: SpaceUpdateMemoryImportancePayload) async throws -> SpaceMemoryRecord {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateMemoryImportance, payload: payload)
+        let response = try decoder.decode(SpaceUpdateMemoryImportanceResult.self, from: data)
+        return response.memory
     }
 
     /// List artifacts in a space, optionally scoped to one turn.
@@ -660,6 +897,13 @@ public actor GatewayClient {
     public func getSpaceArtifact(_ payload: SpaceGetArtifactPayload) async throws -> SpaceArtifactDetail {
         let data = try await sendAndWait(type: MessageType.spaceGetArtifact, payload: payload)
         let response = try decoder.decode(SpaceGetArtifactResult.self, from: data)
+        return response.artifact
+    }
+
+    /// Fetch one debug-only artifact in a space, bypassing the normal preview cap.
+    public func getSpaceDebugArtifact(_ payload: SpaceGetDebugArtifactPayload) async throws -> SpaceArtifactDetail {
+        let data = try await sendAndWait(type: MessageType.spaceGetDebugArtifact, payload: payload)
+        let response = try decoder.decode(SpaceGetDebugArtifactResult.self, from: data)
         return response.artifact
     }
 
@@ -680,86 +924,190 @@ public actor GatewayClient {
         return try decoder.decode(SpaceResetAgentUsageSessionResult.self, from: data)
     }
 
-    /// Create one profile in gateway persistence.
-    public func createProfile(_ payload: ProfileCreatePayload) async throws -> ProfileCreateResult {
-        let data = try await sendAndWait(type: MessageType.profileCreate, payload: payload)
-        let response = try decoder.decode(ProfileCreateResponsePayload.self, from: data)
-        return ProfileCreateResult(profile: response.profile, created: response.created)
+    /// Read the effective tool matrix for one space/agent.
+    public func getEffectiveTools(_ payload: SpaceGetEffectiveToolsPayload) async throws -> EffectiveToolMatrix {
+        let data = try await sendAndWait(type: MessageType.spaceGetEffectiveTools, payload: payload)
+        let response = try decoder.decode(SpaceGetEffectiveToolsResponsePayload.self, from: data)
+        return response.matrix
     }
 
-    /// Fetch one profile by ID.
-    public func getProfile(profileId: String, apiVersion: String? = nil) async throws -> ProfileSummary {
-        let payload = ProfileGetPayload(apiVersion: apiVersion, profileId: profileId)
-        let data = try await sendAndWait(type: MessageType.profileGet, payload: payload)
-        let response = try decoder.decode(ProfileGetResponsePayload.self, from: data)
-        return response.profile
+    /// Read the unified effective tool access matrix for one space/agent.
+    public func getEffectiveToolAccess(_ payload: SpaceGetEffectiveToolAccessPayload) async throws -> EffectiveToolAccess {
+        let data = try await sendAndWait(type: MessageType.spaceGetEffectiveToolAccess, payload: payload)
+        let response = try decoder.decode(SpaceGetEffectiveToolAccessResponsePayload.self, from: data)
+        return response.access
     }
 
-    /// List profiles.
-    public func listProfiles(
+    /// Read the unified tool policy for one space.
+    public func getToolPolicy(_ payload: SpaceGetToolPolicyPayload) async throws -> ToolAccessPolicy {
+        let data = try await sendAndWait(type: MessageType.spaceGetToolPolicy, payload: payload)
+        let response = try decoder.decode(SpaceGetToolPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    /// Update the unified tool policy for one space.
+    public func updateToolPolicy(_ payload: SpaceUpdateToolPolicyPayload) async throws -> ToolAccessPolicy {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateToolPolicy, payload: payload)
+        let response = try decoder.decode(SpaceUpdateToolPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    /// Read the connector policy for one space.
+    public func getConnectorPolicy(_ payload: SpaceGetConnectorPolicyPayload) async throws -> SpaceConnectorPolicy {
+        let data = try await sendAndWait(type: MessageType.spaceGetConnectorPolicy, payload: payload)
+        let response = try decoder.decode(SpaceGetConnectorPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    /// Update the connector policy for one space.
+    public func updateConnectorPolicy(_ payload: SpaceUpdateConnectorPolicyPayload) async throws -> SpaceConnectorPolicy {
+        let data = try await sendAndWait(type: MessageType.spaceUpdateConnectorPolicy, payload: payload)
+        let response = try decoder.decode(SpaceUpdateConnectorPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    public func listAgentDefinitions(
         apiVersion: String? = nil,
         includeArchived: Bool? = nil
-    ) async throws -> [ProfileSummary] {
-        let payload = ProfileListPayload(apiVersion: apiVersion, includeArchived: includeArchived)
-        let data = try await sendAndWait(type: MessageType.profileList, payload: payload)
-        let response = try decoder.decode(ProfileListResponsePayload.self, from: data)
-        return response.profiles
-    }
-
-    /// Update one profile and create a new revision.
-    public func updateProfile(_ payload: ProfileUpdatePayload) async throws -> ProfileUpdateResult {
-        let data = try await sendAndWait(type: MessageType.profileUpdate, payload: payload)
-        let response = try decoder.decode(ProfileUpdateResponsePayload.self, from: data)
-        return ProfileUpdateResult(profile: response.profile, newRevision: response.newRevision)
-    }
-
-    /// Archive one profile.
-    public func archiveProfile(_ payload: ProfileArchivePayload) async throws -> ProfileArchiveResult {
-        let data = try await sendAndWait(type: MessageType.profileArchive, payload: payload)
-        let response = try decoder.decode(ProfileArchiveResponsePayload.self, from: data)
-        return ProfileArchiveResult(profile: response.profile, archived: response.archived)
-    }
-
-    public func listPresets(
-        apiVersion: String? = nil,
-        kind: String? = nil,
-        source: String? = nil,
-        tags: [String]? = nil
-    ) async throws -> [PresetSummary] {
-        let payload = PresetListPayload(
+    ) async throws -> [AgentDefinitionSummary] {
+        let payload = IdentityListAgentDefinitionsPayload(
             apiVersion: apiVersion,
-            kind: kind,
-            source: source,
-            tags: tags
+            includeArchived: includeArchived
         )
-        let data = try await sendAndWait(type: MessageType.presetList, payload: payload)
-        let response = try decoder.decode(PresetListResponsePayload.self, from: data)
-        return response.presets
+        let data = try await sendAndWait(type: MessageType.identityListAgentDefinitions, payload: payload)
+        let response = try decoder.decode(IdentityListAgentDefinitionsResponsePayload.self, from: data)
+        return response.agentDefinitions
     }
 
-    public func getPreset(
-        presetId: String,
+    public func getAgentDefinition(
+        agentDefinitionId: String,
         apiVersion: String? = nil
-    ) async throws -> PresetDetail {
-        let payload = PresetGetPayload(apiVersion: apiVersion, presetId: presetId)
-        let data = try await sendAndWait(type: MessageType.presetGet, payload: payload)
-        let response = try decoder.decode(PresetGetResponsePayload.self, from: data)
-        return response.preset
+    ) async throws -> AgentDefinitionSummary {
+        let payload = IdentityGetAgentDefinitionPayload(
+            apiVersion: apiVersion,
+            agentDefinitionId: agentDefinitionId
+        )
+        let data = try await sendAndWait(type: MessageType.identityGetAgentDefinition, payload: payload)
+        let response = try decoder.decode(IdentityGetAgentDefinitionResponsePayload.self, from: data)
+        return response.agentDefinition
     }
 
-    public func applyPresetToSpace(_ payload: PresetApplyToSpacePayload) async throws -> PresetApplyToSpaceResult {
-        let data = try await sendAndWait(type: MessageType.presetApplyToSpace, payload: payload)
-        return try decoder.decode(PresetApplyToSpaceResult.self, from: data)
+    public func createAgentDefinition(
+        _ payload: IdentityCreateAgentDefinitionPayload
+    ) async throws -> AgentDefinitionCreateResult {
+        let data = try await sendAndWait(type: MessageType.identityCreateAgentDefinition, payload: payload)
+        let response = try decoder.decode(IdentityCreateAgentDefinitionResponsePayload.self, from: data)
+        return AgentDefinitionCreateResult(
+            agentDefinition: response.agentDefinition,
+            created: response.created
+        )
     }
 
-    public func saveAgentPreset(_ payload: PresetSaveAgentPayload) async throws -> PresetSaveAgentResult {
-        let data = try await sendAndWait(type: MessageType.presetSaveAgent, payload: payload)
-        return try decoder.decode(PresetSaveAgentResult.self, from: data)
+    public func updateAgentDefinition(
+        _ payload: IdentityUpdateAgentDefinitionPayload
+    ) async throws -> AgentDefinitionUpdateResult {
+        let data = try await sendAndWait(type: MessageType.identityUpdateAgentDefinition, payload: payload)
+        let response = try decoder.decode(IdentityUpdateAgentDefinitionResponsePayload.self, from: data)
+        return AgentDefinitionUpdateResult(
+            agentDefinition: response.agentDefinition,
+            newRevision: response.newRevision
+        )
     }
 
-    public func archiveAgentPreset(_ payload: PresetArchiveAgentPayload) async throws -> PresetArchiveAgentResult {
-        let data = try await sendAndWait(type: MessageType.presetArchiveAgent, payload: payload)
-        return try decoder.decode(PresetArchiveAgentResult.self, from: data)
+    public func archiveAgentDefinition(
+        _ payload: IdentityArchiveAgentDefinitionPayload
+    ) async throws -> AgentDefinitionArchiveResult {
+        let data = try await sendAndWait(type: MessageType.identityArchiveAgentDefinition, payload: payload)
+        let response = try decoder.decode(IdentityArchiveAgentDefinitionResponsePayload.self, from: data)
+        return AgentDefinitionArchiveResult(
+            agentDefinition: response.agentDefinition,
+            archived: response.archived
+        )
+    }
+
+    public func listPersonas(
+        apiVersion: String? = nil,
+        includeArchived: Bool? = nil
+    ) async throws -> [PersonaSummary] {
+        let payload = IdentityListPersonasPayload(apiVersion: apiVersion, includeArchived: includeArchived)
+        let data = try await sendAndWait(type: MessageType.identityListPersonas, payload: payload)
+        let response = try decoder.decode(IdentityListPersonasResponsePayload.self, from: data)
+        return response.personas
+    }
+
+    public func getPersona(personaId: String, apiVersion: String? = nil) async throws -> PersonaSummary {
+        let payload = IdentityGetPersonaPayload(apiVersion: apiVersion, personaId: personaId)
+        let data = try await sendAndWait(type: MessageType.identityGetPersona, payload: payload)
+        let response = try decoder.decode(IdentityGetPersonaResponsePayload.self, from: data)
+        return response.persona
+    }
+
+    public func createPersona(_ payload: IdentityCreatePersonaPayload) async throws -> PersonaCreateResult {
+        let data = try await sendAndWait(type: MessageType.identityCreatePersona, payload: payload)
+        let response = try decoder.decode(IdentityCreatePersonaResponsePayload.self, from: data)
+        return PersonaCreateResult(persona: response.persona, created: response.created)
+    }
+
+    public func updatePersona(_ payload: IdentityUpdatePersonaPayload) async throws -> PersonaUpdateResult {
+        let data = try await sendAndWait(type: MessageType.identityUpdatePersona, payload: payload)
+        let response = try decoder.decode(IdentityUpdatePersonaResponsePayload.self, from: data)
+        return PersonaUpdateResult(persona: response.persona, newRevision: response.newRevision)
+    }
+
+    public func archivePersona(_ payload: IdentityArchivePersonaPayload) async throws -> PersonaArchiveResult {
+        let data = try await sendAndWait(type: MessageType.identityArchivePersona, payload: payload)
+        let response = try decoder.decode(IdentityArchivePersonaResponsePayload.self, from: data)
+        return PersonaArchiveResult(persona: response.persona, archived: response.archived)
+    }
+
+    public func previewCompiledInstructions(
+        agentDefinitionId: String,
+        apiVersion: String? = nil,
+        workspaceContext: String? = nil
+    ) async throws -> CompiledInstructionsPreview {
+        let payload = IdentityPreviewCompiledInstructionsPayload(
+            apiVersion: apiVersion,
+            agentDefinitionId: agentDefinitionId,
+            workspaceContext: workspaceContext
+        )
+        let data = try await sendAndWait(
+            type: MessageType.identityPreviewCompiledInstructions,
+            payload: payload
+        )
+        let response = try decoder.decode(IdentityPreviewCompiledInstructionsResponsePayload.self, from: data)
+        return response.preview
+    }
+
+    public func previewRuntimeSystemPrompt(
+        _ payload: IdentityPreviewRuntimeSystemPromptPayload
+    ) async throws -> RuntimeSystemPromptPreview {
+        let data = try await sendAndWait(
+            type: MessageType.identityPreviewRuntimeSystemPrompt,
+            payload: payload
+        )
+        let response = try decoder.decode(IdentityPreviewRuntimeSystemPromptResponsePayload.self, from: data)
+        return response.preview
+    }
+
+    /// Preview the composed system prompt across all budget classes for an agent definition.
+    public func previewSystemPromptMatrix(
+        agentDefinitionId: String,
+        spaceId: String? = nil,
+        agentId: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> SystemPromptMatrix {
+        let payload = IdentityPreviewSystemPromptMatrixPayload(
+            apiVersion: apiVersion,
+            agentDefinitionId: agentDefinitionId,
+            spaceId: spaceId,
+            agentId: agentId
+        )
+        let data = try await sendAndWait(
+            type: MessageType.identityPreviewSystemPromptMatrix,
+            payload: payload
+        )
+        let response = try decoder.decode(IdentityPreviewSystemPromptMatrixResponsePayload.self, from: data)
+        return response.matrix
     }
 
     public func previewTemplate(_ payload: SpacePreviewTemplatePayload) async throws -> SpacePreviewTemplateResult {
@@ -780,6 +1128,106 @@ public actor GatewayClient {
     public func saveSpaceTemplate(_ payload: SpaceSaveTemplatePayload) async throws -> SpaceSaveTemplateResult {
         let data = try await sendAndWait(type: MessageType.spaceSaveTemplate, payload: payload)
         return try decoder.decode(SpaceSaveTemplateResult.self, from: data)
+    }
+
+    public func listSpaceTemplates(
+        apiVersion: String? = nil,
+        includeArchived: Bool? = nil,
+        includeSystem: Bool? = nil
+    ) async throws -> [SpaceTemplateRecord] {
+        let payload = SpaceTemplateListPayload(apiVersion: apiVersion, includeArchived: includeArchived, includeSystem: includeSystem)
+        let data = try await sendAndWait(type: MessageType.spaceListTemplates, payload: payload)
+        let response = try decoder.decode(SpaceTemplateListResponsePayload.self, from: data)
+        return response.templates
+    }
+
+    public func getSpaceTemplate(
+        templateId: String,
+        apiVersion: String? = nil
+    ) async throws -> SpaceTemplateRecord {
+        let payload = SpaceTemplateGetPayload(apiVersion: apiVersion, templateId: templateId)
+        let data = try await sendAndWait(type: MessageType.spaceGetTemplate, payload: payload)
+        let response = try decoder.decode(SpaceTemplateGetResponsePayload.self, from: data)
+        return response.template
+    }
+
+    public func previewSpaceTemplateRecord(
+        _ payload: SpaceTemplatePreviewPayload
+    ) async throws -> SpaceTemplatePreviewResult {
+        async let template = getSpaceTemplate(
+            templateId: payload.templateId,
+            apiVersion: payload.apiVersion
+        )
+        async let preview = previewTemplate(
+            SpacePreviewTemplatePayload(
+                apiVersion: payload.apiVersion,
+                templateId: payload.templateId,
+                resourceId: payload.resourceId,
+                name: payload.name,
+                goal: payload.goal
+            )
+        )
+        let (record, resolvedPreview) = try await (template, preview)
+        return SpaceTemplatePreviewResult(
+            template: record,
+            resolved: resolvedPreview.resolved,
+            warnings: resolvedPreview.warnings
+        )
+    }
+
+    public func createSpaceFromManagedTemplate(
+        _ payload: SpaceTemplateCreateSpacePayload
+    ) async throws -> SpaceTemplateCreateSpaceResult {
+        async let template = getSpaceTemplate(
+            templateId: payload.templateId,
+            apiVersion: payload.apiVersion
+        )
+        async let created = createSpaceFromTemplate(
+            SpaceCreateFromTemplatePayload(
+                apiVersion: payload.apiVersion,
+                idempotencyKey: payload.idempotencyKey,
+                templateId: payload.templateId,
+                spaceId: payload.spaceId,
+                resourceId: payload.resourceId,
+                name: payload.name,
+                goal: payload.goal,
+                workspaceRoot: payload.workspaceRoot,
+                visibility: payload.visibility
+            )
+        )
+        let (record, result) = try await (template, created)
+        return SpaceTemplateCreateSpaceResult(template: record, space: result.space)
+    }
+
+    public func saveManagedSpaceTemplate(
+        _ payload: SpaceTemplateSavePayload
+    ) async throws -> SpaceTemplateSaveResult {
+        let result = try await saveSpaceTemplate(
+            SpaceSaveTemplatePayload(
+                apiVersion: payload.apiVersion,
+                templateId: payload.templateId,
+                title: payload.name,
+                description: payload.description,
+                communicationMode: payload.communicationMode,
+                conversationTopology: payload.conversationTopology,
+                promptPackId: payload.promptPackId,
+                baseAgents: payload.baseAgents,
+                sourceSpaceId: payload.sourceSpaceId
+            )
+        )
+        let template = try await getSpaceTemplate(
+            templateId: result.template.templateId,
+            apiVersion: payload.apiVersion
+        )
+        return SpaceTemplateSaveResult(template: template, created: result.created)
+    }
+
+    public func archiveSpaceTemplate(
+        _ payload: SpaceTemplateArchivePayload
+    ) async throws -> SpaceTemplateArchiveResult {
+        let data = try await sendAndWait(type: MessageType.spaceArchiveTemplate, payload: payload)
+        let response = try decoder.decode(SpaceTemplateArchiveResponsePayload.self, from: data)
+        return SpaceTemplateArchiveResult(template: response.template, archived: response.archived)
     }
 
     public func registerDevice(_ payload: AuthRegisterDevicePayload) async throws -> AuthRegisterDeviceResult {
@@ -858,8 +1306,8 @@ public actor GatewayClient {
         selectionMode: MainAgentSelectionMode,
         providerId: String? = nil,
         modelId: String? = nil,
-        sourceProfileId: String? = nil,
-        copyPersonality: Bool? = nil
+        sourceAgentDefinitionId: String? = nil,
+        applyPersonaInstructions: Bool? = nil
     ) async throws -> GatewayMainAgentState {
         let payload = GatewaySetMainAgentPayload(
             apiVersion: apiVersion,
@@ -867,8 +1315,8 @@ public actor GatewayClient {
             selectionMode: selectionMode,
             providerId: providerId,
             modelId: modelId,
-            sourceProfileId: sourceProfileId,
-            copyPersonality: copyPersonality
+            sourceAgentDefinitionId: sourceAgentDefinitionId,
+            applyPersonaInstructions: applyPersonaInstructions
         )
         return try await setMainAgent(payload)
     }
@@ -880,14 +1328,61 @@ public actor GatewayClient {
         return response.state
     }
 
+    /// Read canonical concierge-agent state for the configured concierge backing space.
+    public func getConciergeAgent(
+        apiVersion: String? = nil,
+        spaceId: String? = nil,
+        repairIfMissing: Bool? = true
+    ) async throws -> GatewayConciergeAgentState {
+        let payload = GatewayGetConciergeAgentPayload(
+            apiVersion: apiVersion,
+            spaceId: spaceId,
+            repairIfMissing: repairIfMissing
+        )
+        let data = try await sendAndWait(type: MessageType.gatewayGetConciergeAgent, payload: payload)
+        let response = try decoder.decode(GatewayGetConciergeAgentResponsePayload.self, from: data)
+        return response.state
+    }
+
+    /// Update canonical concierge-agent runtime selection for the configured concierge backing space.
+    public func setConciergeAgent(
+        apiVersion: String? = nil,
+        spaceId: String? = nil,
+        selectionMode: ConciergeAgentSelectionMode,
+        providerId: String? = nil,
+        modelId: String? = nil,
+        sourceAgentDefinitionId: String? = nil,
+        applyPersonaInstructions: Bool? = nil
+    ) async throws -> GatewayConciergeAgentState {
+        let payload = GatewaySetConciergeAgentPayload(
+            apiVersion: apiVersion,
+            spaceId: spaceId,
+            selectionMode: selectionMode,
+            providerId: providerId,
+            modelId: modelId,
+            sourceAgentDefinitionId: sourceAgentDefinitionId,
+            applyPersonaInstructions: applyPersonaInstructions
+        )
+        return try await setConciergeAgent(payload)
+    }
+
+    /// Update canonical concierge-agent runtime selection with a fully-formed payload.
+    public func setConciergeAgent(_ payload: GatewaySetConciergeAgentPayload) async throws -> GatewayConciergeAgentState {
+        let data = try await sendAndWait(type: MessageType.gatewaySetConciergeAgent, payload: payload)
+        let response = try decoder.decode(GatewaySetConciergeAgentResponsePayload.self, from: data)
+        return response.state
+    }
+
     /// List runtime model catalogs discovered by the gateway.
     public func listAvailableModels(
         apiVersion: String? = nil,
-        providerId: String? = nil
+        providerId: String? = nil,
+        refresh: Bool? = nil
     ) async throws -> [GatewayModelProviderCatalog] {
         let payload = GatewayListAvailableModelsPayload(
             apiVersion: apiVersion,
-            providerId: providerId
+            providerId: providerId,
+            refresh: refresh
         )
         let data = try await sendAndWait(type: MessageType.gatewayListAvailableModels, payload: payload)
         let response = try decoder.decode(GatewayListAvailableModelsResponsePayload.self, from: data)
@@ -897,53 +1392,134 @@ public actor GatewayClient {
     /// List runtime catalogs grouped by integration class.
     public func listProviderCatalogs(
         apiVersion: String? = nil,
-        providerId: String? = nil
+        providerId: String? = nil,
+        refresh: Bool? = nil
     ) async throws -> [GatewayModelProviderCatalog] {
         let payload = GatewayListProviderCatalogsPayload(
             apiVersion: apiVersion,
-            providerId: providerId
+            providerId: providerId,
+            refresh: refresh
         )
         let data = try await sendAndWait(type: MessageType.gatewayListProviderCatalogs, payload: payload)
         let response = try decoder.decode(GatewayListProviderCatalogsResponsePayload.self, from: data)
         return response.providers
     }
 
-    /// Create a connector/provider/runtime request for the connected gateway operator.
-    public func createIntegrationRequest(
-        apiVersion: String? = nil,
-        integrationClass: GatewayIntegrationClass,
-        requestedName: String,
-        useCase: String? = nil,
-        sourceURL: String? = nil,
-        notes: String? = nil
-    ) async throws -> GatewayIntegrationRequest {
-        let payload = GatewayCreateIntegrationRequestPayload(
-            apiVersion: apiVersion,
-            integrationClass: integrationClass,
-            requestedName: requestedName,
-            useCase: useCase,
-            sourceURL: sourceURL,
-            notes: notes
-        )
-        let data = try await sendAndWait(type: MessageType.gatewayCreateIntegrationRequest, payload: payload)
-        let response = try decoder.decode(GatewayCreateIntegrationRequestResponsePayload.self, from: data)
-        return response.request
+    /// List registered external CLI tools known to the gateway.
+    public func listTools(apiVersion: String? = nil) async throws -> [GatewayTool] {
+        let payload = GatewayListToolsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.toolList, payload: payload)
+        let response = try decoder.decode(GatewayListToolsResponsePayload.self, from: data)
+        return response.tools
     }
 
-    /// List previously submitted integration requests for the connected gateway.
-    public func listIntegrationRequests(
+    /// Fetch one CLI tool bundle by ID.
+    public func getTool(
+        toolId: String,
+        apiVersion: String? = nil
+    ) async throws -> GatewayTool? {
+        let payload = GatewayGetToolPayload(apiVersion: apiVersion, toolId: toolId)
+        let data = try await sendAndWait(type: MessageType.toolGet, payload: payload)
+        let response = try decoder.decode(GatewayGetToolResponsePayload.self, from: data)
+        return response.tool
+    }
+
+    /// List supported interconnector bundles and their current availability state.
+    public func listInterconnectors(
+        apiVersion: String? = nil
+    ) async throws -> [GatewayInterconnectorBundle] {
+        let payload = GatewayListInterconnectorsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayListInterconnectors, payload: payload)
+        let response = try decoder.decode(GatewayListInterconnectorsResponsePayload.self, from: data)
+        return response.interconnectors
+    }
+
+    /// Generate a starter CLI tool bundle manifest and README.
+    public func scaffoldTool(_ payload: GatewayScaffoldToolPayload) async throws -> GatewayScaffoldedToolBundle {
+        let data = try await sendAndWait(type: MessageType.toolScaffold, payload: payload)
+        let response = try decoder.decode(GatewayScaffoldToolResponsePayload.self, from: data)
+        return GatewayScaffoldedToolBundle(manifest: response.manifest, readme: response.readme)
+    }
+
+    /// Register or update one CLI tool bundle on the gateway.
+    public func registerTool(_ payload: GatewayRegisterToolPayload) async throws -> GatewayTool {
+        let data = try await sendAndWait(type: MessageType.toolRegister, payload: payload)
+        let response = try decoder.decode(GatewayRegisterToolResponsePayload.self, from: data)
+        return response.tool
+    }
+
+    /// Remove one registered CLI tool bundle by ID.
+    public func removeTool(
+        toolId: String,
+        apiVersion: String? = nil
+    ) async throws -> Bool {
+        let payload = GatewayRemoveToolPayload(apiVersion: apiVersion, toolId: toolId)
+        let data = try await sendAndWait(type: MessageType.toolRemove, payload: payload)
+        let response = try decoder.decode(GatewayRemoveToolResponsePayload.self, from: data)
+        return response.removed
+    }
+
+    /// Enable or disable a CLI tool bundle by representative tool id.
+    public func setToolEnabled(
+        toolId: String,
+        enabled: Bool,
+        apiVersion: String? = nil
+    ) async throws -> [GatewayTool] {
+        let payload = GatewaySetToolEnabledPayload(apiVersion: apiVersion, toolId: toolId, enabled: enabled)
+        let data = try await sendAndWait(type: MessageType.toolSetEnabled, payload: payload)
+        let response = try decoder.decode(GatewaySetToolEnabledResponsePayload.self, from: data)
+        return response.tools
+    }
+
+    /// Rescan supported interconnector bundles and refresh the gateway-managed bundle catalog.
+    public func rescanInterconnectors(
+        apiVersion: String? = nil
+    ) async throws -> [GatewayInterconnectorBundle] {
+        let payload = GatewayRescanInterconnectorsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayRescanInterconnectors, payload: payload)
+        let response = try decoder.decode(GatewayRescanInterconnectorsResponsePayload.self, from: data)
+        return response.interconnectors
+    }
+
+    /// Compatibility alias for `rescanInterconnectors()` kept for older clients.
+    public func rescanJiraCliTools(
+        apiVersion: String? = nil
+    ) async throws -> GatewayRescanJiraCliToolsResponsePayload {
+        let payload = GatewayRescanJiraCliToolsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.toolRescanJira, payload: payload)
+        return try decoder.decode(GatewayRescanJiraCliToolsResponsePayload.self, from: data)
+    }
+
+    /// List active or historical CLI tool approval grants.
+    public func listToolApprovalGrants(
         apiVersion: String? = nil,
-        integrationClass: GatewayIntegrationClass? = nil,
-        limit: Int? = nil
-    ) async throws -> [GatewayIntegrationRequest] {
-        let payload = GatewayListIntegrationRequestsPayload(
+        principalId: String? = nil,
+        deviceId: String? = nil,
+        spaceId: String? = nil,
+        toolId: String? = nil,
+        includeRevoked: Bool? = nil,
+        includeExpired: Bool? = nil
+    ) async throws -> [GatewayToolApprovalGrant] {
+        let payload = GatewayListToolApprovalGrantsPayload(
             apiVersion: apiVersion,
-            integrationClass: integrationClass,
-            limit: limit
+            principalId: principalId,
+            deviceId: deviceId,
+            spaceId: spaceId,
+            toolId: toolId,
+            includeRevoked: includeRevoked,
+            includeExpired: includeExpired
         )
-        let data = try await sendAndWait(type: MessageType.gatewayListIntegrationRequests, payload: payload)
-        let response = try decoder.decode(GatewayListIntegrationRequestsResponsePayload.self, from: data)
-        return response.requests
+        let data = try await sendAndWait(type: MessageType.toolListGrants, payload: payload)
+        let response = try decoder.decode(GatewayListToolApprovalGrantsResponsePayload.self, from: data)
+        return response.grants
+    }
+
+    /// Revoke a CLI tool approval grant for one space/tool scope.
+    public func revokeToolApprovalGrant(
+        _ payload: GatewayRevokeToolApprovalGrantPayload
+    ) async throws -> GatewayRevokeToolApprovalGrantResult {
+        let data = try await sendAndWait(type: MessageType.toolRevokeGrant, payload: payload)
+        return try decoder.decode(GatewayRevokeToolApprovalGrantResponsePayload.self, from: data)
     }
 
     /// Read telemetry for configured model runtimes.
@@ -974,6 +1550,73 @@ public actor GatewayClient {
         return response.telemetry
     }
 
+    /// Read the gateway-owned managed space home root.
+    public func getWorkspaceDefaults(
+        apiVersion: String? = nil
+    ) async throws -> GatewayWorkspaceDefaults {
+        let payload = GatewayGetWorkspaceDefaultsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayGetWorkspaceDefaults, payload: payload)
+        let response = try decoder.decode(GatewayGetWorkspaceDefaultsResponsePayload.self, from: data)
+        return response.defaults
+    }
+
+    /// Update the gateway-owned managed space home root.
+    public func setWorkspaceDefaults(
+        apiVersion: String? = nil,
+        spaceHomeRoot: String? = nil
+    ) async throws -> GatewayWorkspaceDefaults {
+        let payload = GatewaySetWorkspaceDefaultsPayload(
+            apiVersion: apiVersion,
+            spaceHomeRoot: spaceHomeRoot
+        )
+        let data = try await sendAndWait(type: MessageType.gatewaySetWorkspaceDefaults, payload: payload)
+        let response = try decoder.decode(GatewaySetWorkspaceDefaultsResponsePayload.self, from: data)
+        return response.defaults
+    }
+
+    public func getMemoryDefaults(
+        apiVersion: String? = nil
+    ) async throws -> GatewayMemoryDefaults {
+        let payload = GatewayGetMemoryDefaultsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayGetMemoryDefaults, payload: payload)
+        let response = try decoder.decode(GatewayGetMemoryDefaultsResponsePayload.self, from: data)
+        return response.defaults
+    }
+
+    public func setMemoryDefaults(
+        apiVersion: String? = nil,
+        defaultExperienceCapture: SpaceExperienceCaptureMode,
+        defaultSpacePrivacyMode: SpacePrivacyMode = .standard
+    ) async throws -> GatewayMemoryDefaults {
+        let payload = GatewaySetMemoryDefaultsPayload(
+            apiVersion: apiVersion,
+            defaultExperienceCapture: defaultExperienceCapture,
+            defaultSpacePrivacyMode: defaultSpacePrivacyMode
+        )
+        let data = try await sendAndWait(type: MessageType.gatewaySetMemoryDefaults, payload: payload)
+        let response = try decoder.decode(GatewaySetMemoryDefaultsResponsePayload.self, from: data)
+        return response.defaults
+    }
+
+    /// Read gateway-owned external connectivity settings and live status.
+    public func getExternalConnectivity(
+        apiVersion: String? = nil
+    ) async throws -> GatewayGetExternalConnectivityResponsePayload {
+        let payload = GatewayGetExternalConnectivityPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayGetExternalConnectivity, payload: payload)
+        return try decoder.decode(GatewayGetExternalConnectivityResponsePayload.self, from: data)
+    }
+
+    /// Update the desired external connectivity mode and return the live status snapshot.
+    public func setExternalConnectivity(
+        apiVersion: String? = nil,
+        mode: String
+    ) async throws -> GatewaySetExternalConnectivityResponsePayload {
+        let payload = GatewaySetExternalConnectivityPayload(apiVersion: apiVersion, mode: mode)
+        let data = try await sendAndWait(type: MessageType.gatewaySetExternalConnectivity, payload: payload)
+        return try decoder.decode(GatewaySetExternalConnectivityResponsePayload.self, from: data)
+    }
+
     /// Fetch full runtime settings for one configured runtime.
     public func getProviderSettings(
         apiVersion: String? = nil,
@@ -992,10 +1635,11 @@ public actor GatewayClient {
         model: String? = nil,
         apiKey: String? = nil,
         apiKeySecretRef: String? = nil,
+        authMode: GatewayProviderAuthMode? = nil,
         baseURL: String? = nil,
+        executablePath: String? = nil,
         allowedModels: [String]? = nil,
-        allowCustomModel: Bool? = nil,
-        nativeCliToolsEnabled: Bool? = nil
+        allowCustomModel: Bool? = nil
     ) async throws -> GatewayProviderRuntimeConfig {
         let payload = GatewaySetProviderConfigPayload(
             apiVersion: apiVersion,
@@ -1003,10 +1647,11 @@ public actor GatewayClient {
             model: model,
             apiKey: apiKey,
             apiKeySecretRef: apiKeySecretRef,
+            authMode: authMode,
             baseURL: baseURL,
+            executablePath: executablePath,
             allowedModels: allowedModels,
-            allowCustomModel: allowCustomModel,
-            nativeCliToolsEnabled: nativeCliToolsEnabled
+            allowCustomModel: allowCustomModel
         )
         let data = try await sendAndWait(type: MessageType.gatewaySetProviderConfig, payload: payload)
         let response = try decoder.decode(GatewaySetProviderConfigResponsePayload.self, from: data)
@@ -1020,10 +1665,11 @@ public actor GatewayClient {
         model: String? = nil,
         apiKey: String? = nil,
         apiKeySecretRef: String? = nil,
+        authMode: GatewayProviderAuthMode? = nil,
         baseURL: String? = nil,
+        executablePath: String? = nil,
         allowedModels: [String]? = nil,
-        allowCustomModel: Bool? = nil,
-        nativeCliToolsEnabled: Bool? = nil
+        allowCustomModel: Bool? = nil
     ) async throws -> GatewayProviderRuntimeConfig {
         let payload = GatewayUpdateProviderSettingsPayload(
             apiVersion: apiVersion,
@@ -1031,10 +1677,11 @@ public actor GatewayClient {
             model: model,
             apiKey: apiKey,
             apiKeySecretRef: apiKeySecretRef,
+            authMode: authMode,
             baseURL: baseURL,
+            executablePath: executablePath,
             allowedModels: allowedModels,
-            allowCustomModel: allowCustomModel,
-            nativeCliToolsEnabled: nativeCliToolsEnabled
+            allowCustomModel: allowCustomModel
         )
         let data = try await sendAndWait(type: MessageType.gatewayUpdateProviderSettings, payload: payload)
         let response = try decoder.decode(GatewayUpdateProviderSettingsResponsePayload.self, from: data)
@@ -1121,6 +1768,16 @@ public actor GatewayClient {
         return response.deleted
     }
 
+    /// Read the canonical grouped integrations snapshot for one gateway.
+    public func getIntegrationsSnapshot(
+        apiVersion: String? = nil
+    ) async throws -> GatewayIntegrationsSnapshot {
+        let payload = GatewayGetIntegrationsSnapshotPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayGetIntegrationsSnapshot, payload: payload)
+        let response = try decoder.decode(GatewayGetIntegrationsSnapshotResponsePayload.self, from: data)
+        return response.snapshot
+    }
+
     /// List registered connector families available in the current gateway profile.
     public func listConnectorFamilies(apiVersion: String? = nil) async throws -> [GatewayConnectorFamily] {
         let payload = GatewayListConnectorFamiliesPayload(apiVersion: apiVersion)
@@ -1156,6 +1813,14 @@ public actor GatewayClient {
         let data = try await sendAndWait(type: MessageType.gatewayRemoveConnector, payload: payload)
         let response = try decoder.decode(GatewayRemoveConnectorResponsePayload.self, from: data)
         return response.removed
+    }
+
+    /// Submit one inbound connector event and receive routing directives.
+    public func submitConnectorInboundEvent(
+        _ payload: ConnectorSubmitInboundEventPayload
+    ) async throws -> ConnectorInboundEventResultPayload {
+        let data = try await sendAndWait(type: MessageType.connectorSubmitInboundEvent, payload: payload)
+        return try decoder.decode(ConnectorInboundEventResultPayload.self, from: data)
     }
 
     /// List connector bindings, optionally filtered to one connector instance.
@@ -1210,6 +1875,29 @@ public actor GatewayClient {
         return response.policy
     }
 
+    /// Read the unified gateway tool policy.
+    public func getToolPolicy(apiVersion: String? = nil) async throws -> ToolAccessPolicy {
+        let payload = GatewayGetToolPolicyPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayGetToolPolicy, payload: payload)
+        let response = try decoder.decode(GatewayGetToolPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    /// Update the unified gateway tool policy.
+    public func updateToolPolicy(_ payload: GatewayUpdateToolPolicyPayload) async throws -> ToolAccessPolicy {
+        let data = try await sendAndWait(type: MessageType.gatewayUpdateToolPolicy, payload: payload)
+        let response = try decoder.decode(GatewayUpdateToolPolicyResponsePayload.self, from: data)
+        return response.policy
+    }
+
+    /// List seeded gateway safety profiles.
+    public func listSafetyProfiles(apiVersion: String? = nil) async throws -> [SafetyProfileDefinition] {
+        let payload = GatewayListSafetyProfilesPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.gatewayListSafetyProfiles, payload: payload)
+        let response = try decoder.decode(GatewayListSafetyProfilesResponsePayload.self, from: data)
+        return response.profiles
+    }
+
     /// Run a connector self-check with policy and inbound-route diagnostics.
     public func testConnector(
         connectorId: String,
@@ -1258,48 +1946,123 @@ public actor GatewayClient {
         return response.policy
     }
 
-    /// List gateway-managed skills from the shared catalog.
     public func listGatewaySkills(
-        apiVersion: String? = nil,
         query: String? = nil,
         tags: [String]? = nil,
         status: String? = nil,
         limit: Int? = nil
     ) async throws -> [GatewaySkillEntry] {
-        let payload = GatewaySkillListPayload(
-            apiVersion: apiVersion,
-            query: query,
-            tags: tags,
-            status: status,
-            limit: limit
-        )
+        let payload = GatewaySkillListPayload(query: query, tags: tags, status: status, limit: limit)
         let data = try await sendAndWait(type: MessageType.gatewaySkillList, payload: payload)
         let response = try decoder.decode(GatewaySkillListResponsePayload.self, from: data)
         return response.skills
     }
 
-    /// Fetch one gateway-managed skill by ID.
-    public func getGatewaySkill(skillId: String, apiVersion: String? = nil) async throws -> GatewaySkillEntry {
-        let payload = GatewaySkillGetPayload(apiVersion: apiVersion, skillId: skillId)
-        let data = try await sendAndWait(type: MessageType.gatewaySkillGet, payload: payload)
-        let response = try decoder.decode(GatewaySkillGetResponsePayload.self, from: data)
-        return response.skill
+    public func listLibraryEntries(
+        apiVersion: String? = nil,
+        query: String? = nil,
+        tags: [String]? = nil,
+        status: LibraryEntryStatus? = nil,
+        sourceKinds: [LibrarySourceKind]? = nil,
+        includeArchived: Bool? = nil,
+        includeContent: Bool? = nil,
+        limit: Int? = nil
+    ) async throws -> [LibraryEntry] {
+        let payload = LibraryListEntriesPayload(
+            apiVersion: apiVersion,
+            query: query,
+            tags: tags,
+            status: status,
+            sourceKinds: sourceKinds,
+            includeArchived: includeArchived,
+            includeContent: includeContent,
+            limit: limit
+        )
+        let data = try await sendAndWait(type: MessageType.libraryListEntries, payload: payload)
+        let response = try decoder.decode(LibraryListEntriesResponsePayload.self, from: data)
+        return response.entries
     }
 
-    /// Create or update one gateway-managed skill.
-    public func upsertGatewaySkill(_ payload: GatewaySkillUpsertPayload) async throws -> GatewaySkillUpsertResult {
-        let data = try await sendAndWait(type: MessageType.gatewaySkillUpsert, payload: payload)
-        return try decoder.decode(GatewaySkillUpsertResult.self, from: data)
+    public func getLibraryEntry(
+        entryId: String,
+        apiVersion: String? = nil,
+        includeContent: Bool? = nil
+    ) async throws -> LibraryEntry {
+        let payload = LibraryGetEntryPayload(
+            apiVersion: apiVersion,
+            entryId: entryId,
+            includeContent: includeContent
+        )
+        let data = try await sendAndWait(type: MessageType.libraryGetEntry, payload: payload)
+        let response = try decoder.decode(LibraryGetEntryResponsePayload.self, from: data)
+        return response.entry
     }
 
-    /// Delete one gateway-managed skill by ID.
-    public func deleteGatewaySkill(
-        skillId: String,
-        apiVersion: String? = nil
-    ) async throws -> GatewaySkillDeleteResult {
-        let payload = GatewaySkillDeletePayload(apiVersion: apiVersion, skillId: skillId)
-        let data = try await sendAndWait(type: MessageType.gatewaySkillDelete, payload: payload)
-        return try decoder.decode(GatewaySkillDeleteResult.self, from: data)
+    public func saveLibrarySkill(_ payload: LibrarySaveSkillPayload) async throws -> LibrarySaveSkillResult {
+        let data = try await sendAndWait(type: MessageType.librarySaveSkill, payload: payload)
+        let response = try decoder.decode(LibrarySaveSkillResponsePayload.self, from: data)
+        return LibrarySaveSkillResult(entry: response.entry, created: response.created)
+    }
+
+    public func importLibraryEntry(_ payload: LibraryImportEntryPayload) async throws -> LibraryImportEntryResult {
+        let data = try await sendAndWait(type: MessageType.libraryImportEntry, payload: payload)
+        let response = try decoder.decode(LibraryImportEntryResponsePayload.self, from: data)
+        return LibraryImportEntryResult(entry: response.entry, created: response.created)
+    }
+
+    public func archiveLibraryEntry(_ payload: LibraryArchiveEntryPayload) async throws -> LibraryArchiveEntryResult {
+        let data = try await sendAndWait(type: MessageType.libraryArchiveEntry, payload: payload)
+        let response = try decoder.decode(LibraryArchiveEntryResponsePayload.self, from: data)
+        return LibraryArchiveEntryResult(entry: response.entry, archived: response.archived)
+    }
+
+    public func setLibraryEntryEnabled(_ payload: LibrarySetEntryEnabledPayload) async throws -> LibraryEntry {
+        let data = try await sendAndWait(type: MessageType.librarySetEntryEnabled, payload: payload)
+        let response = try decoder.decode(LibrarySetEntryEnabledResponsePayload.self, from: data)
+        return response.entry
+    }
+
+    public func deleteLibraryEntry(_ payload: LibraryDeleteEntryPayload) async throws -> LibraryDeleteEntryResult {
+        let data = try await sendAndWait(type: MessageType.libraryDeleteEntry, payload: payload)
+        let response = try decoder.decode(LibraryDeleteEntryResponsePayload.self, from: data)
+        return LibraryDeleteEntryResult(entryId: response.entryId, deleted: response.deleted)
+    }
+
+    public func scanLibraryEntries(apiVersion: String? = nil) async throws -> LibraryScanEntriesResult {
+        let payload = LibraryScanEntriesPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.libraryScanEntries, payload: payload)
+        let response = try decoder.decode(LibraryScanEntriesResponsePayload.self, from: data)
+        return LibraryScanEntriesResult(entries: response.entries, scannedAt: response.scannedAt)
+    }
+
+    public func listSkillDrafts(apiVersion: String? = nil) async throws -> [SkillDraft] {
+        let payload = LibraryListSkillDraftsPayload(apiVersion: apiVersion)
+        let data = try await sendAndWait(type: MessageType.libraryListSkillDrafts, payload: payload)
+        let response = try decoder.decode(LibraryListSkillDraftsResponsePayload.self, from: data)
+        return response.drafts
+    }
+
+    public func getSkillDraft(draftId: String, apiVersion: String? = nil) async throws -> SkillDraft {
+        let payload = LibraryGetSkillDraftPayload(apiVersion: apiVersion, draftId: draftId)
+        let data = try await sendAndWait(type: MessageType.libraryGetSkillDraft, payload: payload)
+        let response = try decoder.decode(LibraryGetSkillDraftResponsePayload.self, from: data)
+        return response.draft
+    }
+
+    public func createSkillDraft(
+        _ payload: LibraryCreateSkillDraftPayload
+    ) async throws -> LibraryCreateSkillDraftResult {
+        let data = try await sendAndWait(type: MessageType.libraryCreateSkillDraft, payload: payload)
+        let response = try decoder.decode(LibraryCreateSkillDraftResponsePayload.self, from: data)
+        return LibraryCreateSkillDraftResult(draft: response.draft, created: response.created)
+    }
+
+    public func deleteSkillDraft(
+        _ payload: LibraryDeleteSkillDraftPayload
+    ) async throws -> LibraryDeleteSkillDraftResult {
+        let data = try await sendAndWait(type: MessageType.libraryDeleteSkillDraft, payload: payload)
+        let response = try decoder.decode(LibraryDeleteSkillDraftResponsePayload.self, from: data)
+        return LibraryDeleteSkillDraftResult(draftId: response.draftId, deleted: response.deleted)
     }
 
     /// List gateway knowledge base entries (global + optional space-scoped).
@@ -1402,6 +2165,25 @@ public actor GatewayClient {
         let data = try await sendAndWait(type: MessageType.orchestratorGetCommand, payload: payload)
         let response = try decoder.decode(OrchestratorCommandResponsePayload.self, from: data)
         return response.command
+    }
+
+    /// Fetch a concise digest for a target space through the orchestrator control plane.
+    public func getSpaceDigest(
+        spaceId: String,
+        sourceSpaceId: String? = nil,
+        window: String = "latest"
+    ) async throws -> SpaceDigestResult {
+        let command = try await sendOrchestratorCommand(
+            OrchestratorCommandPayload(
+                commandType: "get_space_digest",
+                targetSpaceId: sourceSpaceId ?? spaceId,
+                payload: [
+                    "spaceId": spaceId,
+                    "window": window,
+                ]
+            )
+        )
+        return try decodeOrchestratorResult(command, as: SpaceDigestResult.self)
     }
 
     public func createSchedulerJob(_ payload: SchedulerCreateJobPayload) async throws -> SchedulerJob {
@@ -1694,6 +2476,10 @@ public actor GatewayClient {
         spaceId: String,
         spaceUid: String? = nil,
         sessionId: String? = nil,
+        locale: String? = nil,
+        sourceDevice: String? = nil,
+        enableTranscription: Bool? = nil,
+        enablePlayback: Bool? = nil,
         agentId: String? = nil,
         autoSubmitTurns: Bool? = nil,
         preferredSource: String? = nil,
@@ -1703,13 +2489,19 @@ public actor GatewayClient {
         appleSpeechProviderId: String? = nil,
         allowByokFallback: Bool? = nil,
         allowLocalFallback: Bool? = nil,
-        allowAppleSpeechFallback: Bool? = nil
+        allowAppleSpeechFallback: Bool? = nil,
+        sttPreferences: SpeechRoutePreferences? = nil,
+        ttsPreferences: SpeechRoutePreferences? = nil
     ) async throws -> SpeechSessionEvent {
         let payload = SpeechStartPayload(
             apiVersion: apiVersion,
             spaceId: spaceId,
-            spaceUid: spaceUid ?? spaceId,
+            spaceUid: spaceUid,
             sessionId: sessionId,
+            locale: locale,
+            sourceDevice: sourceDevice,
+            enableTranscription: enableTranscription,
+            enablePlayback: enablePlayback,
             agentId: agentId,
             autoSubmitTurns: autoSubmitTurns,
             preferredSource: preferredSource,
@@ -1719,7 +2511,9 @@ public actor GatewayClient {
             appleSpeechProviderId: appleSpeechProviderId,
             allowByokFallback: allowByokFallback,
             allowLocalFallback: allowLocalFallback,
-            allowAppleSpeechFallback: allowAppleSpeechFallback
+            allowAppleSpeechFallback: allowAppleSpeechFallback,
+            sttPreferences: sttPreferences,
+            ttsPreferences: ttsPreferences
         )
         return try await startSpeechSession(payload)
     }
@@ -1758,6 +2552,228 @@ public actor GatewayClient {
         return response.event
     }
 
+    public func startConciergeCall(
+        apiVersion: String? = nil,
+        callId: String,
+        deviceId: String? = nil,
+        platform: String,
+        ttsMode: String? = nil,
+        targetGatewayId: String? = nil,
+        displayName: String? = nil,
+        handoffContext: ConciergeCallHandoffContext? = nil,
+        spaceId: String? = nil,
+        spaceUid: String? = nil,
+        targetAgentId: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallStartPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            deviceId: deviceId,
+            platform: platform,
+            ttsMode: ttsMode,
+            targetGatewayId: targetGatewayId,
+            displayName: displayName,
+            handoffContext: handoffContext,
+            spaceId: spaceId,
+            spaceUid: spaceUid,
+            targetAgentId: targetAgentId
+        )
+        return try await startConciergeCall(payload)
+    }
+
+    public func startConciergeCall(_ payload: ConciergeCallStartPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallStart, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func answerConciergeCall(
+        callId: String,
+        deviceId: String? = nil,
+        platform: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallAnswerPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            deviceId: deviceId,
+            platform: platform
+        )
+        return try await answerConciergeCall(payload)
+    }
+
+    public func answerConciergeCall(_ payload: ConciergeCallAnswerPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallAnswer, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func endConciergeCall(
+        callId: String,
+        reason: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallEndPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            reason: reason
+        )
+        return try await endConciergeCall(payload)
+    }
+
+    public func endConciergeCall(_ payload: ConciergeCallEndPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallEnd, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func setConciergeCallMuted(
+        callId: String,
+        muted: Bool,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallSetMutedPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            muted: muted
+        )
+        return try await setConciergeCallMuted(payload)
+    }
+
+    public func setConciergeCallMuted(_ payload: ConciergeCallSetMutedPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallSetMuted, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func appendConciergeCallAudio(
+        callId: String,
+        sequence: Int,
+        audioBase64: String,
+        audioDurationSeconds: Double? = nil,
+        sampleRateHz: Int? = nil,
+        channels: Int? = nil,
+        codec: String? = nil,
+        transcriptText: String? = nil,
+        isFinal: Bool? = nil,
+        apiVersion: String? = nil
+    ) async throws -> [ConciergeCallEvent] {
+        let payload = ConciergeCallAudioChunkPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            sequence: sequence,
+            audioBase64: audioBase64,
+            audioDurationSeconds: audioDurationSeconds,
+            sampleRateHz: sampleRateHz,
+            channels: channels,
+            codec: codec,
+            transcriptText: transcriptText,
+            isFinal: isFinal
+        )
+        return try await appendConciergeCallAudio(payload)
+    }
+
+    public func appendConciergeCallAudio(_ payload: ConciergeCallAudioChunkPayload) async throws -> [ConciergeCallEvent] {
+        let data = try await sendAndWait(type: MessageType.conciergeCallAudioChunk, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventsResponsePayload.self, from: data)
+        return response.events
+    }
+
+    public func controlConciergeCall(
+        callId: String,
+        command: String,
+        reason: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallControlPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            command: command,
+            reason: reason
+        )
+        return try await controlConciergeCall(payload)
+    }
+
+    public func controlConciergeCall(_ payload: ConciergeCallControlPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallControl, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func prepareConciergeCallHandoff(
+        callId: String,
+        sourceDeviceId: String? = nil,
+        destinationPlatform: String,
+        destinationDeviceId: String? = nil,
+        destinationClientId: String? = nil,
+        resumeUrl: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallHandoffPreparation {
+        let payload = ConciergeCallHandoffPreparePayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            sourceDeviceId: sourceDeviceId,
+            destinationPlatform: destinationPlatform,
+            destinationDeviceId: destinationDeviceId,
+            destinationClientId: destinationClientId,
+            resumeUrl: resumeUrl
+        )
+        return try await prepareConciergeCallHandoff(payload)
+    }
+
+    public func prepareConciergeCallHandoff(_ payload: ConciergeCallHandoffPreparePayload) async throws -> ConciergeCallHandoffPreparation {
+        let data = try await sendAndWait(type: MessageType.conciergeCallHandoffPrepare, payload: payload)
+        return try decoder.decode(ConciergeCallHandoffPreparation.self, from: data)
+    }
+
+    public func acceptConciergeCallHandoff(
+        callId: String,
+        handoffToken: String,
+        deviceId: String? = nil,
+        platform: String? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeCallEvent {
+        let payload = ConciergeCallHandoffAcceptPayload(
+            apiVersion: apiVersion,
+            callId: callId,
+            handoffToken: handoffToken,
+            deviceId: deviceId,
+            platform: platform
+        )
+        return try await acceptConciergeCallHandoff(payload)
+    }
+
+    public func acceptConciergeCallHandoff(_ payload: ConciergeCallHandoffAcceptPayload) async throws -> ConciergeCallEvent {
+        let data = try await sendAndWait(type: MessageType.conciergeCallHandoffAccept, payload: payload)
+        let response = try decoder.decode(ConciergeCallEventResponsePayload.self, from: data)
+        return response.event
+    }
+
+    public func registerConciergeCallPush(
+        deviceId: String? = nil,
+        platform: String,
+        pushToken: String,
+        voipTopic: String? = nil,
+        proactiveOptIn: Bool? = nil,
+        apiVersion: String? = nil
+    ) async throws -> ConciergeVoipPushRegistration {
+        let payload = ConciergeCallRegisterPushPayload(
+            apiVersion: apiVersion,
+            deviceId: deviceId,
+            platform: platform,
+            pushToken: pushToken,
+            voipTopic: voipTopic,
+            proactiveOptIn: proactiveOptIn
+        )
+        return try await registerConciergeCallPush(payload)
+    }
+
+    public func registerConciergeCallPush(_ payload: ConciergeCallRegisterPushPayload) async throws -> ConciergeVoipPushRegistration {
+        let data = try await sendAndWait(type: MessageType.conciergeCallRegisterPush, payload: payload)
+        let response = try decoder.decode(ConciergeCallRegisterPushResponsePayload.self, from: data)
+        return response.registration
+    }
+
     /// Ensure a main space exists and optionally subscribe to it.
     public func ensureMainSpace(
         _ options: MainSpaceBootstrapOptions = .init()
@@ -1780,6 +2796,7 @@ public actor GatewayClient {
                 name: options.name,
                 goal: options.goal,
                 visibility: "shared",
+                thinkingCapturePolicy: options.thinkingCapturePolicy,
                 initialAgents: options.initialAgents
             )
             space = try await createSpace(payload)
@@ -1937,6 +2954,34 @@ public actor GatewayClient {
         }
     }
 
+    private func decodeOrchestratorResult<T: Decodable>(
+        _ command: OrchestratorCommandResult,
+        as type: T.Type
+    ) throws -> T {
+        guard command.status == "completed" else {
+            if let error = command.error {
+                throw error
+            }
+            throw GatewayError(
+                code: "FAILED_PRECONDITION",
+                message: "Gateway command did not complete successfully.",
+                details: nil
+            )
+        }
+
+        guard let payload = command.result else {
+            throw GatewayError(
+                code: "FAILED_PRECONDITION",
+                message: "Gateway command returned no payload.",
+                details: nil
+            )
+        }
+
+        let jsonObject = payload.mapValues(\.value)
+        let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [])
+        return try decoder.decode(type, from: data)
+    }
+
     private func requestTimeoutNanoseconds(timeoutSec: TimeInterval?) -> UInt64 {
         let effectiveTimeout = max(timeoutSec ?? options.requestTimeoutSec, 0.1)
         return UInt64((effectiveTimeout * 1_000_000_000).rounded())
@@ -2089,6 +3134,14 @@ public actor GatewayClient {
                 let msg = try decoder.decode(GatewayMessage<GatewayNotification>.self, from: data)
                 emit(.notification(msg.payload))
 
+            case MessageType.appNavigate:
+                let msg = try decoder.decode(GatewayMessage<AppNavigateEvent>.self, from: data)
+                emit(.appNavigate(msg.payload))
+
+            case MessageType.appConciergeActionRequest:
+                let msg = try decoder.decode(GatewayMessage<AppConciergeActionRequestPayload>.self, from: data)
+                emit(.conciergeActionRequest(msg.payload))
+
             case MessageType.capabilityInvokeAdapter:
                 let msg = try decoder.decode(GatewayMessage<AdapterCapabilityInvokePayload>.self, from: data)
                 emit(.capabilityInvoke(msg.payload))
@@ -2116,6 +3169,10 @@ public actor GatewayClient {
             case MessageType.speechEvent:
                 let msg = try decoder.decode(GatewayMessage<SpeechSessionEvent>.self, from: data)
                 emit(.speechEvent(msg.payload))
+
+            case MessageType.conciergeCallEvent:
+                let msg = try decoder.decode(GatewayMessage<ConciergeCallEvent>.self, from: data)
+                emit(.conciergeCallEvent(msg.payload))
 
             case MessageType.error:
                 let msg = try decoder.decode(GatewayMessage<GatewayError>.self, from: data)
@@ -2213,7 +3270,8 @@ public actor GatewayClient {
         reconnectAttempts += 1
         setState(.reconnecting(attempt: reconnectAttempts))
 
-        let delay = options.reconnectIntervalSec * pow(2, Double(reconnectAttempts - 1))
+        let exponential = options.reconnectIntervalSec * pow(2, Double(reconnectAttempts - 1))
+        let delay = min(exponential, options.maxReconnectDelaySec)
         try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
 
         do {
@@ -2315,18 +3373,6 @@ private struct ExecuteTurnAckCompat: Codable {
     let spaceUid: String?
     let eventType: String?
     let data: AnyCodable?
-}
-
-private struct SubscribeResponseCompat: Codable {
-    let subscribedSpaceIds: [String]?
-    let subscribedSpaceUids: [String]?
-
-    func subscribedIdentifiers() -> [String] {
-        if let subscribedSpaceUids {
-            return subscribedSpaceUids
-        }
-        return subscribedSpaceIds ?? []
-    }
 }
 
 // MARK: - Event Continuations (Thread-safe)

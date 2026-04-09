@@ -3,8 +3,8 @@
     {
       "runId": "sample-runId",
       "jobId": "sample-jobId",
-      "trigger": null,
-      "status": null,
+      "trigger": "scheduled",
+      "status": "running",
       "commandId": "sample-commandId",
       "scheduledFor": "sample-scheduledFor",
       "startedAt": "sample-startedAt",

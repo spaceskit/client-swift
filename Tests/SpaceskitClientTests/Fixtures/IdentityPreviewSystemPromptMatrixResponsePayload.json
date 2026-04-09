@@ -1,0 +1,22 @@
+{
+  "matrix": {
+    "agentDefinitionId": "sample-agentDefinitionId",
+    "personaId": "sample-personaId",
+    "generatedAt": "sample-generatedAt",
+    "variants": [
+      {
+        "budgetClass": "full",
+        "label": "sample-label",
+        "tokenEstimate": 3.14,
+        "sections": [
+          {
+            "key": "system_scaffold",
+            "title": "sample-title",
+            "content": "sample-content"
+          }
+        ],
+        "compiledText": "sample-compiledText"
+      }
+    ]
+  }
+}

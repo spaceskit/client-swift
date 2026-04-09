@@ -3,13 +3,13 @@
     "providerId": "sample-providerId",
     "model": "sample-model",
     "baseURL": "sample-baseURL",
+    "executablePath": "sample-executablePath",
     "hasApiKey": true,
     "apiKeySecretRef": "sample-apiKeySecretRef",
     "allowedModels": [
       "sample-allowedModels"
     ],
     "allowCustomModel": true,
-    "nativeCliToolsEnabled": true,
     "updatedAt": "sample-updatedAt",
     "source": "env"
   }

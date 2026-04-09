@@ -1,0 +1,9 @@
+{
+  "type": "test_conciergeactionresultackpayload",
+  "id": "msg-conciergeactionresultackpayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "acknowledged": true,
+    "requestId": "sample-requestId"
+  }
+}

@@ -4,10 +4,10 @@
     "spaceId": "sample-spaceId",
     "participantId": "sample-participantId",
     "createdByPrincipalId": "sample-createdByPrincipalId",
-    "status": null,
+    "status": "draft",
     "title": "sample-title",
     "description": "sample-description",
-    "adapter": null,
+    "adapter": "filesystem",
     "targetBranch": "sample-targetBranch",
     "workspaceBasePath": "sample-workspaceBasePath",
     "submittedAt": "sample-submittedAt",
@@ -19,7 +19,7 @@
   },
   "result": {
     "changeSetId": "sample-changeSetId",
-    "adapter": null,
+    "adapter": "filesystem",
     "appliedPaths": [
       "sample-appliedPaths"
     ],

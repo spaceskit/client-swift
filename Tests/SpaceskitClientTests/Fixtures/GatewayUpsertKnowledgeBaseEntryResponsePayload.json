@@ -2,13 +2,13 @@
   "entry": {
     "entryId": "sample-entryId",
     "name": "sample-name",
-    "kind": null,
+    "kind": "web",
     "uri": "sample-uri",
     "description": "sample-description",
     "tags": [
       "sample-tags"
     ],
-    "scopeType": null,
+    "scopeType": "global",
     "spaceId": "sample-spaceId",
     "createdAt": "sample-createdAt",
     "updatedAt": "sample-updatedAt"

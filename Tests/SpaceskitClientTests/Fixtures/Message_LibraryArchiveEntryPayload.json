@@ -1,0 +1,10 @@
+{
+  "type": "test_libraryarchiveentrypayload",
+  "id": "msg-libraryarchiveentrypayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "entryId": "sample-entryId"
+  }
+}

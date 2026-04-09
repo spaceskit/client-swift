@@ -25,6 +25,24 @@
       "completedAt": "sample-completedAt"
     }
   ],
+  "activities": [
+    {
+      "activityId": "sample-activityId",
+      "seq": 42,
+      "eventType": "sample-eventType",
+      "agentId": "sample-agentId",
+      "title": "sample-title",
+      "detail": "sample-detail",
+      "status": "running",
+      "visibility": "observable",
+      "toolCallId": "sample-toolCallId",
+      "toolName": "sample-toolName",
+      "createdAt": "sample-createdAt",
+      "payload": {
+        "key1": "value1"
+      }
+    }
+  ],
   "artifactIds": [
     "sample-artifactIds"
   ]

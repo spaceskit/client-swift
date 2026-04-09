@@ -1,0 +1,21 @@
+{
+  "type": "test_gatewaybuiltinintegrationentrypayload",
+  "id": "msg-gatewaybuiltinintegrationentrypayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "integrationId": "sample-integrationId",
+    "displayName": "sample-displayName",
+    "description": "sample-description",
+    "enabled": true,
+    "capabilityTypes": [
+      "sample-capabilityTypes"
+    ],
+    "managementSummary": "sample-managementSummary",
+    "runtimeAvailable": true,
+    "runtimeStatus": "available",
+    "runtimeStatusMessage": "sample-runtimeStatusMessage",
+    "providerIds": [
+      "sample-providerIds"
+    ]
+  }
+}

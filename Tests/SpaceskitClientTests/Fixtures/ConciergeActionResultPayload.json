@@ -1,0 +1,8 @@
+{
+  "requestId": "sample-requestId",
+  "status": "ok",
+  "payload": {
+    "example": true
+  },
+  "error": "sample-error"
+}

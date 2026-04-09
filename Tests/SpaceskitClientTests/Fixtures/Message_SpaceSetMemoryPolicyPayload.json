@@ -1,0 +1,14 @@
+{
+  "type": "test_spacesetmemorypolicypayload",
+  "id": "msg-spacesetmemorypolicypayload-001",
+  "ts": "2026-03-13T22:07:19.233Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "spaceId": "sample-spaceId",
+    "memoryPolicy": {
+      "experienceCapture": "INHERIT",
+      "privacyMode": "STANDARD"
+    }
+  }
+}

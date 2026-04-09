@@ -1,0 +1,10 @@
+{
+  "principalId": "sample-principalId",
+  "deviceId": "sample-deviceId",
+  "platform": "sample-platform",
+  "pushToken": "sample-pushToken",
+  "voipTopic": "sample-voipTopic",
+  "proactiveOptIn": true,
+  "registeredAt": "sample-registeredAt",
+  "ts": "sample-ts"
+}

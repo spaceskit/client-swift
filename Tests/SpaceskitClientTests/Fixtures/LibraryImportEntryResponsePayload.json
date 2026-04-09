@@ -1,0 +1,23 @@
+{
+  "entry": {
+    "entryId": "sample-entryId",
+    "skillId": "sample-skillId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "contentMarkdown": "sample-contentMarkdown",
+    "sourceKind": "installed",
+    "sourceRef": "sample-sourceRef",
+    "provenance": {
+      "key1": "value1"
+    },
+    "tags": [
+      "sample-tags"
+    ],
+    "status": "enabled",
+    "importable": true,
+    "importedSkillId": "sample-importedSkillId",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  },
+  "created": true
+}

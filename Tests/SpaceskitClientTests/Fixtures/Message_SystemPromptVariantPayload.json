@@ -1,0 +1,18 @@
+{
+  "type": "test_systempromptvariantpayload",
+  "id": "msg-systempromptvariantpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "budgetClass": "full",
+    "label": "sample-label",
+    "tokenEstimate": 3.14,
+    "sections": [
+      {
+        "key": "system_scaffold",
+        "title": "sample-title",
+        "content": "sample-content"
+      }
+    ],
+    "compiledText": "sample-compiledText"
+  }
+}

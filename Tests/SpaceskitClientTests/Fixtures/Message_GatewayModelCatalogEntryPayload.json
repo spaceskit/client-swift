@@ -1,11 +1,11 @@
 {
   "type": "test_gatewaymodelcatalogentrypayload",
   "id": "msg-gatewaymodelcatalogentrypayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "id": "sample-id",
     "displayName": "sample-displayName",
-    "source": null,
+    "source": "detected",
     "available": true,
     "contextWindow": 3.14
   }

@@ -3,10 +3,13 @@
   "templateId": "sample-templateId",
   "title": "sample-title",
   "description": "sample-description",
-  "communicationMode": null,
+  "communicationMode": "async_notes",
+  "conversationTopology": "direct",
+  "promptPackId": "sample-promptPackId",
   "baseAgents": [
     {
       "agentId": "sample-agentId",
+      "agentDefinitionId": "sample-agentDefinitionId",
       "profileId": "sample-profileId",
       "role": "participant",
       "turnOrder": 3.14,

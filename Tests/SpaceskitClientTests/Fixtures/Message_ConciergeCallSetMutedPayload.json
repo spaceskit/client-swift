@@ -1,0 +1,10 @@
+{
+  "type": "test_conciergecallsetmutedpayload",
+  "id": "msg-conciergecallsetmutedpayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "callId": "sample-callId",
+    "muted": true
+  }
+}

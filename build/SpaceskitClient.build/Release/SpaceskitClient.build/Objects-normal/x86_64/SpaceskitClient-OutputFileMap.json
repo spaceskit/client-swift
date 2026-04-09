@@ -23,15 +23,15 @@
     "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/GatewayClient.bc",
     "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/GatewayClient.o"
   },
-  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/GeneratedProtocol.swift" : {
-    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/GeneratedProtocol.o",
-    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/GeneratedProtocol.bc",
-    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/GeneratedProtocol.o"
-  },
   "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/Protocol.swift" : {
     "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/Protocol.o",
     "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/Protocol.bc",
     "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/Protocol.o"
+  },
+  "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/RichContent.swift" : {
+    "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/RichContent.o",
+    "llvm-bc" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/RichContent.bc",
+    "object" : "/Users/caruso/code/spaces/client-swift/build/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/RichContent.o"
   },
   "/Users/caruso/code/spaces/client-swift/Sources/SpaceskitClient/Types.swift" : {
     "index-unit-output-path" : "/SpaceskitClient.build/Release/SpaceskitClient.build/Objects-normal/x86_64/Types.o",

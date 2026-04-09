@@ -1,7 +1,7 @@
 {
   "id": "sample-id",
   "displayName": "sample-displayName",
-  "source": null,
+  "source": "detected",
   "available": true,
   "contextWindow": 3.14
 }

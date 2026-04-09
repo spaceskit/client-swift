@@ -1,0 +1,16 @@
+{
+  "operationId": "sample-operationId",
+  "capability": "sample-capability",
+  "operation": "sample-operation",
+  "providerIds": [
+    "sample-providerIds"
+  ],
+  "selectors": [
+    "sample-selectors"
+  ],
+  "allowed": true,
+  "denialReasonCode": "sample-denialReasonCode",
+  "denialReason": "sample-denialReason",
+  "requiredDangerousCapability": "managed_shell",
+  "escalationAllowed": true
+}

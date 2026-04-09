@@ -1,7 +1,7 @@
 {
   "request": {
     "integrationRequestId": "sample-integrationRequestId",
-    "integrationClass": null,
+    "integrationClass": "cloud",
     "requestedName": "sample-requestedName",
     "useCase": "sample-useCase",
     "sourceURL": "sample-sourceURL",

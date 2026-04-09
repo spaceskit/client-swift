@@ -6,6 +6,6 @@
   "devicePublicKey": "sample-devicePublicKey",
   "identityModeHint": "device_key",
   "appleIdAssertion": "sample-appleIdAssertion",
-  "joinRoute": null,
+  "joinRoute": "direct",
   "relaySessionToken": "sample-relaySessionToken"
 }

@@ -1,5 +1,5 @@
 {
-  "kind": null,
+  "kind": "hourly",
   "intervalHours": 3.14,
   "minute": 3.14,
   "hour": 3.14,

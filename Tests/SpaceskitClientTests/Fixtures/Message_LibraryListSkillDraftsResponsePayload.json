@@ -1,0 +1,18 @@
+{
+  "type": "test_librarylistskilldraftsresponsepayload",
+  "id": "msg-librarylistskilldraftsresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "drafts": [
+      {
+        "draftId": "sample-draftId",
+        "name": "sample-name",
+        "description": "sample-description",
+        "requestPrompt": "sample-requestPrompt",
+        "contentMarkdown": "sample-contentMarkdown",
+        "createdAt": "sample-createdAt",
+        "updatedAt": "sample-updatedAt"
+      }
+    ]
+  }
+}

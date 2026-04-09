@@ -1,0 +1,8 @@
+{
+  "name": "sample-name",
+  "description": "sample-description",
+  "arguments": {
+    "key1": "value1"
+  },
+  "expectedOutput": "sample-expectedOutput"
+}

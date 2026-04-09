@@ -1,12 +1,14 @@
 {
   "type": "test_gatewaymainagentstatepayload",
   "id": "msg-gatewaymainagentstatepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "spaceId": "sample-spaceId",
     "spaceUid": "sample-spaceUid",
     "mainAgentId": "sample-mainAgentId",
+    "mainAgentDefinitionId": "sample-mainAgentDefinitionId",
     "mainProfileId": "sample-mainProfileId",
+    "assignedAgentDefinitionId": "sample-assignedAgentDefinitionId",
     "assignedProfileId": "sample-assignedProfileId",
     "providerHint": "sample-providerHint",
     "modelHint": "sample-modelHint",

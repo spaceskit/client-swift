@@ -6,9 +6,9 @@
   "message": "sample-message",
   "state": "idle",
   "eventType": "sample-eventType",
-  "providerSource": null,
+  "providerSource": "managed",
   "providerId": "sample-providerId",
-  "fallbackReason": null,
+  "fallbackReason": "default",
   "usage": {
     "sttSeconds": 3.14,
     "ttsChars": 3.14,

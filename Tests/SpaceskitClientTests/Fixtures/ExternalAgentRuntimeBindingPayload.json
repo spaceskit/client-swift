@@ -1,5 +1,5 @@
 {
-  "runtimeKind": null,
+  "runtimeKind": "external_mcp",
   "spaceId": "sample-spaceId",
   "agentId": "sample-agentId",
   "endpointId": "sample-endpointId",

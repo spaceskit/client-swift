@@ -1,0 +1,16 @@
+{
+  "type": "test_spaceopenworkspaceconflictpayload",
+  "id": "msg-spaceopenworkspaceconflictpayload-001",
+  "ts": "2026-03-13T22:07:19.233Z",
+  "payload": {
+    "reason": "workspace_claimed",
+    "message": "Workspace root is already bound to another space: /tmp/spaces/sample-space",
+    "workspaceRoot": "/tmp/spaces/sample-space",
+    "metadataPath": "/tmp/spaces/sample-space/.space/space.json",
+    "existingSpaceId": "space-existing",
+    "existingSpaceUid": "space-uid-existing",
+    "existingWorkspaceRoot": "/tmp/spaces/sample-space",
+    "requestedSpaceId": "space-requested",
+    "requestedSpaceUid": "space-uid-requested"
+  }
+}

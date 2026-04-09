@@ -1,0 +1,13 @@
+{
+  "type": "test_librarycreateskilldraftpayload",
+  "id": "msg-librarycreateskilldraftpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "draftId": "sample-draftId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "requestPrompt": "sample-requestPrompt"
+  }
+}

@@ -8,7 +8,7 @@
       "spaceUid": "sample-spaceUid",
       "principalId": "sample-principalId",
       "principalType": "sample-principalType",
-      "mode": "collaborator",
+      "mode": "read_only",
       "status": "active",
       "joinedViaInviteId": "sample-joinedViaInviteId",
       "deviceId": "sample-deviceId",

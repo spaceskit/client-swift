@@ -1,0 +1,16 @@
+{
+  "type": "test_spacetemplatecreatespacepayload",
+  "id": "msg-spacetemplatecreatespacepayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "idempotencyKey": "sample-idempotencyKey",
+    "templateId": "sample-templateId",
+    "spaceId": "sample-spaceId",
+    "resourceId": "sample-resourceId",
+    "name": "sample-name",
+    "goal": "sample-goal",
+    "visibility": "shared",
+    "workspaceRoot": "sample-workspaceRoot"
+  }
+}

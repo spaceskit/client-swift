@@ -1,7 +1,7 @@
 {
   "type": "test_spacegetworkspaceresponsepayload",
   "id": "msg-spacegetworkspaceresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.233Z",
   "payload": {
     "workspace": {
       "spaceId": "space-1",
@@ -14,7 +14,8 @@
       "workPath": "/tmp/spaces/sample-space/.space/work",
       "sharedContextPath": "/tmp/spaces/sample-space/.space/shared-context",
       "scratchpadsPath": "/tmp/spaces/sample-space/.space/scratchpads",
-      "layoutVersion": 2,
+      "artifactsPath": "/tmp/spaces/sample-space/.space/artifacts",
+      "layoutVersion": 3,
       "gitRepoDetected": true,
       "metadataStatus": "ready",
       "updatedAt": "2026-03-06T18:44:23.062Z"

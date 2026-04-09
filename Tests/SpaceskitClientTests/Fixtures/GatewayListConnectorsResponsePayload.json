@@ -6,7 +6,7 @@
       "displayName": "sample-displayName",
       "accountFingerprintHash": "sample-accountFingerprintHash",
       "labelSlug": "sample-labelSlug",
-      "status": null,
+      "status": "active",
       "metadata": {
         "key1": "value1"
       },

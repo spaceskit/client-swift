@@ -3,19 +3,19 @@
     {
       "providerId": "sample-providerId",
       "displayName": "sample-displayName",
-      "group": null,
-      "integrationClass": null,
-      "status": null,
+      "group": "cloud",
+      "integrationClass": "cloud",
+      "status": "installed",
       "hasApiKey": true,
       "requiresApiKey": true,
       "baseURL": "sample-baseURL",
-      "detectionStatus": null,
+      "detectionStatus": "available",
       "detectionError": "sample-detectionError",
       "models": [
         {
           "id": "sample-id",
           "displayName": "sample-displayName",
-          "source": null,
+          "source": "detected",
           "available": true,
           "contextWindow": 3.14
         }

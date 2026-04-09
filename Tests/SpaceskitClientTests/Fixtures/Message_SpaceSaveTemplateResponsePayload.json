@@ -1,12 +1,14 @@
 {
   "type": "test_spacesavetemplateresponsepayload",
   "id": "msg-spacesavetemplateresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "template": {
       "templateId": "sample-templateId",
       "title": "sample-title",
-      "communicationMode": null,
+      "communicationMode": "async_notes",
+      "conversationTopology": "direct",
+      "promptPackId": "sample-promptPackId",
       "agentPresetIds": [
         "sample-agentPresetIds"
       ],

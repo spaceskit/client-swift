@@ -1,12 +1,19 @@
 {
   "type": "test_turneventpayload",
   "id": "msg-turneventpayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.236Z",
   "payload": {
     "spaceId": "sample-spaceId",
     "spaceUid": "sample-spaceUid",
     "turnId": "sample-turnId",
+    "rootTurnId": "sample-rootTurnId",
+    "conversationTopology": "direct",
+    "transcriptVisibility": "visible",
+    "summaryTurnId": "sample-summaryTurnId",
     "eventType": "started",
+    "agentId": "sample-agentId",
+    "seq": 42,
+    "timestamp": "sample-timestamp",
     "data": {
       "example": true
     }

@@ -2,7 +2,9 @@
   "template": {
     "templateId": "sample-templateId",
     "title": "sample-title",
-    "communicationMode": null,
+    "communicationMode": "async_notes",
+    "conversationTopology": "direct",
+    "promptPackId": "sample-promptPackId",
     "agentPresetIds": [
       "sample-agentPresetIds"
     ],
@@ -14,11 +16,14 @@
   "name": "sample-name",
   "goal": "sample-goal",
   "resourceId": "sample-resourceId",
-  "communicationMode": null,
+  "communicationMode": "async_notes",
+  "conversationTopology": "direct",
+  "promptPackId": "sample-promptPackId",
   "turnModel": "sample-turnModel",
   "initialAgents": [
     {
       "agentId": "sample-agentId",
+      "agentDefinitionId": "sample-agentDefinitionId",
       "profileId": "sample-profileId",
       "role": "participant",
       "turnOrder": 3.14,

@@ -1,0 +1,9 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "callId": "sample-callId",
+  "sourceDeviceId": "sample-sourceDeviceId",
+  "destinationPlatform": "sample-destinationPlatform",
+  "destinationDeviceId": "sample-destinationDeviceId",
+  "destinationClientId": "sample-destinationClientId",
+  "resumeUrl": "sample-resumeUrl"
+}

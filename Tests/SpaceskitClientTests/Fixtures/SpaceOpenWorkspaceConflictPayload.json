@@ -1,0 +1,11 @@
+{
+  "reason": "workspace_claimed",
+  "message": "Workspace root is already bound to another space: /tmp/spaces/sample-space",
+  "workspaceRoot": "/tmp/spaces/sample-space",
+  "metadataPath": "/tmp/spaces/sample-space/.space/space.json",
+  "existingSpaceId": "space-existing",
+  "existingSpaceUid": "space-uid-existing",
+  "existingWorkspaceRoot": "/tmp/spaces/sample-space",
+  "requestedSpaceId": "space-requested",
+  "requestedSpaceUid": "space-uid-requested"
+}

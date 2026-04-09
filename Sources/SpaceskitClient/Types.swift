@@ -5,6 +5,41 @@ import Foundation
 
 // MARK: - Turn Results
 
+/// Options for executing a turn in a space.
+public struct ExecuteTurnOptions: Sendable, Equatable {
+    public let spaceUid: String
+    public let input: String
+    public let targetAgentId: String?
+    public let targetAgentIds: [String]?
+    public let replyToTurnId: String?
+    public let conversationTopology: ConversationTopology?
+    public let mode: String?
+    public let effort: String?
+    public let accessMode: String?
+
+    public init(
+        spaceUid: String,
+        input: String,
+        targetAgentId: String? = nil,
+        targetAgentIds: [String]? = nil,
+        replyToTurnId: String? = nil,
+        conversationTopology: ConversationTopology? = nil,
+        mode: String? = nil,
+        effort: String? = nil,
+        accessMode: String? = nil
+    ) {
+        self.spaceUid = spaceUid
+        self.input = input
+        self.targetAgentId = targetAgentId
+        self.targetAgentIds = targetAgentIds
+        self.replyToTurnId = replyToTurnId
+        self.conversationTopology = conversationTopology
+        self.mode = mode
+        self.effort = effort
+        self.accessMode = accessMode
+    }
+}
+
 /// Result of executing a turn in a space.
 public struct TurnResult: Codable, Sendable {
     public let turnId: String
@@ -12,10 +47,16 @@ public struct TurnResult: Codable, Sendable {
     public let output: String?
     public let status: TurnStatus
     public let error: String?
+    public let mode: String?
+    public let effort: String?
+    public let accessMode: String?
+    public let effectiveAccessMode: String?
+    public let effectiveSafetyProfileId: String?
 
     public enum TurnStatus: String, Codable, Sendable {
         case completed
         case pendingFeedback = "pending_feedback"
+        case cancelled
         case failed
     }
 }
@@ -37,6 +78,125 @@ public enum FeedbackResponse: String, Codable, Sendable {
     case `defer`
 }
 
+public enum ThinkingCapturePolicy: String, Codable, CaseIterable, Sendable {
+    case off = "OFF"
+    case summary = "SUMMARY"
+    case full = "FULL"
+
+    public var title: String {
+        switch self {
+        case .off:
+            return "Off"
+        case .summary:
+            return "Summarized"
+        case .full:
+            return "Full"
+        }
+    }
+}
+
+public enum SpaceExperienceCaptureMode: String, Codable, CaseIterable, Sendable {
+    case inherit = "INHERIT"
+    case enabled = "ENABLED"
+    case disabled = "DISABLED"
+
+    public var title: String {
+        switch self {
+        case .inherit:
+            return "Inherit"
+        case .enabled:
+            return "Enabled"
+        case .disabled:
+            return "Disabled"
+        }
+    }
+}
+
+public enum SpacePrivacyMode: String, Codable, CaseIterable, Sendable {
+    case standard = "STANDARD"
+    case incognitoSession = "INCOGNITO_SESSION"
+
+    public var title: String {
+        switch self {
+        case .standard:
+            return "Standard"
+        case .incognitoSession:
+            return "Incognito"
+        }
+    }
+}
+
+public struct SpaceMemoryPolicy: Codable, Sendable, Equatable {
+    public let experienceCapture: SpaceExperienceCaptureMode
+    public let privacyMode: SpacePrivacyMode
+
+    public init(
+        experienceCapture: SpaceExperienceCaptureMode = .inherit,
+        privacyMode: SpacePrivacyMode = .standard
+    ) {
+        self.experienceCapture = experienceCapture
+        self.privacyMode = privacyMode
+    }
+}
+
+public struct GatewayMemoryDefaults: Codable, Sendable, Equatable {
+    public let defaultExperienceCapture: SpaceExperienceCaptureMode
+    public let defaultSpacePrivacyMode: SpacePrivacyMode
+    public let updatedAt: String
+
+    public init(
+        defaultExperienceCapture: SpaceExperienceCaptureMode,
+        defaultSpacePrivacyMode: SpacePrivacyMode = .standard,
+        updatedAt: String
+    ) {
+        self.defaultExperienceCapture = defaultExperienceCapture
+        self.defaultSpacePrivacyMode = defaultSpacePrivacyMode
+        self.updatedAt = updatedAt
+    }
+}
+
+public enum AgentActivityState: String, Codable, CaseIterable, Sendable {
+    case idle
+    case thinking
+    case acting
+    case needsFeedback = "needs_feedback"
+    case errored
+
+    public init?(normalizing rawValue: String?) {
+        guard let normalized = rawValue?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased(),
+            !normalized.isEmpty else {
+            return nil
+        }
+
+        switch normalized {
+        case "idle", "done", "completed", "finished", "stopped", "ready":
+            self = .idle
+        case "thinking", "reasoning", "planning":
+            self = .thinking
+        case "acting", "executing", "running_tools", "running-tools", "working", "running", "streaming":
+            self = .acting
+        case "needs_feedback", "needs-feedback", "needsfeedback",
+            "waiting_for_approval", "waiting-for-approval", "awaiting_approval",
+            "pending_feedback", "waiting_on_you", "waiting-on-you":
+            self = .needsFeedback
+        case "errored", "error", "failed":
+            self = .errored
+        default:
+            return nil
+        }
+    }
+
+    public var isActive: Bool {
+        self == .thinking || self == .acting
+    }
+
+    public var requiresFeedback: Bool {
+        self == .needsFeedback
+    }
+}
+
 // MARK: - Gateway Events
 
 /// A turn lifecycle event from the gateway.
@@ -44,23 +204,44 @@ public struct TurnEvent: Codable, Sendable {
     public let spaceId: String
     public let spaceUid: String
     public let turnId: String
+    public let rootTurnId: String?
+    public let conversationTopology: ConversationTopology?
+    public let transcriptVisibility: TranscriptVisibility?
+    public let summaryTurnId: String?
     public let eventType: String
+    public let agentId: String?
+    public let seq: Int?
     public let data: AnyCodable?
+    public let typedPayload: TypedTurnEventPayload?
     public let timestamp: String?
 
     public init(
         spaceId: String,
         spaceUid: String,
         turnId: String,
+        rootTurnId: String? = nil,
+        conversationTopology: ConversationTopology? = nil,
+        transcriptVisibility: TranscriptVisibility? = nil,
+        summaryTurnId: String? = nil,
         eventType: String,
+        agentId: String? = nil,
+        seq: Int? = nil,
         data: AnyCodable? = nil,
+        typedPayload: TypedTurnEventPayload? = nil,
         timestamp: String? = nil
     ) {
         self.spaceId = spaceId
         self.spaceUid = spaceUid
         self.turnId = turnId
+        self.rootTurnId = rootTurnId
+        self.conversationTopology = conversationTopology
+        self.transcriptVisibility = transcriptVisibility
+        self.summaryTurnId = summaryTurnId
         self.eventType = eventType
+        self.agentId = agentId
+        self.seq = seq
         self.data = data
+        self.typedPayload = typedPayload
         self.timestamp = timestamp
     }
 
@@ -68,10 +249,18 @@ public struct TurnEvent: Codable, Sendable {
         case spaceId
         case spaceUid
         case turnId
+        case rootTurnId
+        case conversationTopology
+        case transcriptVisibility
+        case summaryTurnId
         case eventType
+        case agentId
+        case seq
         case data
+        case typedPayload
         case timestamp
         case event
+        case ts
     }
 
     public init(from decoder: Decoder) throws {
@@ -84,7 +273,15 @@ public struct TurnEvent: Codable, Sendable {
             : decodedSpaceUid
         let normalizedSpaceId = decodedSpaceId.isEmpty ? normalizedSpaceUid : decodedSpaceId
         let turnId = (try? container.decode(String.self, forKey: .turnId)) ?? ""
-        let timestamp = try? container.decode(String.self, forKey: .timestamp)
+        let rootTurnId = try? container.decodeIfPresent(String.self, forKey: .rootTurnId)
+        let conversationTopology = try? container.decodeIfPresent(ConversationTopology.self, forKey: .conversationTopology)
+        let transcriptVisibility = try? container.decodeIfPresent(TranscriptVisibility.self, forKey: .transcriptVisibility)
+        let summaryTurnId = try? container.decodeIfPresent(String.self, forKey: .summaryTurnId)
+        let agentId = try? container.decodeIfPresent(String.self, forKey: .agentId)
+        let seq = try? container.decodeIfPresent(Int.self, forKey: .seq)
+        let timestamp = (try? container.decode(String.self, forKey: .timestamp))
+            ?? (try? container.decode(String.self, forKey: .ts))
+        let typedPayload = try? container.decodeIfPresent(TypedTurnEventPayload.self, forKey: .typedPayload)
 
         // Current protocol shape.
         if let eventType = try? container.decode(String.self, forKey: .eventType) {
@@ -93,8 +290,15 @@ public struct TurnEvent: Codable, Sendable {
                 spaceId: normalizedSpaceId,
                 spaceUid: normalizedSpaceUid,
                 turnId: turnId,
+                rootTurnId: rootTurnId,
+                conversationTopology: conversationTopology,
+                transcriptVisibility: transcriptVisibility,
+                summaryTurnId: summaryTurnId,
                 eventType: eventType,
+                agentId: agentId,
+                seq: seq,
                 data: data,
+                typedPayload: typedPayload,
                 timestamp: timestamp
             )
             return
@@ -102,13 +306,21 @@ public struct TurnEvent: Codable, Sendable {
 
         // Compatibility for gateway-internal event envelope shape.
         if let event = try? container.decode(AnyCodable.self, forKey: .event) {
-            let mappedEventType = Self.mapEventType(from: event.value) ?? "streaming"
+            let mappedEventType = Self.mapEventType(from: event.value) ?? "started"
+            let mappedAgentId = agentId ?? Self.extractAgentId(from: event.value)
             self.init(
                 spaceId: normalizedSpaceId,
                 spaceUid: normalizedSpaceUid,
                 turnId: turnId,
+                rootTurnId: rootTurnId,
+                conversationTopology: conversationTopology,
+                transcriptVisibility: transcriptVisibility,
+                summaryTurnId: summaryTurnId,
                 eventType: mappedEventType,
+                agentId: mappedAgentId,
+                seq: seq,
                 data: event,
+                typedPayload: typedPayload,
                 timestamp: timestamp
             )
             return
@@ -120,8 +332,15 @@ public struct TurnEvent: Codable, Sendable {
                 spaceId: normalizedSpaceId,
                 spaceUid: normalizedSpaceUid,
                 turnId: turnId,
+                rootTurnId: rootTurnId,
+                conversationTopology: conversationTopology,
+                transcriptVisibility: transcriptVisibility,
+                summaryTurnId: summaryTurnId,
                 eventType: "started",
+                agentId: agentId,
+                seq: seq,
                 data: nil,
+                typedPayload: typedPayload,
                 timestamp: timestamp
             )
             return
@@ -141,8 +360,15 @@ public struct TurnEvent: Codable, Sendable {
         try container.encode(spaceId, forKey: .spaceId)
         try container.encode(spaceUid, forKey: .spaceUid)
         try container.encode(turnId, forKey: .turnId)
+        try container.encodeIfPresent(rootTurnId, forKey: .rootTurnId)
+        try container.encodeIfPresent(conversationTopology, forKey: .conversationTopology)
+        try container.encodeIfPresent(transcriptVisibility, forKey: .transcriptVisibility)
+        try container.encodeIfPresent(summaryTurnId, forKey: .summaryTurnId)
         try container.encode(eventType, forKey: .eventType)
+        try container.encodeIfPresent(agentId, forKey: .agentId)
+        try container.encodeIfPresent(seq, forKey: .seq)
         try container.encodeIfPresent(data, forKey: .data)
+        try container.encodeIfPresent(typedPayload, forKey: .typedPayload)
         try container.encodeIfPresent(timestamp, forKey: .timestamp)
     }
 
@@ -153,19 +379,108 @@ public struct TurnEvent: Codable, Sendable {
         }
 
         switch type {
+        case "turn_started":
+            return "started"
         case "text_delta":
             return "streaming"
-        case "tool_call_start", "tool_result":
+        case "reasoning_delta":
+            return "streaming"
+        case "tool_call", "tool_call_start", "tool_result":
             return "tool_call"
         case "feedback_requested":
             return "feedback_requested"
+        case "feedback_resolved", "context_summarizing", "context_summarized":
+            return "streaming"
+        case "rate_limited":
+            return "rate_limited"
+        case "state_changed":
+            return "state_changed"
         case "turn_completed":
             return "completed"
         case "error":
             return "failed"
         default:
-            return "streaming"
+            return "started"
         }
+    }
+
+    private static func extractAgentId(from eventValue: Any) -> String? {
+        guard let event = eventValue as? [String: Any] else {
+            return nil
+        }
+        if let agentId = event["agentId"] as? String, !agentId.isEmpty {
+            return agentId
+        }
+        if let result = event["result"] as? [String: Any],
+           let agentId = result["agentId"] as? String,
+           !agentId.isEmpty {
+            return agentId
+        }
+        return nil
+    }
+
+    // MARK: - Convenience Accessors (try typedPayload first, fall back to data)
+
+    public var resolvedAgentActivityState: AgentActivityState? {
+        if case .stateChanged(let payload) = typedPayload {
+            return payload.state
+        }
+        if let dict = data?.value as? [String: Any] {
+            return AgentActivityState(normalizing: dict["state"] as? String)
+        }
+        return nil
+    }
+
+    /// The resolved agent state, from typedPayload or data dictionary.
+    public var resolvedAgentState: String? {
+        resolvedAgentActivityState?.rawValue
+    }
+
+    /// Tool call ID from typedPayload, if this is a tool event.
+    public var resolvedToolCallId: String? {
+        switch typedPayload {
+        case .toolStarted(let p): return p.toolCallId
+        case .toolCompleted(let p): return p.toolCallId
+        default: break
+        }
+        if let dict = data?.value as? [String: Any] {
+            return (dict["toolCallId"] as? String) ?? (dict["id"] as? String)
+        }
+        return nil
+    }
+
+    /// Tool name from typedPayload.
+    public var resolvedToolName: String? {
+        switch typedPayload {
+        case .toolStarted(let p): return p.toolName
+        case .toolCompleted(let p): return p.toolName
+        default: break
+        }
+        if let dict = data?.value as? [String: Any] {
+            return (dict["toolName"] as? String) ?? (dict["name"] as? String)
+        }
+        return nil
+    }
+
+    /// Error message from typedPayload.
+    public var resolvedErrorMessage: String? {
+        if case .turnFailed(let p) = typedPayload { return p.errorMessage }
+        if let dict = data?.value as? [String: Any] {
+            return (dict["message"] as? String) ?? (dict["error"] as? String)
+        }
+        return nil
+    }
+
+    /// Structured usage from typedPayload.
+    public var resolvedUsage: TurnUsagePayload? {
+        if case .turnCompleted(let p) = typedPayload { return p.usage }
+        return nil
+    }
+
+    /// Structured metadata from typedPayload.
+    public var resolvedMetadata: TurnMetadataPayload? {
+        if case .turnCompleted(let p) = typedPayload { return p.metadata }
+        return nil
     }
 }
 
@@ -174,7 +489,11 @@ public struct TurnStream: Codable, Sendable {
     public let spaceId: String
     public let spaceUid: String
     public let turnId: String
+    public let rootTurnId: String?
     public let agentId: String
+    public let conversationTopology: ConversationTopology?
+    public let transcriptVisibility: TranscriptVisibility?
+    public let summaryTurnId: String?
     public let delta: String
     public let seq: Int
     public let done: Bool
@@ -184,7 +503,11 @@ public struct TurnStream: Codable, Sendable {
         spaceId: String,
         spaceUid: String,
         turnId: String,
+        rootTurnId: String? = nil,
         agentId: String,
+        conversationTopology: ConversationTopology? = nil,
+        transcriptVisibility: TranscriptVisibility? = nil,
+        summaryTurnId: String? = nil,
         delta: String,
         seq: Int,
         done: Bool,
@@ -193,7 +516,11 @@ public struct TurnStream: Codable, Sendable {
         self.spaceId = spaceId
         self.spaceUid = spaceUid
         self.turnId = turnId
+        self.rootTurnId = rootTurnId
         self.agentId = agentId
+        self.conversationTopology = conversationTopology
+        self.transcriptVisibility = transcriptVisibility
+        self.summaryTurnId = summaryTurnId
         self.delta = delta
         self.seq = seq
         self.done = done
@@ -204,7 +531,11 @@ public struct TurnStream: Codable, Sendable {
         case spaceId
         case spaceUid
         case turnId
+        case rootTurnId
         case agentId
+        case conversationTopology
+        case transcriptVisibility
+        case summaryTurnId
         case delta
         case seq
         case done
@@ -222,6 +553,10 @@ public struct TurnStream: Codable, Sendable {
             : decodedSpaceUid
         let normalizedSpaceId = decodedSpaceId.isEmpty ? normalizedSpaceUid : decodedSpaceId
         let turnId = (try? container.decode(String.self, forKey: .turnId)) ?? ""
+        let rootTurnId = try? container.decodeIfPresent(String.self, forKey: .rootTurnId)
+        let conversationTopology = try? container.decodeIfPresent(ConversationTopology.self, forKey: .conversationTopology)
+        let transcriptVisibility = try? container.decodeIfPresent(TranscriptVisibility.self, forKey: .transcriptVisibility)
+        let summaryTurnId = try? container.decodeIfPresent(String.self, forKey: .summaryTurnId)
         let timestamp = try? container.decode(String.self, forKey: .timestamp)
 
         // Current protocol shape.
@@ -234,7 +569,11 @@ public struct TurnStream: Codable, Sendable {
                 spaceId: normalizedSpaceId,
                 spaceUid: normalizedSpaceUid,
                 turnId: turnId,
+                rootTurnId: rootTurnId,
                 agentId: agentId,
+                conversationTopology: conversationTopology,
+                transcriptVisibility: transcriptVisibility,
+                summaryTurnId: summaryTurnId,
                 delta: delta,
                 seq: seq,
                 done: done,
@@ -264,7 +603,11 @@ public struct TurnStream: Codable, Sendable {
                 spaceId: normalizedSpaceId,
                 spaceUid: normalizedSpaceUid,
                 turnId: turnId,
+                rootTurnId: rootTurnId,
                 agentId: agentId,
+                conversationTopology: conversationTopology,
+                transcriptVisibility: transcriptVisibility,
+                summaryTurnId: summaryTurnId,
                 delta: text,
                 seq: seq,
                 done: done,
@@ -287,11 +630,206 @@ public struct TurnStream: Codable, Sendable {
         try container.encode(spaceId, forKey: .spaceId)
         try container.encode(spaceUid, forKey: .spaceUid)
         try container.encode(turnId, forKey: .turnId)
+        try container.encodeIfPresent(rootTurnId, forKey: .rootTurnId)
         try container.encode(agentId, forKey: .agentId)
+        try container.encodeIfPresent(conversationTopology, forKey: .conversationTopology)
+        try container.encodeIfPresent(transcriptVisibility, forKey: .transcriptVisibility)
+        try container.encodeIfPresent(summaryTurnId, forKey: .summaryTurnId)
         try container.encode(delta, forKey: .delta)
         try container.encode(seq, forKey: .seq)
         try container.encode(done, forKey: .done)
         try container.encodeIfPresent(timestamp, forKey: .timestamp)
+    }
+}
+
+// MARK: - Typed Turn Event Payloads
+
+/// Structured turn usage information.
+public struct TurnUsagePayload: Codable, Sendable, Equatable {
+    public let promptTokens: Int
+    public let completionTokens: Int
+    public let totalTokens: Int
+}
+
+/// Structured turn metadata.
+public struct TurnMetadataPayload: Codable, Sendable, Equatable {
+    public let modelId: String?
+    public let providerId: String?
+    public let durationMs: Int?
+    public let finishReason: String?
+    public let startedAt: String?
+    public let completedAt: String?
+    public let tokensPerSecond: Double?
+}
+
+public struct TurnStartedPayload: Codable, Sendable, Equatable {
+    public let agentId: String
+    public let turnId: String
+    public let rootTurnId: String?
+    public let conversationTopology: String?
+    public let transcriptVisibility: String?
+}
+
+public struct TurnCompletedPayload: Codable, Sendable, Equatable {
+    public let agentId: String
+    public let usage: TurnUsagePayload?
+    public let metadata: TurnMetadataPayload?
+    public let finalMessage: String?
+    public let effectiveSafetyProfileId: String?
+}
+
+public struct TurnCancelledPayload: Codable, Sendable, Equatable {
+    public let agentId: String?
+}
+
+public struct TurnFailedPayload: Codable, Sendable, Equatable {
+    public let errorMessage: String
+    public let errorCode: String?
+}
+
+public struct ReasoningDeltaPayload: Codable, Sendable, Equatable {
+    public let text: String
+}
+
+public struct ToolStartedPayload: Codable, Sendable, Equatable {
+    public let toolCallId: String
+    public let toolName: String
+    public let arguments: AnyCodable?
+    public let agentId: String?
+}
+
+public struct ToolCompletedPayload: Codable, Sendable, Equatable {
+    public let toolCallId: String
+    public let toolName: String?
+    public let result: AnyCodable?
+    public let isError: Bool
+    public let agentId: String?
+}
+
+public struct StateChangedPayload: Codable, Sendable, Equatable {
+    public let state: AgentActivityState
+
+    public init(state: AgentActivityState) {
+        self.state = state
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case state
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let rawState = try container.decode(String.self, forKey: .state)
+        guard let state = AgentActivityState(normalizing: rawState) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .state,
+                in: container,
+                debugDescription: "Unknown agent activity state: \(rawState)"
+            )
+        }
+        self.state = state
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(state.rawValue, forKey: .state)
+    }
+}
+
+public struct ApprovalRequestedPayload: Codable, Sendable, Equatable {
+    public let requestId: String
+    public let agentId: String
+    public let description: String
+    public let options: [String]
+    public let context: AnyCodable?
+}
+
+public struct ApprovalResolvedPayload: Codable, Sendable, Equatable {
+    public let requestId: String
+    public let response: String
+    public let agentId: String?
+}
+
+public struct RateLimitedPayload: Codable, Sendable, Equatable {
+    public let retryAfterMs: Int
+    public let attempt: Int
+    public let maxAttempts: Int
+    public let providerId: String
+    public let retryAt: String
+}
+
+/// Discriminated union of typed turn event payloads, decoded via the `kind` field.
+public enum TypedTurnEventPayload: Sendable, Equatable {
+    case turnStarted(TurnStartedPayload)
+    case turnCompleted(TurnCompletedPayload)
+    case turnCancelled(TurnCancelledPayload)
+    case turnFailed(TurnFailedPayload)
+    case reasoningDelta(ReasoningDeltaPayload)
+    case toolStarted(ToolStartedPayload)
+    case toolCompleted(ToolCompletedPayload)
+    case stateChanged(StateChangedPayload)
+    case approvalRequested(ApprovalRequestedPayload)
+    case approvalResolved(ApprovalResolvedPayload)
+    case rateLimited(RateLimitedPayload)
+}
+
+extension TypedTurnEventPayload: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case kind
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let kind = try container.decode(String.self, forKey: .kind)
+        let singleValueContainer = try decoder.singleValueContainer()
+
+        switch kind {
+        case "turn.started":
+            self = .turnStarted(try singleValueContainer.decode(TurnStartedPayload.self))
+        case "turn.completed":
+            self = .turnCompleted(try singleValueContainer.decode(TurnCompletedPayload.self))
+        case "turn.cancelled":
+            self = .turnCancelled(try singleValueContainer.decode(TurnCancelledPayload.self))
+        case "turn.failed":
+            self = .turnFailed(try singleValueContainer.decode(TurnFailedPayload.self))
+        case "reasoning.delta":
+            self = .reasoningDelta(try singleValueContainer.decode(ReasoningDeltaPayload.self))
+        case "tool.started":
+            self = .toolStarted(try singleValueContainer.decode(ToolStartedPayload.self))
+        case "tool.completed":
+            self = .toolCompleted(try singleValueContainer.decode(ToolCompletedPayload.self))
+        case "state.changed":
+            self = .stateChanged(try singleValueContainer.decode(StateChangedPayload.self))
+        case "approval.requested":
+            self = .approvalRequested(try singleValueContainer.decode(ApprovalRequestedPayload.self))
+        case "approval.resolved":
+            self = .approvalResolved(try singleValueContainer.decode(ApprovalResolvedPayload.self))
+        case "rate_limited":
+            self = .rateLimited(try singleValueContainer.decode(RateLimitedPayload.self))
+        default:
+            throw DecodingError.dataCorruptedError(
+                forKey: .kind,
+                in: container,
+                debugDescription: "Unknown typed payload kind: \(kind)"
+            )
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        // Encode the case payload — the kind field is embedded in each payload struct
+        switch self {
+        case .turnStarted(let p): try p.encode(to: encoder)
+        case .turnCompleted(let p): try p.encode(to: encoder)
+        case .turnCancelled(let p): try p.encode(to: encoder)
+        case .turnFailed(let p): try p.encode(to: encoder)
+        case .reasoningDelta(let p): try p.encode(to: encoder)
+        case .toolStarted(let p): try p.encode(to: encoder)
+        case .toolCompleted(let p): try p.encode(to: encoder)
+        case .stateChanged(let p): try p.encode(to: encoder)
+        case .approvalRequested(let p): try p.encode(to: encoder)
+        case .approvalResolved(let p): try p.encode(to: encoder)
+        case .rateLimited(let p): try p.encode(to: encoder)
+        }
     }
 }
 
@@ -303,6 +841,10 @@ public struct SpaceState: Codable, Sendable {
     public let turnCount: Int
     public let activeAgentId: String?
     public let pendingFeedback: Int
+
+    public var resolvedAgentActivityState: AgentActivityState? {
+        AgentActivityState(normalizing: state)
+    }
 }
 
 public enum SpaceVisibility: String, Codable, Sendable {
@@ -317,16 +859,125 @@ public enum SpaceAssignmentRole: String, Codable, Sendable {
 }
 
 public struct SpaceAgentAssignment: Codable, Sendable {
-  public let spaceId: String
-  public let agentId: String
-  public let profileId: String
+    public let spaceId: String
+    public let agentId: String
+    public let agentDefinitionId: String
+    public let profileId: String
+    public let safetyProfileId: String?
+    public let toolPolicyOverride: ToolAccessPolicy?
+    public let effectiveToolAccess: EffectiveToolAccess?
     public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
     public let role: SpaceAssignmentRole
     public let turnOrder: Int
-  public let isPrimary: Bool
-  public let assignedAt: String
+    public let isPrimary: Bool
+    public let assignedAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case agentId
+        case agentDefinitionId
+        case profileId
+        case safetyProfileId
+        case toolPolicyOverride
+        case effectiveToolAccess
+        case securityScope
+        case spawnContext
+        case contextOverrides
+        case role
+        case turnOrder
+        case isPrimary
+        case assignedAt
+    }
+
+    public init(
+        spaceId: String,
+        agentId: String,
+        agentDefinitionId: String? = nil,
+        profileId: String? = nil,
+        safetyProfileId: String? = nil,
+        toolPolicyOverride: ToolAccessPolicy? = nil,
+        effectiveToolAccess: EffectiveToolAccess? = nil,
+        securityScope: [String: AnyCodable]? = nil,
+        spawnContext: String? = nil,
+        contextOverrides: [String: AnyCodable]? = nil,
+        role: SpaceAssignmentRole,
+        turnOrder: Int,
+        isPrimary: Bool,
+        assignedAt: String
+    ) {
+        let resolvedAgentDefinitionId = agentDefinitionId ?? profileId ?? ""
+        let resolvedProfileId = profileId ?? resolvedAgentDefinitionId
+        self.spaceId = spaceId
+        self.agentId = agentId
+        self.agentDefinitionId = resolvedAgentDefinitionId
+        self.profileId = resolvedProfileId
+        self.safetyProfileId = safetyProfileId
+        self.toolPolicyOverride = toolPolicyOverride
+        self.effectiveToolAccess = effectiveToolAccess
+        self.securityScope = securityScope
+        self.spawnContext = spawnContext
+        self.contextOverrides = contextOverrides
+        self.role = role
+        self.turnOrder = turnOrder
+        self.isPrimary = isPrimary
+        self.assignedAt = assignedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let spaceId = try container.decode(String.self, forKey: .spaceId)
+        let agentId = try container.decode(String.self, forKey: .agentId)
+        let decodedAgentDefinitionId = try container.decodeIfPresent(String.self, forKey: .agentDefinitionId)
+        let decodedProfileId = try container.decodeIfPresent(String.self, forKey: .profileId)
+        let resolvedAgentDefinitionId = decodedAgentDefinitionId ?? decodedProfileId ?? ""
+        let resolvedProfileId = decodedProfileId ?? resolvedAgentDefinitionId
+        guard !resolvedAgentDefinitionId.isEmpty else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.agentDefinitionId,
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "SpaceAgentAssignment requires agentDefinitionId or profileId"
+                )
+            )
+        }
+
+        self.init(
+            spaceId: spaceId,
+            agentId: agentId,
+            agentDefinitionId: resolvedAgentDefinitionId,
+            profileId: resolvedProfileId,
+            safetyProfileId: try container.decodeIfPresent(String.self, forKey: .safetyProfileId),
+            toolPolicyOverride: try container.decodeIfPresent(ToolAccessPolicy.self, forKey: .toolPolicyOverride),
+            effectiveToolAccess: try container.decodeIfPresent(EffectiveToolAccess.self, forKey: .effectiveToolAccess),
+            securityScope: try container.decodeIfPresent([String: AnyCodable].self, forKey: .securityScope),
+            spawnContext: try container.decodeIfPresent(String.self, forKey: .spawnContext),
+            contextOverrides: try container.decodeIfPresent([String: AnyCodable].self, forKey: .contextOverrides),
+            role: try container.decodeIfPresent(SpaceAssignmentRole.self, forKey: .role) ?? .participant,
+            turnOrder: try container.decodeIfPresent(Int.self, forKey: .turnOrder) ?? 0,
+            isPrimary: try container.decodeIfPresent(Bool.self, forKey: .isPrimary) ?? false,
+            assignedAt: try container.decode(String.self, forKey: .assignedAt)
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(spaceId, forKey: .spaceId)
+        try container.encode(agentId, forKey: .agentId)
+        try container.encode(agentDefinitionId, forKey: .agentDefinitionId)
+        try container.encode(profileId, forKey: .profileId)
+        try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
+        try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
+        try container.encodeIfPresent(effectiveToolAccess, forKey: .effectiveToolAccess)
+        try container.encodeIfPresent(securityScope, forKey: .securityScope)
+        try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
+        try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
+        try container.encode(role, forKey: .role)
+        try container.encode(turnOrder, forKey: .turnOrder)
+        try container.encode(isPrimary, forKey: .isPrimary)
+        try container.encode(assignedAt, forKey: .assignedAt)
+    }
 }
 
 public enum SpaceWorkspaceMetadataStatus: String, Codable, Sendable {
@@ -346,9 +997,11 @@ public struct SpaceWorkspace: Codable, Sendable {
     public let workPath: String
     public let sharedContextPath: String
     public let scratchpadsPath: String
+    public let artifactsPath: String
     public let layoutVersion: Int
     public let gitRepoDetected: Bool
     public let metadataStatus: SpaceWorkspaceMetadataStatus
+    public let discoveredProjectFiles: [String]
     public let updatedAt: String
 
     private enum CodingKeys: String, CodingKey {
@@ -362,9 +1015,11 @@ public struct SpaceWorkspace: Codable, Sendable {
         case workPath
         case sharedContextPath
         case scratchpadsPath
+        case artifactsPath
         case layoutVersion
         case gitRepoDetected
         case metadataStatus
+        case discoveredProjectFiles
         case updatedAt
     }
 
@@ -379,9 +1034,11 @@ public struct SpaceWorkspace: Codable, Sendable {
         workPath: String,
         sharedContextPath: String,
         scratchpadsPath: String,
+        artifactsPath: String,
         layoutVersion: Int,
         gitRepoDetected: Bool = false,
         metadataStatus: SpaceWorkspaceMetadataStatus = .unknown,
+        discoveredProjectFiles: [String] = [],
         updatedAt: String
     ) {
         self.spaceId = spaceId
@@ -394,28 +1051,286 @@ public struct SpaceWorkspace: Codable, Sendable {
         self.workPath = workPath
         self.sharedContextPath = sharedContextPath
         self.scratchpadsPath = scratchpadsPath
+        self.artifactsPath = artifactsPath
         self.layoutVersion = layoutVersion
         self.gitRepoDetected = gitRepoDetected
         self.metadataStatus = metadataStatus
+        self.discoveredProjectFiles = discoveredProjectFiles
         self.updatedAt = updatedAt
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         spaceId = try container.decode(String.self, forKey: .spaceId)
-        spaceUid = try container.decode(String.self, forKey: .spaceUid)
-        mode = try container.decode(String.self, forKey: .mode)
+        let decodedSpaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        spaceUid = (decodedSpaceUid?.isEmpty == false ? decodedSpaceUid : nil) ?? spaceId
         explicitWorkspaceRoot = try container.decodeIfPresent(String.self, forKey: .explicitWorkspaceRoot)
-        effectiveWorkspaceRoot = try container.decode(String.self, forKey: .effectiveWorkspaceRoot)
-        metaPath = try container.decode(String.self, forKey: .metaPath)
-        logsPath = try container.decode(String.self, forKey: .logsPath)
-        workPath = try container.decode(String.self, forKey: .workPath)
-        sharedContextPath = try container.decode(String.self, forKey: .sharedContextPath)
-        scratchpadsPath = try container.decode(String.self, forKey: .scratchpadsPath)
-        layoutVersion = try container.decode(Int.self, forKey: .layoutVersion)
+        let decodedEffectiveWorkspaceRoot = try container.decodeIfPresent(
+            String.self,
+            forKey: .effectiveWorkspaceRoot
+        )?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let decodedMetaPath = try container.decodeIfPresent(String.self, forKey: .metaPath)?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        effectiveWorkspaceRoot = Self.resolveEffectiveWorkspaceRoot(
+            decodedEffectiveWorkspaceRoot,
+            explicitWorkspaceRoot: explicitWorkspaceRoot,
+            metaPath: decodedMetaPath
+        )
+        let resolvedMetaPath = Self.resolveMetaPath(
+            decodedMetaPath,
+            effectiveWorkspaceRoot: effectiveWorkspaceRoot
+        )
+        metaPath = resolvedMetaPath
+        logsPath = Self.resolvePath(
+            try container.decodeIfPresent(String.self, forKey: .logsPath),
+            fallbackBasePath: resolvedMetaPath,
+            component: "logs"
+        )
+        workPath = Self.resolvePath(
+            try container.decodeIfPresent(String.self, forKey: .workPath),
+            fallbackBasePath: resolvedMetaPath,
+            component: "work"
+        )
+        sharedContextPath = Self.resolvePath(
+            try container.decodeIfPresent(String.self, forKey: .sharedContextPath),
+            fallbackBasePath: resolvedMetaPath,
+            component: "shared-context"
+        )
+        scratchpadsPath = Self.resolvePath(
+            try container.decodeIfPresent(String.self, forKey: .scratchpadsPath),
+            fallbackBasePath: resolvedMetaPath,
+            component: "scratchpads"
+        )
+        artifactsPath = Self.resolvePath(
+            try container.decodeIfPresent(String.self, forKey: .artifactsPath),
+            fallbackBasePath: resolvedMetaPath,
+            component: "artifacts"
+        )
+        layoutVersion = try container.decodeIfPresent(Int.self, forKey: .layoutVersion) ?? 2
         gitRepoDetected = try container.decodeIfPresent(Bool.self, forKey: .gitRepoDetected) ?? false
         metadataStatus = try container.decodeIfPresent(SpaceWorkspaceMetadataStatus.self, forKey: .metadataStatus) ?? .unknown
-        updatedAt = try container.decode(String.self, forKey: .updatedAt)
+        discoveredProjectFiles = try container.decodeIfPresent([String].self, forKey: .discoveredProjectFiles) ?? []
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
+            ?? ISO8601DateFormatter().string(from: Date())
+        mode = try container.decodeIfPresent(String.self, forKey: .mode)
+            ?? (explicitWorkspaceRoot == nil ? "managed" : "folder_bound")
+    }
+
+    private static func resolveEffectiveWorkspaceRoot(
+        _ decodedEffectiveWorkspaceRoot: String?,
+        explicitWorkspaceRoot: String?,
+        metaPath: String?
+    ) -> String {
+        if let decodedEffectiveWorkspaceRoot, !decodedEffectiveWorkspaceRoot.isEmpty {
+            return decodedEffectiveWorkspaceRoot
+        }
+        if let explicitWorkspaceRoot, !explicitWorkspaceRoot.isEmpty {
+            return explicitWorkspaceRoot
+        }
+        if let metaPath, !metaPath.isEmpty {
+            return (metaPath as NSString).deletingLastPathComponent
+        }
+        return ""
+    }
+
+    private static func resolveMetaPath(
+        _ decodedMetaPath: String?,
+        effectiveWorkspaceRoot: String
+    ) -> String {
+        if let decodedMetaPath, !decodedMetaPath.isEmpty {
+            return decodedMetaPath
+        }
+        guard !effectiveWorkspaceRoot.isEmpty else { return ".space" }
+        return (effectiveWorkspaceRoot as NSString).appendingPathComponent(".space")
+    }
+
+    private static func resolvePath(
+        _ decodedPath: String?,
+        fallbackBasePath: String,
+        component: String
+    ) -> String {
+        let trimmedPath = decodedPath?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let trimmedPath, !trimmedPath.isEmpty {
+            return trimmedPath
+        }
+        return (fallbackBasePath as NSString).appendingPathComponent(component)
+    }
+}
+
+public struct GatewayWorkspaceDefaults: Codable, Sendable {
+    public let spaceHomeRoot: String
+    public let updatedAt: String
+
+    public init(spaceHomeRoot: String, updatedAt: String) {
+        self.spaceHomeRoot = spaceHomeRoot
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct GatewayExternalConnectivitySettings: Codable, Sendable {
+    public let mode: String
+    public let updatedAt: String
+
+    public init(mode: String, updatedAt: String) {
+        self.mode = mode
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct GatewayExternalConnectivityAdvertisedEndpoint: Codable, Sendable {
+    public let provider: String
+    public let label: String
+    public let host: String
+    public let port: Int
+    public let websocketUrl: String
+    public let healthUrl: String
+
+    public init(
+        provider: String,
+        label: String,
+        host: String,
+        port: Int,
+        websocketUrl: String,
+        healthUrl: String
+    ) {
+        self.provider = provider
+        self.label = label
+        self.host = host
+        self.port = port
+        self.websocketUrl = websocketUrl
+        self.healthUrl = healthUrl
+    }
+}
+
+public struct GatewayExternalConnectivityTailscaleStatus: Codable, Sendable {
+    public let cliAvailable: Bool
+    public let version: String?
+    public let backendState: String?
+    public let health: [String]
+    public let hostName: String?
+    public let dnsName: String?
+    public let magicDnsSuffix: String?
+    public let tailscaleIps: [String]
+    public let serveConfigured: Bool
+    public let serveTarget: String?
+    public let servePort: Int?
+
+    public init(
+        cliAvailable: Bool,
+        version: String? = nil,
+        backendState: String? = nil,
+        health: [String],
+        hostName: String? = nil,
+        dnsName: String? = nil,
+        magicDnsSuffix: String? = nil,
+        tailscaleIps: [String],
+        serveConfigured: Bool,
+        serveTarget: String? = nil,
+        servePort: Int? = nil
+    ) {
+        self.cliAvailable = cliAvailable
+        self.version = version
+        self.backendState = backendState
+        self.health = health
+        self.hostName = hostName
+        self.dnsName = dnsName
+        self.magicDnsSuffix = magicDnsSuffix
+        self.tailscaleIps = tailscaleIps
+        self.serveConfigured = serveConfigured
+        self.serveTarget = serveTarget
+        self.servePort = servePort
+    }
+}
+
+public struct GatewayExternalConnectivityStatus: Codable, Sendable {
+    public let state: String
+    public let summary: String
+    public let remediation: String?
+    public let advertisedEndpoints: [GatewayExternalConnectivityAdvertisedEndpoint]
+    public let tailscaleStatus: GatewayExternalConnectivityTailscaleStatus?
+
+    public init(
+        state: String,
+        summary: String,
+        remediation: String? = nil,
+        advertisedEndpoints: [GatewayExternalConnectivityAdvertisedEndpoint],
+        tailscaleStatus: GatewayExternalConnectivityTailscaleStatus? = nil
+    ) {
+        self.state = state
+        self.summary = summary
+        self.remediation = remediation
+        self.advertisedEndpoints = advertisedEndpoints
+        self.tailscaleStatus = tailscaleStatus
+    }
+}
+
+public enum SpaceOpenWorkspaceStatus: String, Codable, Sendable {
+    case openedExisting = "opened_existing"
+    case createdNew = "created_new"
+    case unbound
+    case conflict
+}
+
+public struct SpaceOpenWorkspaceConflict: Codable, Sendable {
+    public let reason: String
+    public let message: String
+    public let workspaceRoot: String
+    public let metadataPath: String?
+    public let existingSpaceId: String?
+    public let existingSpaceUid: String?
+    public let existingWorkspaceRoot: String?
+    public let requestedSpaceId: String?
+    public let requestedSpaceUid: String?
+
+    public init(
+        reason: String,
+        message: String,
+        workspaceRoot: String,
+        metadataPath: String? = nil,
+        existingSpaceId: String? = nil,
+        existingSpaceUid: String? = nil,
+        existingWorkspaceRoot: String? = nil,
+        requestedSpaceId: String? = nil,
+        requestedSpaceUid: String? = nil
+    ) {
+        self.reason = reason
+        self.message = message
+        self.workspaceRoot = workspaceRoot
+        self.metadataPath = metadataPath
+        self.existingSpaceId = existingSpaceId
+        self.existingSpaceUid = existingSpaceUid
+        self.existingWorkspaceRoot = existingWorkspaceRoot
+        self.requestedSpaceId = requestedSpaceId
+        self.requestedSpaceUid = requestedSpaceUid
+    }
+}
+
+public struct SpaceOpenWorkspaceResult: Codable, Sendable {
+    public let status: SpaceOpenWorkspaceStatus
+    public let workspaceRoot: String
+    public let gitRepoDetected: Bool
+    public let hasSpaceMetadata: Bool
+    public let space: SpaceConfig?
+    public let workspace: SpaceWorkspace?
+    public let conflict: SpaceOpenWorkspaceConflict?
+
+    public init(
+        status: SpaceOpenWorkspaceStatus,
+        workspaceRoot: String,
+        gitRepoDetected: Bool,
+        hasSpaceMetadata: Bool,
+        space: SpaceConfig? = nil,
+        workspace: SpaceWorkspace? = nil,
+        conflict: SpaceOpenWorkspaceConflict? = nil
+    ) {
+        self.status = status
+        self.workspaceRoot = workspaceRoot
+        self.gitRepoDetected = gitRepoDetected
+        self.hasSpaceMetadata = hasSpaceMetadata
+        self.space = space
+        self.workspace = workspace
+        self.conflict = conflict
     }
 }
 
@@ -423,11 +1338,15 @@ public struct SpaceConfig: Codable, Sendable {
     public let id: String
     public let spaceUid: String
     public let workspace: SpaceWorkspace?
+    public let status: String?
     public let resourceId: String
     public let name: String
     public let goal: String?
+    public let orchestratorAgentDefinitionId: String?
     public let orchestratorProfileId: String?
     public let templateId: String?
+    public let conversationTopology: ConversationTopology?
+    public let promptPackId: String?
     public let turnModel: String
     public let turnModelConfig: [String: AnyCodable]?
     public let skillIds: [String]?
@@ -436,7 +1355,11 @@ public struct SpaceConfig: Codable, Sendable {
     public let capabilityOverrides: [String: String]
     public let maxTurns: Int?
     public let visibility: SpaceVisibility
+    public let thinkingCapturePolicy: ThinkingCapturePolicy
+    public let memoryPolicy: SpaceMemoryPolicy
     public let moderatorProfileId: String?
+    public let archivedAt: String?
+    public let deletedAt: String?
     public let createdAt: String
     public let updatedAt: String
 }
@@ -446,11 +1369,15 @@ extension SpaceConfig {
         case id
         case spaceUid
         case workspace
+        case status
         case resourceId
         case name
         case goal
+        case orchestratorAgentDefinitionId
         case orchestratorProfileId
         case templateId
+        case conversationTopology
+        case promptPackId
         case turnModel
         case turnModelConfig
         case skillIds
@@ -459,7 +1386,11 @@ extension SpaceConfig {
         case capabilityOverrides
         case maxTurns
         case visibility
+        case thinkingCapturePolicy
+        case memoryPolicy
         case moderatorProfileId
+        case archivedAt
+        case deletedAt
         case createdAt
         case updatedAt
     }
@@ -475,11 +1406,23 @@ extension SpaceConfig {
         self.id = id
         self.spaceUid = spaceUid
         self.workspace = try container.decodeIfPresent(SpaceWorkspace.self, forKey: .workspace)
+        self.status = try container.decodeIfPresent(String.self, forKey: .status)
         self.resourceId = try container.decode(String.self, forKey: .resourceId)
         self.name = try container.decode(String.self, forKey: .name)
         self.goal = try container.decodeIfPresent(String.self, forKey: .goal)
-        self.orchestratorProfileId = try container.decodeIfPresent(String.self, forKey: .orchestratorProfileId)
+        let decodedOrchestratorAgentDefinitionId = try container.decodeIfPresent(
+            String.self,
+            forKey: .orchestratorAgentDefinitionId
+        )
+        let decodedOrchestratorProfileId = try container.decodeIfPresent(
+            String.self,
+            forKey: .orchestratorProfileId
+        )
+        self.orchestratorAgentDefinitionId = decodedOrchestratorAgentDefinitionId ?? decodedOrchestratorProfileId
+        self.orchestratorProfileId = decodedOrchestratorProfileId ?? decodedOrchestratorAgentDefinitionId
         self.templateId = try container.decodeIfPresent(String.self, forKey: .templateId)
+        self.conversationTopology = try container.decodeIfPresent(ConversationTopology.self, forKey: .conversationTopology)
+        self.promptPackId = try container.decodeIfPresent(String.self, forKey: .promptPackId)
         self.turnModel = try container.decode(String.self, forKey: .turnModel)
         self.turnModelConfig = try container.decodeIfPresent([String: AnyCodable].self, forKey: .turnModelConfig)
         self.skillIds = try container.decodeIfPresent([String].self, forKey: .skillIds)
@@ -488,7 +1431,17 @@ extension SpaceConfig {
         self.capabilityOverrides = try container.decodeIfPresent([String: String].self, forKey: .capabilityOverrides) ?? [:]
         self.maxTurns = try container.decodeIfPresent(Int.self, forKey: .maxTurns)
         self.visibility = try container.decodeIfPresent(SpaceVisibility.self, forKey: .visibility) ?? .shared
+        self.thinkingCapturePolicy = try container.decodeIfPresent(
+            ThinkingCapturePolicy.self,
+            forKey: .thinkingCapturePolicy
+        ) ?? .summary
+        self.memoryPolicy = try container.decodeIfPresent(
+            SpaceMemoryPolicy.self,
+            forKey: .memoryPolicy
+        ) ?? SpaceMemoryPolicy()
         self.moderatorProfileId = try container.decodeIfPresent(String.self, forKey: .moderatorProfileId)
+        self.archivedAt = try container.decodeIfPresent(String.self, forKey: .archivedAt)
+        self.deletedAt = try container.decodeIfPresent(String.self, forKey: .deletedAt)
         self.createdAt = try container.decode(String.self, forKey: .createdAt)
         self.updatedAt = try container.decode(String.self, forKey: .updatedAt)
     }
@@ -541,16 +1494,26 @@ public struct SpaceListResourcesResult: Codable, Sendable {
 
 public struct SpaceTurn: Codable, Sendable, Equatable {
     public let turnId: String
+    public let rootTurnId: String?
     public let agentId: String
     public let status: String
     public let inputText: String?
     public let outputText: String?
+    public let inputContent: ContentEnvelope?
+    public let outputContent: ContentEnvelope?
+    public let conversationTopology: ConversationTopology?
+    public let transcriptVisibility: TranscriptVisibility?
+    public let summaryTurnId: String?
     public let promptTokens: Int?
     public let completionTokens: Int?
     public let totalTokens: Int?
     public let createdAt: String
     public let completedAt: String?
     public let replyToTurnId: String?
+    public let mode: String?
+    public let effort: String?
+    public let accessMode: String?
+    public let effectiveAccessMode: String?
 }
 
 public struct SpaceListTurnsResult: Codable, Sendable {
@@ -692,17 +1655,655 @@ public struct SpaceTurnTraceToolCall: Codable, Sendable {
     public let completedAt: String?
 }
 
+public struct SpaceTurnTraceActivity: Codable, Sendable {
+    public let activityId: String
+    public let seq: Int
+    public let eventType: String
+    public let agentId: String?
+    public let title: String
+    public let detail: String?
+    public let status: String?
+    public let visibility: String
+    public let toolCallId: String?
+    public let toolName: String?
+    public let createdAt: String
+    public let payload: [String: AnyCodable]
+}
+
+public struct SpaceTurnTraceExecutionRun: Codable, Sendable {
+    public let executionId: String
+    public let stepIndex: Int
+    public let agentId: String?
+    public let providerId: String?
+    public let modelId: String?
+    public let status: String
+    public let startedAt: String?
+    public let completedAt: String?
+    public let durationMs: Int?
+    public let workingDirectory: String?
+    public let exitCode: Int?
+    public let commandPreview: String?
+    public let transcriptArtifactId: String?
+    public let transcriptTruncated: Bool
+}
+
 public struct SpaceTurnTrace: Codable, Sendable {
     public let spaceId: String
     public let turnId: String
     public let total: Int
     public let events: [SpaceTurnTraceEvent]
     public let toolCalls: [SpaceTurnTraceToolCall]
+    public let activities: [SpaceTurnTraceActivity]
+    public let executionRuns: [SpaceTurnTraceExecutionRun]
     public let artifactIds: [String]
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case turnId
+        case total
+        case events
+        case toolCalls
+        case activities
+        case executionRuns
+        case artifactIds
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        spaceId = try container.decode(String.self, forKey: .spaceId)
+        turnId = try container.decode(String.self, forKey: .turnId)
+        total = try container.decode(Int.self, forKey: .total)
+        events = try container.decodeIfPresent([SpaceTurnTraceEvent].self, forKey: .events) ?? []
+        toolCalls = try container.decodeIfPresent([SpaceTurnTraceToolCall].self, forKey: .toolCalls) ?? []
+        activities = try container.decodeIfPresent([SpaceTurnTraceActivity].self, forKey: .activities) ?? []
+        executionRuns = try container.decodeIfPresent([SpaceTurnTraceExecutionRun].self, forKey: .executionRuns) ?? []
+        artifactIds = try container.decodeIfPresent([String].self, forKey: .artifactIds) ?? []
+    }
 }
 
 public struct SpaceGetTurnTraceResult: Codable, Sendable {
     public let trace: SpaceTurnTrace
+}
+
+public struct SpaceListActivityLogPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String?
+    public let spaceUid: String?
+    public let turnId: String?
+    public let includeSystem: Bool?
+    public let limit: Int?
+    public let offset: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String? = nil,
+        spaceUid: String? = nil,
+        turnId: String? = nil,
+        includeSystem: Bool? = true,
+        limit: Int? = nil,
+        offset: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.turnId = turnId
+        self.includeSystem = includeSystem
+        self.limit = limit
+        self.offset = offset
+    }
+}
+
+public struct SpaceActivityLogEntry: Codable, Sendable {
+    public let entryId: String
+    public let source: String
+    public let category: String
+    public let turnId: String?
+    public let rootTurnId: String?
+    public let summaryTurnId: String?
+    public let agentId: String?
+    public let actorId: String?
+    public let eventType: String
+    public let title: String
+    public let detail: String?
+    public let status: String?
+    public let visibility: String
+    public let toolCallId: String?
+    public let toolName: String?
+    public let createdAt: String
+    public let seq: Int
+    public let payload: [String: AnyCodable]
+
+    private enum CodingKeys: String, CodingKey {
+        case entryId
+        case source
+        case category
+        case turnId
+        case rootTurnId
+        case summaryTurnId
+        case agentId
+        case actorId
+        case eventType
+        case title
+        case detail
+        case status
+        case visibility
+        case toolCallId
+        case toolName
+        case createdAt
+        case seq
+        case payload
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        entryId = try container.decode(String.self, forKey: .entryId)
+        source = try container.decode(String.self, forKey: .source)
+        category = try container.decode(String.self, forKey: .category)
+        turnId = try container.decodeIfPresent(String.self, forKey: .turnId)
+        rootTurnId = try container.decodeIfPresent(String.self, forKey: .rootTurnId)
+        summaryTurnId = try container.decodeIfPresent(String.self, forKey: .summaryTurnId)
+        agentId = try container.decodeIfPresent(String.self, forKey: .agentId)
+        actorId = try container.decodeIfPresent(String.self, forKey: .actorId)
+        eventType = try container.decode(String.self, forKey: .eventType)
+        title = try container.decode(String.self, forKey: .title)
+        detail = try container.decodeIfPresent(String.self, forKey: .detail)
+        status = try container.decodeIfPresent(String.self, forKey: .status)
+        visibility = try container.decode(String.self, forKey: .visibility)
+        toolCallId = try container.decodeIfPresent(String.self, forKey: .toolCallId)
+        toolName = try container.decodeIfPresent(String.self, forKey: .toolName)
+        createdAt = try container.decode(String.self, forKey: .createdAt)
+        seq = try container.decodeIfPresent(Int.self, forKey: .seq) ?? 0
+        payload = try container.decodeIfPresent([String: AnyCodable].self, forKey: .payload) ?? [:]
+    }
+}
+
+public struct SpaceListActivityLogResult: Codable, Sendable {
+    public let spaceId: String
+    public let spaceUid: String
+    public let entries: [SpaceActivityLogEntry]
+    public let total: Int
+    public let nextOffset: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case spaceUid
+        case entries
+        case total
+        case nextOffset
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        spaceId = try container.decode(String.self, forKey: .spaceId)
+        spaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid) ?? spaceId
+        entries = try container.decodeIfPresent([SpaceActivityLogEntry].self, forKey: .entries) ?? []
+        total = try container.decodeIfPresent(Int.self, forKey: .total) ?? entries.count
+        nextOffset = try container.decodeIfPresent(Int.self, forKey: .nextOffset)
+    }
+}
+
+public struct SpaceExperienceRecord: Codable, Sendable {
+    public let experienceId: String
+    public let spaceId: String
+    public let title: String?
+    public let summary: String?
+    public let observationSummary: String?
+    public let status: String?
+    public let sourceTurnId: String?
+    public let createdAt: String
+    public let updatedAt: String
+    public let metadata: [String: AnyCodable]?
+
+    private enum CodingKeys: String, CodingKey {
+        case experienceId
+        case spaceId
+        case title
+        case summary
+        case observationSummary
+        case status
+        case sourceTurnId
+        case createdAt
+        case updatedAt
+        case metadata
+    }
+}
+
+public struct SpaceListExperiencesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let limit: Int?
+    public let offset: Int?
+
+    public init(apiVersion: String? = nil, spaceId: String, limit: Int? = nil, offset: Int? = nil) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.limit = limit
+        self.offset = offset
+    }
+}
+
+public struct SpaceListExperiencesResult: Codable, Sendable {
+    public let experiences: [SpaceExperienceRecord]
+    public let total: Int
+    public let nextOffset: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case experiences
+        case total
+        case nextOffset
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        experiences = try container.decodeIfPresent([SpaceExperienceRecord].self, forKey: .experiences) ?? []
+        total = try container.decodeIfPresent(Int.self, forKey: .total) ?? experiences.count
+        nextOffset = try container.decodeIfPresent(Int.self, forKey: .nextOffset)
+    }
+}
+
+public struct SpaceGetExperiencePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let experienceId: String
+
+    public init(apiVersion: String? = nil, spaceId: String, experienceId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.experienceId = experienceId
+    }
+}
+
+public struct SpaceGetExperienceResult: Codable, Sendable {
+    public let experience: SpaceExperienceRecord
+}
+
+public struct SpacePersonalityInsightRecord: Codable, Sendable {
+    public let insightId: String
+    public let spaceId: String
+    public let experienceId: String?
+    public let agentId: String?
+    public let title: String?
+    public let summary: String?
+    public let rationale: String?
+    public let status: String
+    public let createdAt: String
+    public let updatedAt: String
+    public let acceptedAt: String?
+    public let rejectedAt: String?
+    public let dismissedAt: String?
+    public let metadata: [String: AnyCodable]?
+}
+
+public struct SpaceListInsightsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let status: String?
+    public let limit: Int?
+    public let offset: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        status: String? = nil,
+        limit: Int? = nil,
+        offset: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.status = status
+        self.limit = limit
+        self.offset = offset
+    }
+}
+
+public struct SpaceListInsightsResult: Codable, Sendable {
+    public let insights: [SpacePersonalityInsightRecord]
+    public let total: Int
+    public let nextOffset: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case insights
+        case total
+        case nextOffset
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        insights = try container.decodeIfPresent([SpacePersonalityInsightRecord].self, forKey: .insights) ?? []
+        total = try container.decodeIfPresent(Int.self, forKey: .total) ?? insights.count
+        nextOffset = try container.decodeIfPresent(Int.self, forKey: .nextOffset)
+    }
+}
+
+public struct SpaceGetInsightPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let insightId: String
+
+    public init(apiVersion: String? = nil, spaceId: String, insightId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.insightId = insightId
+    }
+}
+
+public struct SpaceGetInsightResult: Codable, Sendable {
+    public let insight: SpacePersonalityInsightRecord
+}
+
+public struct SpaceAcceptInsightPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let insightId: String
+    public let notes: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        insightId: String,
+        notes: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.insightId = insightId
+        self.notes = notes
+    }
+}
+
+public struct SpaceRejectInsightPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let insightId: String
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        insightId: String,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.insightId = insightId
+        self.reason = reason
+    }
+}
+
+public struct SpaceDismissInsightPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let insightId: String
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        insightId: String,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.insightId = insightId
+        self.reason = reason
+    }
+}
+
+public struct SpaceInsightActionResult: Codable, Sendable {
+    public let insight: SpacePersonalityInsightRecord
+}
+
+public struct SpaceAgentNotesRecord: Codable, Sendable {
+    public let spaceId: String
+    public let agentId: String
+    public let notes: String
+    public let updatedAt: String
+    public let createdAt: String?
+}
+
+public struct SpaceGetSpaceAgentNotesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let agentId: String
+
+    public init(apiVersion: String? = nil, spaceId: String, agentId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.agentId = agentId
+    }
+}
+
+public struct SpaceUpdateSpaceAgentNotesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let agentId: String
+    public let notes: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        agentId: String,
+        notes: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.agentId = agentId
+        self.notes = notes
+    }
+}
+
+public struct SpaceAgentNotesResult: Codable, Sendable {
+    public let notes: SpaceAgentNotesRecord?
+}
+
+public struct SpaceUserProfileRecord: Codable, Sendable {
+    public let principalId: String
+    public let displayName: String?
+    public let summary: String?
+    public let facts: [String]
+    public let preferences: [String]
+    public let corrections: [String]
+    public let metadata: [String: AnyCodable]?
+    public let updatedAt: String
+    public let createdAt: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case principalId
+        case displayName
+        case summary
+        case facts
+        case preferences
+        case corrections
+        case metadata
+        case updatedAt
+        case createdAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        principalId = try container.decode(String.self, forKey: .principalId)
+        displayName = try container.decodeIfPresent(String.self, forKey: .displayName)
+        summary = try container.decodeIfPresent(String.self, forKey: .summary)
+        facts = try container.decodeIfPresent([String].self, forKey: .facts) ?? []
+        preferences = try container.decodeIfPresent([String].self, forKey: .preferences) ?? []
+        corrections = try container.decodeIfPresent([String].self, forKey: .corrections) ?? []
+        metadata = try container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata)
+        updatedAt = try container.decode(String.self, forKey: .updatedAt)
+        createdAt = try container.decodeIfPresent(String.self, forKey: .createdAt)
+    }
+}
+
+public struct SpaceGetUserProfilePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let principalId: String?
+
+    public init(apiVersion: String? = nil, principalId: String? = nil) {
+        self.apiVersion = apiVersion
+        self.principalId = principalId
+    }
+}
+
+public struct SpaceUpdateUserProfilePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let principalId: String?
+    public let displayName: String?
+    public let summary: String?
+    public let facts: [String]?
+    public let preferences: [String]?
+    public let corrections: [String]?
+    public let metadata: [String: AnyCodable]?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        principalId: String? = nil,
+        displayName: String? = nil,
+        summary: String? = nil,
+        facts: [String]? = nil,
+        preferences: [String]? = nil,
+        corrections: [String]? = nil,
+        metadata: [String: Any]? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.principalId = principalId
+        self.displayName = displayName
+        self.summary = summary
+        self.facts = facts
+        self.preferences = preferences
+        self.corrections = corrections
+        self.metadata = metadata?.mapValues { AnyCodable($0) }
+    }
+}
+
+public struct SpaceUserProfileResult: Codable, Sendable {
+    public let profile: SpaceUserProfileRecord?
+}
+
+public struct SpaceMemoryRecord: Codable, Sendable {
+    public let memoryId: String
+    public let spaceId: String
+    public let principalId: String?
+    public let sourceType: String?
+    public let sourceId: String?
+    public let status: String?
+    public let scopeType: String?
+    public let scopeId: String?
+    public let category: String?
+    public let textPreview: String?
+    public let importance: Double?
+    public let createdAt: String
+    public let updatedAt: String
+    public let metadata: [String: AnyCodable]?
+}
+
+public struct SpaceListMemoriesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let principalId: String?
+    public let sourceType: String?
+    public let status: String?
+    public let limit: Int?
+    public let offset: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        principalId: String? = nil,
+        sourceType: String? = nil,
+        status: String? = nil,
+        limit: Int? = nil,
+        offset: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.principalId = principalId
+        self.sourceType = sourceType
+        self.status = status
+        self.limit = limit
+        self.offset = offset
+    }
+}
+
+public struct SpaceListMemoriesResult: Codable, Sendable {
+    public let memories: [SpaceMemoryRecord]
+    public let total: Int
+    public let nextOffset: Int?
+
+    private enum CodingKeys: String, CodingKey {
+        case memories
+        case total
+        case nextOffset
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        memories = try container.decodeIfPresent([SpaceMemoryRecord].self, forKey: .memories) ?? []
+        total = try container.decodeIfPresent(Int.self, forKey: .total) ?? memories.count
+        nextOffset = try container.decodeIfPresent(Int.self, forKey: .nextOffset)
+    }
+}
+
+public struct SpaceDeleteMemoryPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let memoryId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        memoryId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.memoryId = memoryId
+    }
+}
+
+public struct SpaceDeleteMemoryResult: Codable, Sendable {
+    public let deleted: Bool
+    public let memoryId: String
+}
+
+public struct SpaceUpdateMemoryImportancePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let memoryId: String
+    public let importance: Double
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        memoryId: String,
+        importance: Double
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.memoryId = memoryId
+        self.importance = importance
+    }
+}
+
+public struct SpaceUpdateMemoryImportanceResult: Codable, Sendable {
+    public let memory: SpaceMemoryRecord
 }
 
 public struct SpaceListArtifactsPayload: Codable, Sendable {
@@ -728,6 +2329,18 @@ public struct SpaceListArtifactsPayload: Codable, Sendable {
 }
 
 public struct SpaceGetArtifactPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let artifactId: String
+
+    public init(apiVersion: String? = nil, spaceId: String, artifactId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.artifactId = artifactId
+    }
+}
+
+public struct SpaceGetDebugArtifactPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String
     public let artifactId: String
@@ -768,6 +2381,9 @@ public struct SpaceArtifactDetail: Codable, Sendable {
     public let createdAt: String
     public let updatedAt: String
     public let content: AnyCodable
+    public let contentEnvelope: ContentEnvelope?
+    public let previewText: String?
+    public let primaryMimeType: String?
 }
 
 public struct SpaceListArtifactsResult: Codable, Sendable {
@@ -776,6 +2392,10 @@ public struct SpaceListArtifactsResult: Codable, Sendable {
 }
 
 public struct SpaceGetArtifactResult: Codable, Sendable {
+    public let artifact: SpaceArtifactDetail
+}
+
+public struct SpaceGetDebugArtifactResult: Codable, Sendable {
     public let artifact: SpaceArtifactDetail
 }
 
@@ -800,9 +2420,58 @@ public struct SpaceAgentUpdatedEvent: Codable, Sendable {
     public let spaceId: String
     public let spaceUid: String
     public let agentId: String
+    public let oldAgentDefinitionId: String?
+    public let newAgentDefinitionId: String?
     public let oldProfileId: String
     public let newProfileId: String
     public let updatedAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case spaceUid
+        case agentId
+        case oldAgentDefinitionId
+        case newAgentDefinitionId
+        case oldProfileId
+        case newProfileId
+        case updatedAt
+    }
+
+    public init(
+        spaceId: String,
+        spaceUid: String,
+        agentId: String,
+        oldAgentDefinitionId: String? = nil,
+        newAgentDefinitionId: String? = nil,
+        oldProfileId: String,
+        newProfileId: String,
+        updatedAt: String
+    ) {
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.agentId = agentId
+        self.oldAgentDefinitionId = oldAgentDefinitionId ?? oldProfileId
+        self.newAgentDefinitionId = newAgentDefinitionId ?? newProfileId
+        self.oldProfileId = oldProfileId
+        self.newProfileId = newProfileId
+        self.updatedAt = updatedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let oldProfileId = try container.decode(String.self, forKey: .oldProfileId)
+        let newProfileId = try container.decode(String.self, forKey: .newProfileId)
+        self.init(
+            spaceId: try container.decode(String.self, forKey: .spaceId),
+            spaceUid: try container.decode(String.self, forKey: .spaceUid),
+            agentId: try container.decode(String.self, forKey: .agentId),
+            oldAgentDefinitionId: try container.decodeIfPresent(String.self, forKey: .oldAgentDefinitionId),
+            newAgentDefinitionId: try container.decodeIfPresent(String.self, forKey: .newAgentDefinitionId),
+            oldProfileId: oldProfileId,
+            newProfileId: newProfileId,
+            updatedAt: try container.decode(String.self, forKey: .updatedAt)
+        )
+    }
 }
 
 public struct ProfileModelConfig: Codable, Sendable {
@@ -821,47 +2490,127 @@ public struct ProfileModelConfig: Codable, Sendable {
     }
 }
 
-public struct ProfileSummary: Codable, Sendable {
-    public let profileId: String
+public enum ManagedRecordStatus: String, Codable, Sendable {
+    case active
+    case archived
+}
+
+public struct AgentDefinitionSummary: Codable, Sendable {
+    public let agentDefinitionId: String
+    public let personaId: String?
     public let name: String
     public let description: String
-    public let personalityPrompt: String
+    public let instructions: String
     public let defaultSkillIds: [String]
     public let providerHint: String?
     public let modelHint: String?
     public let modelConfig: ProfileModelConfig?
-    public let canModerate: Bool
     public let isDefault: Bool
-    public let status: String
+    public let status: ManagedRecordStatus
     public let activeRevision: Int
     public let source: String
     public let createdAt: String
     public let updatedAt: String
 }
 
-public struct ProfileCreateResult: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct AgentDefinitionCreateResult: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let created: Bool
 }
 
-public struct ProfileUpdateResult: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct AgentDefinitionUpdateResult: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let newRevision: Int
 }
 
-public struct ProfileArchiveResult: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct AgentDefinitionArchiveResult: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let archived: Bool
 }
 
-public enum PresetKind: String, Codable, Sendable {
-    case agent
-    case space
+public struct PersonaSummary: Codable, Sendable {
+    public let personaId: String
+    public let name: String
+    public let description: String
+    public let tone: String?
+    public let style: String?
+    public let emotionalLayer: String?
+    public let constraints: [String]
+    public let instructions: String
+    public let isDefault: Bool
+    public let status: ManagedRecordStatus
+    public let activeRevision: Int
+    public let source: String
+    public let createdAt: String
+    public let updatedAt: String
 }
 
-public enum PresetSource: String, Codable, Sendable {
-    case system
-    case user
+public struct PersonaCreateResult: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let created: Bool
+}
+
+public struct PersonaUpdateResult: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let newRevision: Int
+}
+
+public struct PersonaArchiveResult: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let archived: Bool
+}
+
+public enum CompiledInstructionSectionKey: String, Codable, Sendable {
+    case systemScaffold = "system_scaffold"
+    case agentDefinition = "agent_definition"
+    case persona
+    case skills
+    case policyAppendices = "policy_appendices"
+    case workspaceContext = "workspace_context"
+    case conversationPrompt = "conversation_prompt"
+    case assignmentContext = "assignment_context"
+}
+
+public struct CompiledInstructionSection: Codable, Sendable {
+    public let key: CompiledInstructionSectionKey
+    public let title: String
+    public let content: String
+}
+
+public struct CompiledInstructionsPreview: Codable, Sendable {
+    public let agentDefinitionId: String
+    public let personaId: String?
+    public let sections: [CompiledInstructionSection]
+    public let compiledText: String
+    public let generatedAt: String
+}
+
+public enum RuntimeSystemPromptSectionKey: String, Codable, Sendable {
+    case agentDefinition = "agent_definition"
+    case persona
+    case activeSkillContext = "active_skill_context"
+    case workspaceContext = "workspace_context"
+    case conversationPrompt = "conversation_prompt"
+    case assignmentContext = "assignment_context"
+}
+
+public struct RuntimeSystemPromptSection: Codable, Sendable {
+    public let key: RuntimeSystemPromptSectionKey
+    public let title: String
+    public let content: String
+}
+
+public struct RuntimeSystemPromptPreview: Codable, Sendable {
+    public let spaceId: String
+    public let agentId: String?
+    public let profileId: String
+    public let personaId: String?
+    public let targetKind: String
+    public let conversationTopology: ConversationTopology?
+    public let promptPackId: String?
+    public let sections: [RuntimeSystemPromptSection]
+    public let compiledText: String
+    public let generatedAt: String
 }
 
 public enum CommunicationMode: String, Codable, Sendable {
@@ -870,89 +2619,117 @@ public enum CommunicationMode: String, Codable, Sendable {
     case structuredHandoff = "structured_handoff"
 }
 
+public enum ConversationTopology: String, Codable, Sendable, CaseIterable {
+    case direct
+    case sharedTeamChat = "shared_team_chat"
+    case broadcastTeam = "broadcast_team"
+
+    public var title: String {
+        switch self {
+        case .direct:
+            return "Single Agent"
+        case .sharedTeamChat:
+            return "Shared Team Chat"
+        case .broadcastTeam:
+            return "Broadcast Team"
+        }
+    }
+}
+
+public enum TranscriptVisibility: String, Codable, Sendable {
+    case visible
+    case activityOnly = "activity_only"
+    case summary
+}
+
 public struct TemplateAgentDefinition: Codable, Sendable {
     public let agentId: String
+    public let agentDefinitionId: String
     public let profileId: String
     public let role: SpaceAssignmentRole?
     public let turnOrder: Int?
     public let isPrimary: Bool?
 
+    private enum CodingKeys: String, CodingKey {
+        case agentId
+        case agentDefinitionId
+        case profileId
+        case role
+        case turnOrder
+        case isPrimary
+    }
+
     public init(
         agentId: String,
-        profileId: String,
+        agentDefinitionId: String? = nil,
+        profileId: String? = nil,
         role: SpaceAssignmentRole? = nil,
         turnOrder: Int? = nil,
         isPrimary: Bool? = nil
     ) {
+        let resolvedAgentDefinitionId = agentDefinitionId ?? profileId ?? ""
+        let resolvedProfileId = profileId ?? resolvedAgentDefinitionId
         self.agentId = agentId
-        self.profileId = profileId
+        self.agentDefinitionId = resolvedAgentDefinitionId
+        self.profileId = resolvedProfileId
         self.role = role
         self.turnOrder = turnOrder
         self.isPrimary = isPrimary
     }
-}
 
-public struct SpacePresetConfig: Codable, Sendable {
-    public let communicationMode: CommunicationMode
-    public let turnModel: String
-    public let baseAgents: [TemplateAgentDefinition]
-    public let agentPresetIds: [String]
-}
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedAgentDefinitionId = try container.decodeIfPresent(String.self, forKey: .agentDefinitionId)
+        let decodedProfileId = try container.decodeIfPresent(String.self, forKey: .profileId)
+        let resolvedAgentDefinitionId = decodedAgentDefinitionId ?? decodedProfileId ?? ""
+        let resolvedProfileId = decodedProfileId ?? resolvedAgentDefinitionId
+        guard !resolvedAgentDefinitionId.isEmpty else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.agentDefinitionId,
+                DecodingError.Context(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "TemplateAgentDefinition requires agentDefinitionId or profileId"
+                )
+            )
+        }
 
-public struct AgentPresetConfig: Codable, Sendable {
-    public let defaultAgents: [TemplateAgentDefinition]
-}
+        self.init(
+            agentId: try container.decode(String.self, forKey: .agentId),
+            agentDefinitionId: resolvedAgentDefinitionId,
+            profileId: resolvedProfileId,
+            role: try container.decodeIfPresent(SpaceAssignmentRole.self, forKey: .role),
+            turnOrder: try container.decodeIfPresent(Int.self, forKey: .turnOrder),
+            isPrimary: try container.decodeIfPresent(Bool.self, forKey: .isPrimary)
+        )
+    }
 
-public struct PresetSummary: Codable, Sendable {
-    public let presetId: String
-    public let kind: PresetKind
-    public let title: String
-    public let description: String
-    public let source: PresetSource
-    public let version: Int
-    public let tags: [String]
-}
-
-public struct PresetDetail: Codable, Sendable {
-    public let presetId: String
-    public let kind: PresetKind
-    public let title: String
-    public let description: String
-    public let source: PresetSource
-    public let version: Int
-    public let tags: [String]
-    public let spacePreset: SpacePresetConfig?
-    public let agentPreset: AgentPresetConfig?
-}
-
-public struct PresetApplyToSpaceResult: Codable, Sendable {
-    public let applicationId: String
-    public let presetId: String
-    public let spaceId: String
-    public let createdSpace: Bool
-    public let appliedAgents: Int
-    public let skippedAgents: Int
-    public let appliedAt: String
-    public let space: SpaceConfig
-}
-
-public struct PresetSaveAgentResult: Codable, Sendable {
-    public let preset: PresetDetail
-    public let created: Bool
-}
-
-public struct PresetArchiveAgentResult: Codable, Sendable {
-    public let presetId: String
-    public let archived: Bool
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(agentId, forKey: .agentId)
+        try container.encode(agentDefinitionId, forKey: .agentDefinitionId)
+        try container.encode(profileId, forKey: .profileId)
+        try container.encodeIfPresent(role, forKey: .role)
+        try container.encodeIfPresent(turnOrder, forKey: .turnOrder)
+        try container.encodeIfPresent(isPrimary, forKey: .isPrimary)
+    }
 }
 
 public struct SpaceTemplateSummary: Codable, Sendable {
     public let templateId: String
     public let title: String
     public let communicationMode: CommunicationMode
+    public let conversationTopology: ConversationTopology?
+    public let promptPackId: String?
     public let agentPresetIds: [String]
     public let createdBy: String
     public let updatedAt: String
+    public let category: String?
+    public let complexityTier: String?
+    public let icon: String?
+    public let featured: Bool?
+    public let sortOrder: Int?
+    public let description: String?
+    public let agentCount: Int?
 }
 
 public struct SpaceTemplatePreviewResolved: Codable, Sendable {
@@ -962,6 +2739,8 @@ public struct SpaceTemplatePreviewResolved: Codable, Sendable {
     public let goal: String?
     public let resourceId: String
     public let communicationMode: CommunicationMode
+    public let conversationTopology: ConversationTopology?
+    public let promptPackId: String?
     public let turnModel: String
     public let initialAgents: [TemplateAgentDefinition]
 }
@@ -980,6 +2759,132 @@ public struct SpaceCreateFromTemplateResult: Codable, Sendable {
 public struct SpaceSaveTemplateResult: Codable, Sendable {
     public let template: SpaceTemplateSummary
     public let created: Bool
+}
+
+public enum LibrarySourceKind: String, Codable, Sendable {
+    case installed
+    case scanned
+    case linked
+    case verified
+    case system
+}
+
+public enum LibraryEntryStatus: String, Codable, Sendable {
+    case enabled
+    case disabled
+    case archived
+}
+
+public enum LibraryEntrySyncState: String, Codable, Sendable {
+    case ready
+    case missing
+    case parseError = "parse_error"
+}
+
+public struct LibraryEntry: Codable, Sendable {
+    public let entryId: String
+    public let skillId: String?
+    public let name: String
+    public let description: String?
+    public let contentMarkdown: String?
+    public let sourceKind: LibrarySourceKind
+    public let sourceRef: String?
+    public let syncState: LibraryEntrySyncState?
+    public let provenance: [String: AnyCodable]?
+    public let tags: [String]
+    public let status: LibraryEntryStatus
+    public let importable: Bool
+    public let importedSkillId: String?
+    public let createdAt: String
+    public let updatedAt: String
+}
+
+public struct LibrarySaveSkillResult: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let created: Bool
+}
+
+public struct LibraryImportEntryResult: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let created: Bool
+}
+
+public struct LibraryArchiveEntryResult: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let archived: Bool
+}
+
+public struct LibraryDeleteEntryResult: Codable, Sendable {
+    public let entryId: String
+    public let deleted: Bool
+}
+
+public struct LibraryScanEntriesResult: Codable, Sendable {
+    public let entries: [LibraryEntry]
+    public let scannedAt: String
+}
+
+public struct SkillDraft: Codable, Sendable {
+    public let draftId: String
+    public let name: String
+    public let description: String?
+    public let requestPrompt: String
+    public let contentMarkdown: String
+    public let createdAt: String
+    public let updatedAt: String
+}
+
+public struct LibraryCreateSkillDraftResult: Codable, Sendable {
+    public let draft: SkillDraft
+    public let created: Bool
+}
+
+public struct LibraryDeleteSkillDraftResult: Codable, Sendable {
+    public let draftId: String
+    public let deleted: Bool
+}
+
+public struct SpaceTemplateRecord: Codable, Sendable {
+    public let templateId: String
+    public let name: String
+    public let description: String?
+    public let status: ManagedRecordStatus
+    public let activeRevision: Int
+    public let communicationMode: CommunicationMode
+    public let conversationTopology: ConversationTopology?
+    public let promptPackId: String?
+    public let turnModel: String
+    public let agentDefinitions: [TemplateAgentDefinition]
+    public let createdBy: String
+    public let createdAt: String
+    public let updatedAt: String
+    public let category: String?
+    public let complexityTier: String?
+    public let icon: String?
+    public let featured: Bool?
+    public let sortOrder: Int?
+    public let agentCount: Int?
+}
+
+public struct SpaceTemplatePreviewResult: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let resolved: SpaceTemplatePreviewResolved
+    public let warnings: [String]
+}
+
+public struct SpaceTemplateCreateSpaceResult: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let space: SpaceConfig
+}
+
+public struct SpaceTemplateSaveResult: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let created: Bool
+}
+
+public struct SpaceTemplateArchiveResult: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let archived: Bool
 }
 
 public struct DeviceIdentity: Codable, Sendable {
@@ -1016,6 +2921,9 @@ public struct DiscoveredLocalAgent: Codable, Sendable {
     public let detected: Bool
     public let executablePath: String?
     public let appPath: String?
+    public let version: String?
+    public let resolutionSource: GatewayExecutableResolutionSource
+    public let manualPathConfigured: Bool
     public let serviceReachable: Bool?
     public let recommendedProviderId: String
     public let recommendedModel: String
@@ -1023,24 +2931,81 @@ public struct DiscoveredLocalAgent: Codable, Sendable {
     public let availableModels: [String]?
     public let detectionError: String?
     public let notes: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case detected
+        case executablePath
+        case appPath
+        case version
+        case resolutionSource
+        case manualPathConfigured
+        case serviceReachable
+        case recommendedProviderId
+        case recommendedModel
+        case requiresApiKey
+        case availableModels
+        case detectionError
+        case notes
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.detected = try container.decode(Bool.self, forKey: .detected)
+        self.executablePath = try container.decodeIfPresent(String.self, forKey: .executablePath)
+        self.appPath = try container.decodeIfPresent(String.self, forKey: .appPath)
+        self.version = try container.decodeIfPresent(String.self, forKey: .version)
+        self.resolutionSource = try container.decodeIfPresent(
+            GatewayExecutableResolutionSource.self,
+            forKey: .resolutionSource
+        ) ?? .notFound
+        self.manualPathConfigured = try container.decodeIfPresent(Bool.self, forKey: .manualPathConfigured) ?? false
+        self.serviceReachable = try container.decodeIfPresent(Bool.self, forKey: .serviceReachable)
+        self.recommendedProviderId = try container.decode(String.self, forKey: .recommendedProviderId)
+        self.recommendedModel = try container.decode(String.self, forKey: .recommendedModel)
+        self.requiresApiKey = try container.decode(Bool.self, forKey: .requiresApiKey)
+        self.availableModels = try container.decodeIfPresent([String].self, forKey: .availableModels)
+        self.detectionError = try container.decodeIfPresent(String.self, forKey: .detectionError)
+        self.notes = try container.decodeIfPresent(String.self, forKey: .notes)
+    }
+}
+
+public enum GatewayExecutableResolutionSource: String, Codable, Sendable {
+    case manual
+    case cache
+    case processPath = "process_path"
+    case loginShell = "login_shell"
+    case commonPath = "common_path"
+    case appBundle = "app_bundle"
+    case notFound = "not_found"
 }
 
 public enum MainAgentSelectionMode: String, Codable, Sendable {
     case providerModel = "provider_model"
-    case profileTemplate = "profile_template"
+    case agentDefinition = "agent_definition"
 }
+
+public typealias ConciergeAgentSelectionMode = MainAgentSelectionMode
 
 public enum GatewayMainAgentStatus: String, Codable, Sendable {
     case healthy
     case repaired
+    case degraded
     case fallback
 }
+
+public typealias GatewayConciergeAgentStatus = GatewayMainAgentStatus
 
 public struct GatewayMainAgentState: Codable, Sendable {
     public let spaceId: String
     public let spaceUid: String
     public let mainAgentId: String
+    public let mainAgentDefinitionId: String?
     public let mainProfileId: String
+    public let assignedAgentDefinitionId: String?
     public let assignedProfileId: String?
     public let providerHint: String?
     public let modelHint: String?
@@ -1048,18 +3013,209 @@ public struct GatewayMainAgentState: Codable, Sendable {
     public let repaired: Bool
     public let fallbackApplied: Bool
     public let fallbackReason: String?
+    public let runtimeIssueReason: String?
     public let updatedAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case spaceUid
+        case mainAgentId
+        case mainAgentDefinitionId
+        case mainProfileId
+        case assignedAgentDefinitionId
+        case assignedProfileId
+        case providerHint
+        case modelHint
+        case status
+        case repaired
+        case fallbackApplied
+        case fallbackReason
+        case runtimeIssueReason
+        case updatedAt
+    }
+
+    public init(
+        spaceId: String,
+        spaceUid: String,
+        mainAgentId: String,
+        mainAgentDefinitionId: String? = nil,
+        mainProfileId: String,
+        assignedAgentDefinitionId: String? = nil,
+        assignedProfileId: String? = nil,
+        providerHint: String? = nil,
+        modelHint: String? = nil,
+        status: GatewayMainAgentStatus,
+        repaired: Bool,
+        fallbackApplied: Bool,
+        fallbackReason: String? = nil,
+        runtimeIssueReason: String? = nil,
+        updatedAt: String
+    ) {
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.mainAgentId = mainAgentId
+        self.mainAgentDefinitionId = mainAgentDefinitionId ?? mainProfileId
+        self.mainProfileId = mainProfileId
+        self.assignedAgentDefinitionId = assignedAgentDefinitionId ?? assignedProfileId
+        self.assignedProfileId = assignedProfileId ?? assignedAgentDefinitionId
+        self.providerHint = providerHint
+        self.modelHint = modelHint
+        self.status = status
+        self.repaired = repaired
+        self.fallbackApplied = fallbackApplied
+        self.fallbackReason = fallbackReason
+        self.runtimeIssueReason = runtimeIssueReason
+        self.updatedAt = updatedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let mainAgentDefinitionId = try container.decodeIfPresent(String.self, forKey: .mainAgentDefinitionId)
+        let mainProfileId = try container.decode(String.self, forKey: .mainProfileId)
+        let assignedAgentDefinitionId = try container.decodeIfPresent(
+            String.self,
+            forKey: .assignedAgentDefinitionId
+        )
+        let assignedProfileId = try container.decodeIfPresent(String.self, forKey: .assignedProfileId)
+        let fallbackReason = try container.decodeIfPresent(String.self, forKey: .fallbackReason)
+        let runtimeIssueReason = try container.decodeIfPresent(String.self, forKey: .runtimeIssueReason)
+            ?? fallbackReason
+
+        self.init(
+            spaceId: try container.decode(String.self, forKey: .spaceId),
+            spaceUid: try container.decode(String.self, forKey: .spaceUid),
+            mainAgentId: try container.decode(String.self, forKey: .mainAgentId),
+            mainAgentDefinitionId: mainAgentDefinitionId ?? mainProfileId,
+            mainProfileId: mainProfileId,
+            assignedAgentDefinitionId: assignedAgentDefinitionId ?? assignedProfileId,
+            assignedProfileId: assignedProfileId ?? assignedAgentDefinitionId,
+            providerHint: try container.decodeIfPresent(String.self, forKey: .providerHint),
+            modelHint: try container.decodeIfPresent(String.self, forKey: .modelHint),
+            status: try container.decode(GatewayMainAgentStatus.self, forKey: .status),
+            repaired: try container.decode(Bool.self, forKey: .repaired),
+            fallbackApplied: try container.decode(Bool.self, forKey: .fallbackApplied),
+            fallbackReason: fallbackReason,
+            runtimeIssueReason: runtimeIssueReason,
+            updatedAt: try container.decode(String.self, forKey: .updatedAt)
+        )
+    }
+}
+
+public struct GatewayConciergeAgentState: Codable, Sendable {
+    public let spaceId: String
+    public let spaceUid: String
+    public let conciergeAgentId: String
+    public let conciergeAgentDefinitionId: String?
+    public let conciergeProfileId: String
+    public let assignedAgentDefinitionId: String?
+    public let assignedProfileId: String?
+    public let providerHint: String?
+    public let modelHint: String?
+    public let status: GatewayConciergeAgentStatus
+    public let repaired: Bool
+    public let fallbackApplied: Bool
+    public let fallbackReason: String?
+    public let runtimeIssueReason: String?
+    public let updatedAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case spaceId
+        case spaceUid
+        case conciergeAgentId
+        case conciergeAgentDefinitionId
+        case conciergeProfileId
+        case assignedAgentDefinitionId
+        case assignedProfileId
+        case providerHint
+        case modelHint
+        case status
+        case repaired
+        case fallbackApplied
+        case fallbackReason
+        case runtimeIssueReason
+        case updatedAt
+    }
+
+    public init(
+        spaceId: String,
+        spaceUid: String,
+        conciergeAgentId: String,
+        conciergeAgentDefinitionId: String? = nil,
+        conciergeProfileId: String,
+        assignedAgentDefinitionId: String? = nil,
+        assignedProfileId: String? = nil,
+        providerHint: String? = nil,
+        modelHint: String? = nil,
+        status: GatewayConciergeAgentStatus,
+        repaired: Bool,
+        fallbackApplied: Bool,
+        fallbackReason: String? = nil,
+        runtimeIssueReason: String? = nil,
+        updatedAt: String
+    ) {
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.conciergeAgentId = conciergeAgentId
+        self.conciergeAgentDefinitionId = conciergeAgentDefinitionId ?? conciergeProfileId
+        self.conciergeProfileId = conciergeProfileId
+        self.assignedAgentDefinitionId = assignedAgentDefinitionId ?? assignedProfileId
+        self.assignedProfileId = assignedProfileId ?? assignedAgentDefinitionId
+        self.providerHint = providerHint
+        self.modelHint = modelHint
+        self.status = status
+        self.repaired = repaired
+        self.fallbackApplied = fallbackApplied
+        self.fallbackReason = fallbackReason
+        self.runtimeIssueReason = runtimeIssueReason
+        self.updatedAt = updatedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let conciergeAgentDefinitionId = try container.decodeIfPresent(
+            String.self,
+            forKey: .conciergeAgentDefinitionId
+        )
+        let conciergeProfileId = try container.decode(String.self, forKey: .conciergeProfileId)
+        let assignedAgentDefinitionId = try container.decodeIfPresent(
+            String.self,
+            forKey: .assignedAgentDefinitionId
+        )
+        let assignedProfileId = try container.decodeIfPresent(String.self, forKey: .assignedProfileId)
+        let fallbackReason = try container.decodeIfPresent(String.self, forKey: .fallbackReason)
+        let runtimeIssueReason = try container.decodeIfPresent(String.self, forKey: .runtimeIssueReason)
+            ?? fallbackReason
+
+        self.init(
+            spaceId: try container.decode(String.self, forKey: .spaceId),
+            spaceUid: try container.decode(String.self, forKey: .spaceUid),
+            conciergeAgentId: try container.decode(String.self, forKey: .conciergeAgentId),
+            conciergeAgentDefinitionId: conciergeAgentDefinitionId ?? conciergeProfileId,
+            conciergeProfileId: conciergeProfileId,
+            assignedAgentDefinitionId: assignedAgentDefinitionId ?? assignedProfileId,
+            assignedProfileId: assignedProfileId ?? assignedAgentDefinitionId,
+            providerHint: try container.decodeIfPresent(String.self, forKey: .providerHint),
+            modelHint: try container.decodeIfPresent(String.self, forKey: .modelHint),
+            status: try container.decode(GatewayConciergeAgentStatus.self, forKey: .status),
+            repaired: try container.decode(Bool.self, forKey: .repaired),
+            fallbackApplied: try container.decode(Bool.self, forKey: .fallbackApplied),
+            fallbackReason: fallbackReason,
+            runtimeIssueReason: runtimeIssueReason,
+            updatedAt: try container.decode(String.self, forKey: .updatedAt)
+        )
+    }
 }
 
 public struct GatewayProviderRuntimeConfig: Codable, Sendable {
     public let providerId: String
     public let model: String
     public let baseURL: String?
+    public let executablePath: String?
     public let hasApiKey: Bool
     public let apiKeySecretRef: String?
+    public let authMode: GatewayProviderAuthMode?
     public let allowedModels: [String]
     public let allowCustomModel: Bool
-    public let nativeCliToolsEnabled: Bool
     public let updatedAt: String
     public let source: String
 
@@ -1067,11 +3223,12 @@ public struct GatewayProviderRuntimeConfig: Codable, Sendable {
         case providerId
         case model
         case baseURL
+        case executablePath
         case hasApiKey
         case apiKeySecretRef
+        case authMode
         case allowedModels
         case allowCustomModel
-        case nativeCliToolsEnabled
         case updatedAt
         case source
     }
@@ -1081,14 +3238,36 @@ public struct GatewayProviderRuntimeConfig: Codable, Sendable {
         self.providerId = try container.decode(String.self, forKey: .providerId)
         self.model = try container.decode(String.self, forKey: .model)
         self.baseURL = try container.decodeIfPresent(String.self, forKey: .baseURL)
+        self.executablePath = try container.decodeIfPresent(String.self, forKey: .executablePath)
         self.hasApiKey = try container.decode(Bool.self, forKey: .hasApiKey)
         self.apiKeySecretRef = try container.decodeIfPresent(String.self, forKey: .apiKeySecretRef)
+        self.authMode = try container.decodeIfPresent(GatewayProviderAuthMode.self, forKey: .authMode)
         self.allowedModels = try container.decodeIfPresent([String].self, forKey: .allowedModels) ?? []
         self.allowCustomModel = try container.decodeIfPresent(Bool.self, forKey: .allowCustomModel) ?? true
-        self.nativeCliToolsEnabled = try container.decodeIfPresent(Bool.self, forKey: .nativeCliToolsEnabled) ?? false
         self.updatedAt = try container.decode(String.self, forKey: .updatedAt)
         self.source = try container.decode(String.self, forKey: .source)
     }
+}
+
+public enum GatewayProviderAuthMode: String, Codable, Sendable, Equatable {
+    case apiKey = "api_key"
+    case hostLogin = "host_login"
+}
+
+public enum GatewayProviderAuthStatus: String, Codable, Sendable, Equatable {
+    case authenticated
+    case needsKey = "needs_key"
+    case needsAuth = "needs_auth"
+    case error
+    case unsupported
+}
+
+public struct GatewayProviderAuthAccount: Codable, Sendable, Equatable {
+    public let email: String?
+    public let organization: String?
+    public let subscriptionType: String?
+    public let apiProvider: String?
+    public let tokenSource: String?
 }
 
 public enum GatewayModelDetectionStatus: String, Codable, Sendable {
@@ -1144,6 +3323,10 @@ public struct GatewayModelProviderCatalog: Codable, Sendable {
     public let status: GatewayIntegrationStatus?
     public let hasApiKey: Bool
     public let requiresApiKey: Bool
+    public let supportedAuthModes: [GatewayProviderAuthMode]
+    public let authMode: GatewayProviderAuthMode?
+    public let authStatus: GatewayProviderAuthStatus?
+    public let authAccount: GatewayProviderAuthAccount?
     public let baseURL: String?
     public let detectionStatus: GatewayModelDetectionStatus
     public let detectionError: String?
@@ -1161,6 +3344,10 @@ public struct GatewayModelProviderCatalog: Codable, Sendable {
         case status
         case hasApiKey
         case requiresApiKey
+        case supportedAuthModes
+        case authMode
+        case authStatus
+        case authAccount
         case baseURL
         case detectionStatus
         case detectionError
@@ -1191,6 +3378,10 @@ public struct GatewayModelProviderCatalog: Codable, Sendable {
         self.status = try container.decodeIfPresent(GatewayIntegrationStatus.self, forKey: .status)
         self.hasApiKey = try container.decode(Bool.self, forKey: .hasApiKey)
         self.requiresApiKey = try container.decode(Bool.self, forKey: .requiresApiKey)
+        self.supportedAuthModes = try container.decodeIfPresent([GatewayProviderAuthMode].self, forKey: .supportedAuthModes) ?? []
+        self.authMode = try container.decodeIfPresent(GatewayProviderAuthMode.self, forKey: .authMode)
+        self.authStatus = try container.decodeIfPresent(GatewayProviderAuthStatus.self, forKey: .authStatus)
+        self.authAccount = try container.decodeIfPresent(GatewayProviderAuthAccount.self, forKey: .authAccount)
         self.baseURL = try container.decodeIfPresent(String.self, forKey: .baseURL)
         self.detectionStatus = try container.decode(GatewayModelDetectionStatus.self, forKey: .detectionStatus)
         self.detectionError = try container.decodeIfPresent(String.self, forKey: .detectionError)
@@ -1202,16 +3393,209 @@ public struct GatewayModelProviderCatalog: Codable, Sendable {
     }
 }
 
-public struct GatewayIntegrationRequest: Codable, Sendable {
-    public let integrationRequestId: String
-    public let integrationClass: GatewayIntegrationClass
-    public let requestedName: String
-    public let useCase: String?
-    public let sourceURL: String?
-    public let notes: String?
-    public let principalId: String?
-    public let deviceId: String?
-    public let status: String
+public enum GatewayToolDangerLevel: String, Codable, Sendable {
+    case standard
+    case destructive
+}
+
+public enum GatewayToolHealthStatus: String, Codable, Sendable {
+    case unknown
+    case ok
+    case degraded
+}
+
+public enum GatewayToolApprovalGrantMode: String, Codable, Sendable {
+    case once
+    case timeWindow = "time_window"
+    case durable
+}
+
+public struct GatewayToolExample: Codable, Sendable {
+    public let name: String
+    public let description: String?
+    public let arguments: [String: AnyCodable]
+    public let expectedOutput: String?
+
+    public init(
+        name: String,
+        description: String? = nil,
+        arguments: [String: Any] = [:],
+        expectedOutput: String? = nil
+    ) {
+        self.name = name
+        self.description = description
+        self.arguments = arguments.mapValues { AnyCodable($0) }
+        self.expectedOutput = expectedOutput
+    }
+}
+
+public struct GatewayTool: Codable, Sendable {
+    public let schemaVersion: Int
+    public let id: String
+    public let providerId: String
+    public let displayName: String
+    public let description: String
+    public let bundleId: String?
+    public let bundleDisplayName: String?
+    public let bundleDescription: String?
+    public let toolGroupId: String?
+    public let toolGroupDisplayName: String?
+    public let executable: String
+    public let resolvedExecutable: String
+    public let argsTemplate: [String]
+    public let inputSchema: [String: AnyCodable]
+    public let instructions: String?
+    public let examples: [GatewayToolExample]
+    public let timeoutMs: Int
+    public let maxOutputBytes: Int
+    public let cwdMode: String
+    public let fixedCwd: String?
+    public let outputMode: String
+    public let dangerLevel: GatewayToolDangerLevel
+    public let enabled: Bool
+    public let available: Bool
+    public let healthStatus: GatewayToolHealthStatus
+    public let healthMessage: String?
+    public let manifestPath: String
+    public let readmePath: String?
+    public let readmeContent: String?
+    public let requiresApproval: Bool
+    public let createdAt: String
+    public let updatedAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion
+        case id
+        case providerId
+        case displayName
+        case description
+        case bundleId
+        case bundleDisplayName
+        case bundleDescription
+        case toolGroupId
+        case toolGroupDisplayName
+        case executable
+        case resolvedExecutable
+        case argsTemplate
+        case inputSchema
+        case instructions
+        case examples
+        case timeoutMs
+        case maxOutputBytes
+        case cwdMode
+        case fixedCwd
+        case outputMode
+        case dangerLevel
+        case enabled
+        case available
+        case healthStatus
+        case healthMessage
+        case manifestPath
+        case readmePath
+        case readmeContent
+        case requiresApproval
+        case createdAt
+        case updatedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schemaVersion = try container.decode(Int.self, forKey: .schemaVersion)
+        id = try container.decode(String.self, forKey: .id)
+        providerId = try container.decode(String.self, forKey: .providerId)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        description = try container.decode(String.self, forKey: .description)
+        bundleId = try container.decodeIfPresent(String.self, forKey: .bundleId)
+        bundleDisplayName = try container.decodeIfPresent(String.self, forKey: .bundleDisplayName)
+        bundleDescription = try container.decodeIfPresent(String.self, forKey: .bundleDescription)
+        toolGroupId = try container.decodeIfPresent(String.self, forKey: .toolGroupId)
+        toolGroupDisplayName = try container.decodeIfPresent(String.self, forKey: .toolGroupDisplayName)
+        executable = try container.decode(String.self, forKey: .executable)
+        resolvedExecutable = try container.decode(String.self, forKey: .resolvedExecutable)
+        argsTemplate = try container.decode([String].self, forKey: .argsTemplate)
+        inputSchema = try container.decode([String: AnyCodable].self, forKey: .inputSchema)
+        instructions = try container.decodeIfPresent(String.self, forKey: .instructions)
+        examples = try container.decode([GatewayToolExample].self, forKey: .examples)
+        timeoutMs = try container.decode(Int.self, forKey: .timeoutMs)
+        maxOutputBytes = try container.decode(Int.self, forKey: .maxOutputBytes)
+        cwdMode = try container.decode(String.self, forKey: .cwdMode)
+        fixedCwd = try container.decodeIfPresent(String.self, forKey: .fixedCwd)
+        outputMode = try container.decode(String.self, forKey: .outputMode)
+        dangerLevel = try container.decode(GatewayToolDangerLevel.self, forKey: .dangerLevel)
+        enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        available = try container.decode(Bool.self, forKey: .available)
+        healthStatus = try container.decode(GatewayToolHealthStatus.self, forKey: .healthStatus)
+        healthMessage = try container.decodeIfPresent(String.self, forKey: .healthMessage)
+        manifestPath = try container.decode(String.self, forKey: .manifestPath)
+        readmePath = try container.decodeIfPresent(String.self, forKey: .readmePath)
+        readmeContent = try container.decodeIfPresent(String.self, forKey: .readmeContent)
+        requiresApproval = try container.decode(Bool.self, forKey: .requiresApproval)
+        createdAt = try container.decode(String.self, forKey: .createdAt)
+        updatedAt = try container.decode(String.self, forKey: .updatedAt)
+    }
+}
+
+public struct GatewayToolApprovalGrant: Codable, Sendable {
+    public let principalId: String
+    public let deviceId: String
+    public let spaceId: String
+    public let toolId: String
+    public let mode: GatewayToolApprovalGrantMode
+    public let source: String
+    public let reason: String
+    public let grantedBy: String
+    public let grantedAt: String
+    public let expiresAt: String?
+    public let revokedAt: String?
+    public let updatedAt: String
+}
+
+public struct GatewayScaffoldedToolBundle: Codable, Sendable {
+    public let manifest: GatewayRegisterToolPayload
+    public let readme: String
+}
+
+public struct GatewayJiraCliRescanResult: Codable, Sendable {
+    public let detected: Bool
+    public let toolCount: Int
+    public let toolIds: [String]
+    public let removedToolIds: [String]
+    public let healthStatus: GatewayToolHealthStatus
+    public let healthMessage: String?
+    public let executablePath: String?
+}
+
+public struct GatewayRevokeToolApprovalGrantResult: Codable, Sendable {
+    public let revoked: Bool
+    public let toolId: String
+    public let spaceId: String
+    public let grant: GatewayToolApprovalGrant?
+}
+
+public enum SpaceMcpTransport: String, Codable, Sendable {
+    case sse
+    case stdio
+}
+
+public enum SpaceMcpHealthStatus: String, Codable, Sendable {
+    case unknown
+    case ok
+    case degraded
+    case error
+}
+
+public struct SpaceMcpEndpoint: Codable, Sendable {
+    public let endpointId: String
+    public let spaceId: String
+    public let transport: SpaceMcpTransport
+    public let endpoint: String
+    public let args: [String]
+    public let secretRef: String?
+    public let enabled: Bool
+    public let healthStatus: SpaceMcpHealthStatus
+    public let healthMessage: String?
+    public let lastConnectedAt: String?
+    public let lastErrorAt: String?
     public let createdAt: String
     public let updatedAt: String
 }
@@ -1269,6 +3653,180 @@ public struct SpaceResetResult: Codable, Sendable {
     public let resetAt: String
     public let tablesCleared: Int
     public let rowsDeleted: UInt64
+}
+
+public struct ToolDenyReason: Codable, Sendable {
+    public let code: String
+    public let message: String
+}
+
+public struct ToolAccessRule: Codable, Sendable {
+    public let selectorKind: String
+    public let selectorId: String
+    public let state: String
+
+    public init(selectorKind: String, selectorId: String, state: String) {
+        self.selectorKind = selectorKind
+        self.selectorId = selectorId
+        self.state = state
+    }
+}
+
+public struct DangerousCapabilityRule: Codable, Sendable {
+    public let capabilityId: String
+    public let state: String
+
+    public init(capabilityId: String, state: String) {
+        self.capabilityId = capabilityId
+        self.state = state
+    }
+}
+
+public struct ToolAccessPolicy: Codable, Sendable {
+    public let scopeType: String
+    public let scopeId: String
+    public let rules: [ToolAccessRule]
+    public let dangerousCapabilities: [DangerousCapabilityRule]
+    public let guestAccessPreset: String?
+    public let policyVersion: String
+    public let updatedBy: String?
+    public let updatedAt: String?
+
+    public init(
+        scopeType: String,
+        scopeId: String,
+        rules: [ToolAccessRule],
+        dangerousCapabilities: [DangerousCapabilityRule],
+        guestAccessPreset: String? = nil,
+        policyVersion: String,
+        updatedBy: String? = nil,
+        updatedAt: String? = nil
+    ) {
+        self.scopeType = scopeType
+        self.scopeId = scopeId
+        self.rules = rules
+        self.dangerousCapabilities = dangerousCapabilities
+        self.guestAccessPreset = guestAccessPreset
+        self.policyVersion = policyVersion
+        self.updatedBy = updatedBy
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct SafetyProfileDefinition: Codable, Sendable {
+    public let profileId: String
+    public let displayName: String
+    public let description: String
+    public let rules: [ToolAccessRule]
+    public let dangerousCapabilities: [DangerousCapabilityRule]
+    public let updatedAt: String
+
+    public init(
+        profileId: String,
+        displayName: String,
+        description: String,
+        rules: [ToolAccessRule],
+        dangerousCapabilities: [DangerousCapabilityRule],
+        updatedAt: String
+    ) {
+        self.profileId = profileId
+        self.displayName = displayName
+        self.description = description
+        self.rules = rules
+        self.dangerousCapabilities = dangerousCapabilities
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct EffectiveToolOperation: Codable, Sendable {
+    public let operationId: String
+    public let capability: String
+    public let operation: String
+    public let providerIds: [String]
+    public let allowed: Bool
+    public let denyReasons: [ToolDenyReason]
+}
+
+public struct EffectiveToolMatrix: Codable, Sendable {
+    public let spaceId: String
+    public let principalId: String?
+    public let deviceId: String?
+    public let agentId: String?
+    public let policyVersion: String
+    public let operations: [EffectiveToolOperation]
+    public let generatedAt: String
+}
+
+public struct EffectiveToolAccessOperation: Codable, Sendable {
+    public let operationId: String
+    public let capability: String
+    public let operation: String
+    public let providerIds: [String]
+    public let selectors: [String]
+    public let allowed: Bool
+    public let denialReasonCode: String?
+    public let denialReason: String?
+    public let requiredDangerousCapability: String?
+    public let escalationAllowed: Bool?
+}
+
+public struct EffectiveDangerousCapability: Codable, Sendable {
+    public let capabilityId: String
+    public let enabled: Bool
+    public let source: String
+}
+
+public struct EffectiveToolAccess: Codable, Sendable {
+    public let spaceId: String
+    public let agentId: String?
+    public let policyVersion: String
+    public let safetyProfileId: String?
+    public let operations: [EffectiveToolAccessOperation]
+    public let dangerousCapabilities: [EffectiveDangerousCapability]
+    public let generatedAt: String
+}
+
+public enum SpaceConnectorPolicySourceKind: String, Codable, Sendable {
+    case builtinIntegration = "builtin_integration"
+    case cliBundle = "cli_bundle"
+    case connectorFamily = "connector_family"
+    case connectorInstance = "connector_instance"
+    case mcpServer = "mcp_server"
+}
+
+public enum SpaceConnectorPolicyEntryState: String, Codable, Sendable {
+    case enabled
+    case disabled
+}
+
+public enum SpaceConnectorPolicyMode: String, Codable, Sendable {
+    case allEnabled = "all_enabled"
+    case custom
+}
+
+public struct SpaceConnectorPolicyEntry: Codable, Sendable {
+    public let sourceKind: SpaceConnectorPolicySourceKind
+    public let sourceId: String
+    public let state: SpaceConnectorPolicyEntryState
+
+    public init(
+        sourceKind: SpaceConnectorPolicySourceKind,
+        sourceId: String,
+        state: SpaceConnectorPolicyEntryState
+    ) {
+        self.sourceKind = sourceKind
+        self.sourceId = sourceId
+        self.state = state
+    }
+}
+
+public struct SpaceConnectorPolicy: Codable, Sendable {
+    public let spaceId: String
+    public let mode: SpaceConnectorPolicyMode
+    public let entries: [SpaceConnectorPolicyEntry]
+    public let policyVersion: String
+    public let updatedBy: String?
+    public let updatedAt: String?
 }
 
 public enum GatewayConnectorKind: String, Codable, Sendable {
@@ -1540,10 +4098,54 @@ public struct VoiceUsageWindowSummary: Codable, Sendable {
 
 public struct VoiceUsageSourceSummary: Codable, Sendable {
     public let source: String
-    public let sttSeconds: Double
-    public let ttsChars: Int
-    public let ttsSeconds: Double
-    public let estimatedCostUsd: Double
+    public let usage: VoiceUsageWindowSummary
+
+    public var sttSeconds: Double { usage.sttSeconds }
+    public var ttsChars: Int { usage.ttsChars }
+    public var ttsSeconds: Double { usage.ttsSeconds }
+    public var estimatedCostUsd: Double { usage.estimatedCostUsd }
+
+    private enum CodingKeys: String, CodingKey {
+        case source
+        case usage
+        case sttSeconds
+        case ttsChars
+        case ttsSeconds
+        case estimatedCostUsd
+    }
+
+    public init(source: String, usage: VoiceUsageWindowSummary) {
+        self.source = source
+        self.usage = usage
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let usage = try container.decodeIfPresent(VoiceUsageWindowSummary.self, forKey: .usage)
+            ?? VoiceUsageWindowSummary(
+                sttSeconds: try container.decodeIfPresent(Double.self, forKey: .sttSeconds) ?? 0,
+                ttsChars: try container.decodeIfPresent(Int.self, forKey: .ttsChars) ?? 0,
+                ttsSeconds: try container.decodeIfPresent(Double.self, forKey: .ttsSeconds) ?? 0,
+                estimatedCostUsd: try container.decodeIfPresent(Double.self, forKey: .estimatedCostUsd) ?? 0
+            )
+        self.init(
+            source: try container.decode(String.self, forKey: .source),
+            usage: usage
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(source, forKey: .source)
+        try container.encode(usage, forKey: .usage)
+    }
+}
+
+public struct VoiceUsageProviderSummary: Codable, Sendable {
+    public let channel: String
+    public let source: String
+    public let providerId: String
+    public let usage: VoiceUsageWindowSummary
 }
 
 public struct VoiceUsageLockSummary: Codable, Sendable {
@@ -1567,6 +4169,22 @@ public struct VoiceUsageSnapshot: Codable, Sendable {
     public let windows: Windows
     public let bySource: [VoiceUsageSourceSummary]
     public let lock: VoiceUsageLockSummary?
+    public let byProvider: [VoiceUsageProviderSummary]
+
+    private enum CodingKeys: String, CodingKey {
+        case windows
+        case bySource
+        case lock
+        case byProvider
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        windows = try container.decode(Windows.self, forKey: .windows)
+        bySource = try container.decodeIfPresent([VoiceUsageSourceSummary].self, forKey: .bySource) ?? []
+        lock = try container.decodeIfPresent(VoiceUsageLockSummary.self, forKey: .lock)
+        byProvider = try container.decodeIfPresent([VoiceUsageProviderSummary].self, forKey: .byProvider) ?? []
+    }
 }
 
 public struct UsageSnapshot: Codable, Sendable {
@@ -1619,33 +4237,6 @@ public struct GatewayPolicyUpdate: Sendable {
     }
 }
 
-public enum GatewaySkillStatus: String, Codable, Sendable {
-    case active
-    case archived
-}
-
-public struct GatewaySkillEntry: Codable, Sendable {
-    public let skillId: String
-    public let name: String
-    public let description: String?
-    public let contentMarkdown: String
-    public let sourceRef: String?
-    public let tags: [String]
-    public let status: GatewaySkillStatus
-    public let createdAt: String
-    public let updatedAt: String
-}
-
-public struct GatewaySkillUpsertResult: Codable, Sendable {
-    public let skill: GatewaySkillEntry
-    public let created: Bool
-}
-
-public struct GatewaySkillDeleteResult: Codable, Sendable {
-    public let skillId: String
-    public let deleted: Bool
-}
-
 public enum GatewayKnowledgeBaseEntryKind: String, Codable, Sendable {
     case web
     case file
@@ -1691,6 +4282,16 @@ public struct OrchestratorCommandResult: Codable, Sendable {
   public let events: [OrchestratorCommandEvent]
 }
 
+public struct SpaceDigestResult: Codable, Sendable {
+    public let spaceId: String
+    public let name: String
+    public let summary: String
+    public let activeAgents: Int
+    public let lastTurnAt: String?
+    public let pendingActions: [String]
+    public let trace: [String]?
+}
+
 public struct OrchestratorSummaryParticipant: Codable, Sendable {
     public let agentId: String
     public let turnOrder: Int
@@ -1714,6 +4315,7 @@ public struct OrchestratorSummaryArtifact: Codable, Sendable {
     public let version: String
     public let spaceId: String
     public let turnId: String
+    public let conversationTopology: ConversationTopology?
     public let turnModel: String
     public let generatedAt: String
     public let status: String
@@ -1763,6 +4365,22 @@ public enum SchedulerActionType: String, Codable, Sendable {
     case spacePrompt = "space_prompt"
 }
 
+public enum SchedulerExecutionTargetMode: String, Codable, Sendable {
+    case existingSpace = "existing_space"
+    case newSpace = "new_space"
+}
+
+public enum SchedulerCalendarSyncStatus: String, Codable, Sendable {
+    case pending
+    case synced
+    case error
+}
+
+public enum SchedulerCalendarDriftStatus: String, Codable, Sendable {
+    case none
+    case drifted
+}
+
 public struct SchedulerSchedulePreset: Codable, Sendable {
     public let kind: SchedulerScheduleKind
     public let intervalHours: Int?
@@ -1801,6 +4419,42 @@ public struct SchedulerAction: Codable, Sendable {
     }
 }
 
+public struct SchedulerExecutionTarget: Codable, Sendable {
+    public let mode: SchedulerExecutionTargetMode
+
+    public init(mode: SchedulerExecutionTargetMode) {
+        self.mode = mode
+    }
+}
+
+public struct SchedulerCalendarBinding: Codable, Sendable {
+    public let providerId: String
+    public let calendarId: String
+    public let eventId: String?
+    public let syncStatus: SchedulerCalendarSyncStatus?
+    public let driftStatus: SchedulerCalendarDriftStatus?
+    public let driftMessage: String?
+    public let lastSyncedAt: String?
+
+    public init(
+        providerId: String,
+        calendarId: String,
+        eventId: String? = nil,
+        syncStatus: SchedulerCalendarSyncStatus? = nil,
+        driftStatus: SchedulerCalendarDriftStatus? = nil,
+        driftMessage: String? = nil,
+        lastSyncedAt: String? = nil
+    ) {
+        self.providerId = providerId
+        self.calendarId = calendarId
+        self.eventId = eventId
+        self.syncStatus = syncStatus
+        self.driftStatus = driftStatus
+        self.driftMessage = driftMessage
+        self.lastSyncedAt = lastSyncedAt
+    }
+}
+
 public struct SchedulerLinkedSpace: Codable, Sendable {
     public let spaceId: String
     public let spaceUid: String
@@ -1829,6 +4483,8 @@ public struct SchedulerJob: Codable, Sendable {
     public let createdAt: String
     public let updatedAt: String
     public let linkedSpaces: [SchedulerLinkedSpace]
+    public let executionTarget: SchedulerExecutionTarget
+    public let calendarBinding: SchedulerCalendarBinding?
 }
 
 public struct SchedulerJobRun: Codable, Sendable {
@@ -1987,6 +4643,65 @@ public struct SyncPullResourcesResult: Codable, Sendable {
     public let skippedCount: Int
 }
 
+public struct VoiceIntentDecision: Codable, Sendable {
+    public let intentType: String
+    public let confidence: Double
+    public let rationale: String?
+    public let clarificationPrompt: String?
+    public let capabilityId: String?
+}
+
+public struct SpeechEngineMetrics: Codable, Sendable {
+    public let vadDetectionMs: Double?
+    public let sttTranscriptionMs: Double?
+    public let ttsFirstAudioMs: Double?
+    public let ttsFullSynthesisMs: Double?
+}
+
+public struct SpeechRoutePreferences: Codable, Sendable {
+    public let channel: String
+    public let preferredSource: String?
+    public let preferredProviderId: String?
+    public let byokProviderId: String?
+    public let localModelProviderId: String?
+    public let appleSpeechProviderId: String?
+    public let allowByokFallback: Bool?
+    public let allowLocalFallback: Bool?
+    public let allowAppleSpeechFallback: Bool?
+}
+
+public struct VoiceRoute: Codable, Sendable {
+    public let channel: String
+    public let source: String
+    public let providerId: String
+}
+
+public struct VoiceProviderConfig: Codable, Sendable {
+    public let providerId: String
+    public let channel: String
+    public let source: String
+    public let priority: Int
+    public let healthStatus: String
+    public let costProfile: String?
+}
+
+public struct VoiceLockDecision: Codable, Sendable {
+    public let channel: String
+    public let source: String
+    public let allowed: Bool
+    public let reason: String
+    public let retryAt: String?
+    public let fallbackHint: String?
+}
+
+public struct VoiceFallbackEvent: Codable, Sendable {
+    public let channel: String
+    public let fromRoute: VoiceRoute?
+    public let toRoute: VoiceRoute?
+    public let reason: String
+    public let detail: String?
+}
+
 public struct SpeechSessionEvent: Codable, Sendable {
     public struct UsageMetrics: Codable, Sendable {
         public let sttSeconds: Double
@@ -1997,6 +4712,9 @@ public struct SpeechSessionEvent: Codable, Sendable {
     public let sessionId: String
     public let spaceId: String
     public let spaceUid: String
+    public let type: String?
+    public let message: String?
+    public let intent: VoiceIntentDecision?
     public let state: String
     public let eventType: String
     public let providerSource: String?
@@ -2007,7 +4725,155 @@ public struct SpeechSessionEvent: Codable, Sendable {
     public let transcript: String?
     public let turnId: String?
     public let sequence: Int?
+    public let sequenceNo: Int?
     public let reason: String?
+    public let emittedAt: String?
+    public let sttRoute: VoiceRoute?
+    public let ttsRoute: VoiceRoute?
+    public let lockDecision: VoiceLockDecision?
+    public let fallbackEvent: VoiceFallbackEvent?
+    public let providerConfigs: [VoiceProviderConfig]
+    public let engineMetrics: SpeechEngineMetrics?
+    public let ts: String
+
+    private enum CodingKeys: String, CodingKey {
+        case sessionId
+        case spaceId
+        case spaceUid
+        case type
+        case message
+        case intent
+        case state
+        case eventType
+        case providerSource
+        case providerId
+        case fallbackReason
+        case usage
+        case lockReason
+        case transcript
+        case turnId
+        case sequence
+        case sequenceNo
+        case reason
+        case emittedAt
+        case sttRoute
+        case ttsRoute
+        case lockDecision
+        case fallbackEvent
+        case providerConfigs
+        case engineMetrics
+        case ts
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        sessionId = try container.decode(String.self, forKey: .sessionId)
+        spaceId = try container.decode(String.self, forKey: .spaceId)
+        spaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid) ?? spaceId
+        type = try container.decodeIfPresent(String.self, forKey: .type)
+        message = try container.decodeIfPresent(String.self, forKey: .message)
+        intent = try container.decodeIfPresent(VoiceIntentDecision.self, forKey: .intent)
+        state = try container.decode(String.self, forKey: .state)
+        eventType = try container.decodeIfPresent(String.self, forKey: .eventType) ?? type ?? state
+        providerSource = try container.decodeIfPresent(String.self, forKey: .providerSource)
+        providerId = try container.decodeIfPresent(String.self, forKey: .providerId)
+        fallbackReason = try container.decodeIfPresent(String.self, forKey: .fallbackReason)
+        usage = try container.decodeIfPresent(UsageMetrics.self, forKey: .usage)
+        lockReason = try container.decodeIfPresent(String.self, forKey: .lockReason)
+        transcript = try container.decodeIfPresent(String.self, forKey: .transcript)
+        turnId = try container.decodeIfPresent(String.self, forKey: .turnId)
+        let decodedSequence = try container.decodeIfPresent(Int.self, forKey: .sequence)
+        let decodedSequenceNo = try container.decodeIfPresent(Int.self, forKey: .sequenceNo)
+        sequence = decodedSequence ?? decodedSequenceNo
+        sequenceNo = decodedSequenceNo ?? decodedSequence
+        reason = try container.decodeIfPresent(String.self, forKey: .reason)
+        let decodedEmittedAt = try container.decodeIfPresent(String.self, forKey: .emittedAt)
+        let decodedTs = try container.decodeIfPresent(String.self, forKey: .ts)
+        emittedAt = decodedEmittedAt ?? decodedTs
+        sttRoute = try container.decodeIfPresent(VoiceRoute.self, forKey: .sttRoute)
+        ttsRoute = try container.decodeIfPresent(VoiceRoute.self, forKey: .ttsRoute)
+        lockDecision = try container.decodeIfPresent(VoiceLockDecision.self, forKey: .lockDecision)
+        fallbackEvent = try container.decodeIfPresent(VoiceFallbackEvent.self, forKey: .fallbackEvent)
+        providerConfigs = try container.decodeIfPresent([VoiceProviderConfig].self, forKey: .providerConfigs) ?? []
+        engineMetrics = try container.decodeIfPresent(SpeechEngineMetrics.self, forKey: .engineMetrics)
+        ts = decodedTs ?? decodedEmittedAt ?? ""
+    }
+}
+
+public struct ConciergeCallMetrics: Codable, Sendable {
+    public let callSetupMs: Double?
+    public let sttFirstPartialMs: Double?
+    public let llmFirstTokenMs: Double?
+    public let ttsFirstAudioMs: Double?
+    public let routeChangeCount: Int?
+    public let handoffCount: Int?
+    public let providerFallbackCount: Int?
+    public let interruptCount: Int?
+    public let playbackUnderrunCount: Int?
+    public let reconnectCount: Int?
+}
+
+public struct ConciergeCallHandoffContext: Codable, Sendable {
+    public let destinationPlatform: String?
+    public let destinationDeviceId: String?
+    public let destinationClientId: String?
+    public let resumeUrl: String?
+}
+
+public struct ConciergeCallHandoffToken: Codable, Sendable {
+    public let token: String
+    public let callId: String
+    public let sourceDeviceId: String?
+    public let destinationPlatform: String
+    public let destinationDeviceId: String?
+    public let destinationClientId: String?
+    public let resumeUrl: String?
+    public let expiresAt: String
+    public let signature: String
+}
+
+public struct ConciergeCallEvent: Codable, Sendable {
+    public let callId: String
+    public let state: String
+    public let platform: String
+    public let deviceId: String?
+    public let displayName: String
+    public let ttsMode: String
+    public let muted: Bool
+    public let targetGatewayId: String?
+    public let transcriptDelta: String?
+    public let assistantTextDelta: String?
+    public let urgency: String?
+    public let handoffToken: ConciergeCallHandoffToken?
+    public let metrics: ConciergeCallMetrics?
+    public let reason: String?
+    public let emittedAt: String?
+    public let mediaEventType: String?
+    public let sequence: Int?
+    public let transcriptFinal: Bool?
+    public let assistantTextFinal: Bool?
+    public let activeTurnId: String?
+    public let providerSource: String?
+    public let providerId: String?
+    public let fallbackReason: String?
+    public let assistantAudioBase64: String?
+    public let assistantAudioDurationSeconds: Double?
+    public let ts: String
+}
+
+public struct ConciergeCallHandoffPreparation: Codable, Sendable {
+    public let event: ConciergeCallEvent
+    public let handoffToken: ConciergeCallHandoffToken
+}
+
+public struct ConciergeVoipPushRegistration: Codable, Sendable {
+    public let principalId: String?
+    public let deviceId: String
+    public let platform: String
+    public let pushToken: String
+    public let voipTopic: String?
+    public let proactiveOptIn: Bool
+    public let registeredAt: String
     public let ts: String
 }
 
@@ -2020,6 +4886,7 @@ public struct MainSpaceBootstrapOptions: Sendable {
     public let createIfMissing: Bool
     public let subscribe: Bool
     public let initialAgents: [SpaceCreateInitialAgentPayload]?
+    public let thinkingCapturePolicy: ThinkingCapturePolicy?
 
     public init(
         apiVersion: String? = nil,
@@ -2029,7 +4896,8 @@ public struct MainSpaceBootstrapOptions: Sendable {
         goal: String = "Default shared space for gateway startup and orchestrator coordination.",
         createIfMissing: Bool = true,
         subscribe: Bool = true,
-        initialAgents: [SpaceCreateInitialAgentPayload]? = nil
+        initialAgents: [SpaceCreateInitialAgentPayload]? = nil,
+        thinkingCapturePolicy: ThinkingCapturePolicy? = nil
     ) {
         self.apiVersion = apiVersion
         self.spaceId = spaceId
@@ -2039,6 +4907,7 @@ public struct MainSpaceBootstrapOptions: Sendable {
         self.createIfMissing = createIfMissing
         self.subscribe = subscribe
         self.initialAgents = initialAgents
+        self.thinkingCapturePolicy = thinkingCapturePolicy
     }
 }
 
@@ -2065,7 +4934,89 @@ public struct GatewayNotification: Codable, Sendable {
     public let spaceId: String?
     public let spaceUid: String?
     public let agentId: String?
+    public let data: [String: AnyCodable]?
     public let createdAt: String
+
+    private enum CodingKeys: String, CodingKey {
+        case notificationId
+        case category
+        case severity
+        case title
+        case body
+        case spaceId
+        case spaceUid
+        case agentId
+        case data
+        case createdAt
+    }
+
+    private enum LegacyCodingKeys: String, CodingKey {
+        case message
+    }
+
+    public init(
+        notificationId: String,
+        category: String,
+        severity: String,
+        title: String,
+        body: String,
+        spaceId: String? = nil,
+        spaceUid: String? = nil,
+        agentId: String? = nil,
+        data: [String: AnyCodable]? = nil,
+        createdAt: String
+    ) {
+        self.notificationId = notificationId
+        self.category = category
+        self.severity = severity
+        self.title = title
+        self.body = body
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.agentId = agentId
+        self.data = data
+        self.createdAt = createdAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        notificationId = try container.decode(String.self, forKey: .notificationId)
+        category = try container.decode(String.self, forKey: .category)
+        severity = try container.decode(String.self, forKey: .severity)
+        title = try container.decode(String.self, forKey: .title)
+        body = try container.decodeIfPresent(String.self, forKey: .body)
+            ?? {
+                let legacyContainer = try decoder.container(keyedBy: LegacyCodingKeys.self)
+                return try legacyContainer.decode(String.self, forKey: .message)
+            }()
+        spaceId = try container.decodeIfPresent(String.self, forKey: .spaceId)
+        spaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid)
+        agentId = try container.decodeIfPresent(String.self, forKey: .agentId)
+        data = try container.decodeIfPresent([String: AnyCodable].self, forKey: .data)
+        createdAt = try container.decode(String.self, forKey: .createdAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(notificationId, forKey: .notificationId)
+        try container.encode(category, forKey: .category)
+        try container.encode(severity, forKey: .severity)
+        try container.encode(title, forKey: .title)
+        try container.encode(body, forKey: .body)
+        try container.encodeIfPresent(spaceId, forKey: .spaceId)
+        try container.encodeIfPresent(spaceUid, forKey: .spaceUid)
+        try container.encodeIfPresent(agentId, forKey: .agentId)
+        try container.encodeIfPresent(data, forKey: .data)
+        try container.encode(createdAt, forKey: .createdAt)
+    }
+}
+
+public struct AppNavigateEvent: Codable, Sendable {
+    public let destination: String
+    public let gatewayId: String?
+    public let spaceId: String?
+    public let jobId: String?
+    public let promptText: String?
 }
 
 // MARK: - Inter-Agent Events

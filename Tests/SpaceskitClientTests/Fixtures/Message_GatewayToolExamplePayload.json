@@ -1,0 +1,13 @@
+{
+  "type": "test_gatewaytoolexamplepayload",
+  "id": "msg-gatewaytoolexamplepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "name": "sample-name",
+    "description": "sample-description",
+    "arguments": {
+      "key1": "value1"
+    },
+    "expectedOutput": "sample-expectedOutput"
+  }
+}

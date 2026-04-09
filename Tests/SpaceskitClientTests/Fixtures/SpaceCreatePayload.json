@@ -7,6 +7,8 @@
   "spaceType": "sample-spaceType",
   "name": "sample-name",
   "goal": "sample-goal",
+  "conversationTopology": "direct",
+  "promptPackId": "sample-promptPackId",
   "turnModel": "sample-turnModel",
   "templateId": "sample-templateId",
   "templateRevision": 3.14,
@@ -21,6 +23,11 @@
     "key1": "value1"
   },
   "maxTurns": 3.14,
+  "thinkingCapturePolicy": "OFF",
+  "memoryPolicy": {
+    "experienceCapture": "INHERIT",
+    "privacyMode": "STANDARD"
+  },
   "moderatorProfileId": "sample-moderatorProfileId",
   "initialAgents": [
     {
@@ -28,7 +35,29 @@
       "idempotencyKey": "sample-idempotencyKey",
       "spaceId": "sample-spaceId",
       "agentId": "sample-agentId",
+      "agentDefinitionId": "sample-agentDefinitionId",
       "profileId": "sample-profileId",
+      "safetyProfileId": "safe",
+      "toolPolicyOverride": {
+        "scopeType": "gateway",
+        "scopeId": "sample-scopeId",
+        "rules": [
+          {
+            "selectorKind": "capability",
+            "selectorId": "sample-selectorId",
+            "state": "enabled"
+          }
+        ],
+        "dangerousCapabilities": [
+          {
+            "capabilityId": "managed_shell",
+            "state": "enabled"
+          }
+        ],
+        "policyVersion": "sample-policyVersion",
+        "updatedBy": "sample-updatedBy",
+        "updatedAt": "sample-updatedAt"
+      },
       "securityScope": {
         "key1": "value1"
       },

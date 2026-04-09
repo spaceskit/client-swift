@@ -1,12 +1,12 @@
 {
   "type": "test_spacelistchangesetspayload",
   "id": "msg-spacelistchangesetspayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "apiVersion": "sample-apiVersion",
     "spaceId": "sample-spaceId",
     "statuses": [
-      null
+      "draft"
     ],
     "limit": 3.14,
     "offset": 3.14

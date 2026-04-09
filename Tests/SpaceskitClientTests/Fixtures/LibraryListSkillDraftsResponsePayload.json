@@ -1,0 +1,13 @@
+{
+  "drafts": [
+    {
+      "draftId": "sample-draftId",
+      "name": "sample-name",
+      "description": "sample-description",
+      "requestPrompt": "sample-requestPrompt",
+      "contentMarkdown": "sample-contentMarkdown",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  ]
+}

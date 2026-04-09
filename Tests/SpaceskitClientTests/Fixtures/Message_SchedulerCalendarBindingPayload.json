@@ -1,0 +1,14 @@
+{
+  "type": "test_schedulercalendarbindingpayload",
+  "id": "msg-schedulercalendarbindingpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "providerId": "sample-providerId",
+    "calendarId": "sample-calendarId",
+    "eventId": "sample-eventId",
+    "syncStatus": "pending",
+    "driftStatus": "none",
+    "driftMessage": "sample-driftMessage",
+    "lastSyncedAt": "sample-lastSyncedAt"
+  }
+}

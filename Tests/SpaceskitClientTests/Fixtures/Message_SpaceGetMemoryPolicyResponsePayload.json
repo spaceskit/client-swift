@@ -1,0 +1,12 @@
+{
+  "type": "test_spacegetmemorypolicyresponsepayload",
+  "id": "msg-spacegetmemorypolicyresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "memoryPolicy": {
+      "experienceCapture": "INHERIT",
+      "privacyMode": "STANDARD"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "test_gatewayexternalconnectivityadvertisedendpointpayload",
+  "id": "msg-gatewayexternalconnectivityadvertisedendpointpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "provider": "tailscale",
+    "label": "sample-label",
+    "host": "sample-host",
+    "port": 42,
+    "websocketUrl": "sample-websocketUrl",
+    "healthUrl": "sample-healthUrl"
+  }
+}

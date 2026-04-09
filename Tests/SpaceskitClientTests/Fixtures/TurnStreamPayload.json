@@ -2,7 +2,11 @@
   "spaceId": "sample-spaceId",
   "spaceUid": "sample-spaceUid",
   "turnId": "sample-turnId",
+  "rootTurnId": "sample-rootTurnId",
   "agentId": "sample-agentId",
+  "conversationTopology": "direct",
+  "transcriptVisibility": "visible",
+  "summaryTurnId": "sample-summaryTurnId",
   "delta": "sample-delta",
   "seq": 42,
   "done": true

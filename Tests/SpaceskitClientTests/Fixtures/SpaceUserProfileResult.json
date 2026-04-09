@@ -1,0 +1,19 @@
+{
+  "profile": {
+    "principalId": "principal:local",
+    "displayName": "Local User",
+    "summary": "Prefers concise status updates.",
+    "facts": [
+      "prefers concise summaries"
+    ],
+    "preferences": [
+      "activity-first debug view"
+    ],
+    "corrections": [],
+    "metadata": {
+      "source": "concierge"
+    },
+    "updatedAt": "2026-03-17T08:05:00.000Z",
+    "createdAt": "2026-03-17T08:00:00.000Z"
+  }
+}

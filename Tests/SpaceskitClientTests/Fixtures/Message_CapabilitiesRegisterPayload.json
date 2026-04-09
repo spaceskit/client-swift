@@ -1,13 +1,13 @@
 {
   "type": "test_capabilitiesregisterpayload",
   "id": "msg-capabilitiesregisterpayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.236Z",
   "payload": {
     "providers": [
       {
         "id": "sample-id",
         "name": "sample-name",
-        "source": null,
+        "source": "adapter",
         "capabilityType": "sample-capabilityType",
         "operations": [
           "sample-operations"

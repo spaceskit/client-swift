@@ -1,0 +1,10 @@
+{
+  "type": "test_runtimesystempromptsectionpayload",
+  "id": "msg-runtimesystempromptsectionpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "key": "system_scaffold",
+    "title": "sample-title",
+    "content": "sample-content"
+  }
+}

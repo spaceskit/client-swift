@@ -1,11 +1,15 @@
 {
   "type": "test_resumefeedbackpayload",
   "id": "msg-resumefeedbackpayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.233Z",
   "payload": {
     "spaceUid": "sample-spaceUid",
     "turnId": "sample-turnId",
     "response": "approve",
-    "revision": "sample-revision"
+    "revision": "sample-revision",
+    "approvalGrant": {
+      "mode": "once",
+      "ttlSeconds": 3.14
+    }
   }
 }

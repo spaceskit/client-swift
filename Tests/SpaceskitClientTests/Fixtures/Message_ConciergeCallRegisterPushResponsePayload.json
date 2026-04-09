@@ -1,0 +1,17 @@
+{
+  "type": "test_conciergecallregisterpushresponsepayload",
+  "id": "msg-conciergecallregisterpushresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "registration": {
+      "principalId": "sample-principalId",
+      "deviceId": "sample-deviceId",
+      "platform": "sample-platform",
+      "pushToken": "sample-pushToken",
+      "voipTopic": "sample-voipTopic",
+      "proactiveOptIn": true,
+      "registeredAt": "sample-registeredAt",
+      "ts": "sample-ts"
+    }
+  }
+}

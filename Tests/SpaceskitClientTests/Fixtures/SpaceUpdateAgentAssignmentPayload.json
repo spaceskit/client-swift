@@ -3,7 +3,29 @@
   "idempotencyKey": "sample-idempotencyKey",
   "spaceId": "sample-spaceId",
   "agentId": "sample-agentId",
+  "agentDefinitionId": "sample-agentDefinitionId",
   "profileId": "sample-profileId",
+  "safetyProfileId": "safe",
+  "toolPolicyOverride": {
+    "scopeType": "gateway",
+    "scopeId": "sample-scopeId",
+    "rules": [
+      {
+        "selectorKind": "capability",
+        "selectorId": "sample-selectorId",
+        "state": "enabled"
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "state": "enabled"
+      }
+    ],
+    "policyVersion": "sample-policyVersion",
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  },
   "securityScope": {
     "key1": "value1"
   },

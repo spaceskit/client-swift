@@ -1,0 +1,25 @@
+{
+  "type": "test_identitypreviewruntimesystempromptresponsepayload",
+  "id": "msg-identitypreviewruntimesystempromptresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "preview": {
+      "spaceId": "sample-spaceId",
+      "agentId": "sample-agentId",
+      "profileId": "sample-profileId",
+      "personaId": "sample-personaId",
+      "targetKind": "agent_assignment",
+      "conversationTopology": "direct",
+      "promptPackId": "sample-promptPackId",
+      "sections": [
+        {
+          "key": "system_scaffold",
+          "title": "sample-title",
+          "content": "sample-content"
+        }
+      ],
+      "compiledText": "sample-compiledText",
+      "generatedAt": "sample-generatedAt"
+    }
+  }
+}

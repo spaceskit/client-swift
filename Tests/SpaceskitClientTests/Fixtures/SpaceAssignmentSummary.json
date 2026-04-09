@@ -1,7 +1,61 @@
 {
   "spaceId": "sample-spaceId",
   "agentId": "sample-agentId",
+  "agentDefinitionId": "sample-agentDefinitionId",
   "profileId": "sample-profileId",
+  "safetyProfileId": "safe",
+  "toolPolicyOverride": {
+    "scopeType": "gateway",
+    "scopeId": "sample-scopeId",
+    "rules": [
+      {
+        "selectorKind": "capability",
+        "selectorId": "sample-selectorId",
+        "state": "enabled"
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "state": "enabled"
+      }
+    ],
+    "policyVersion": "sample-policyVersion",
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  },
+  "effectiveToolAccess": {
+    "spaceId": "sample-spaceId",
+    "agentId": "sample-agentId",
+    "policyVersion": "sample-policyVersion",
+    "safetyProfileId": "safe",
+    "operations": [
+      {
+        "operationId": "sample-operationId",
+        "capability": "sample-capability",
+        "operation": "sample-operation",
+        "providerIds": [
+          "sample-providerIds"
+        ],
+        "selectors": [
+          "sample-selectors"
+        ],
+        "allowed": true,
+        "denialReasonCode": "sample-denialReasonCode",
+        "denialReason": "sample-denialReason",
+        "requiredDangerousCapability": "managed_shell",
+        "escalationAllowed": true
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "enabled": true,
+        "source": "profile"
+      }
+    ],
+    "generatedAt": "sample-generatedAt"
+  },
   "securityScope": {
     "key1": "value1"
   },

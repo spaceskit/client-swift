@@ -2,7 +2,7 @@
   "apiVersion": "sample-apiVersion",
   "spaceId": "sample-spaceId",
   "statuses": [
-    null
+    "draft"
   ],
   "limit": 3.14,
   "offset": 3.14

@@ -1,7 +1,7 @@
 {
   "type": "test_speechstartpayload",
   "id": "msg-speechstartpayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.236Z",
   "payload": {
     "apiVersion": "sample-apiVersion",
     "spaceId": "sample-spaceId",
@@ -13,7 +13,7 @@
     "enablePlayback": true,
     "agentId": "sample-agentId",
     "autoSubmitTurns": true,
-    "preferredSource": null,
+    "preferredSource": "managed",
     "preferredProviderId": "sample-preferredProviderId",
     "byokProviderId": "sample-byokProviderId",
     "localModelProviderId": "sample-localModelProviderId",

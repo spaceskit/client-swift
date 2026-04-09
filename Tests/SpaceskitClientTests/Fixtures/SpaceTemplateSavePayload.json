@@ -1,0 +1,21 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "templateId": "sample-templateId",
+  "name": "sample-name",
+  "description": "sample-description",
+  "communicationMode": "async_notes",
+  "conversationTopology": "direct",
+  "promptPackId": "sample-promptPackId",
+  "baseAgents": [
+    {
+      "agentId": "sample-agentId",
+      "agentDefinitionId": "sample-agentDefinitionId",
+      "profileId": "sample-profileId",
+      "role": "participant",
+      "turnOrder": 3.14,
+      "isPrimary": true
+    }
+  ],
+  "sourceSpaceId": "sample-sourceSpaceId"
+}

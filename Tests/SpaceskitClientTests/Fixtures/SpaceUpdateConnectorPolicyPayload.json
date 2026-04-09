@@ -1,0 +1,12 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "spaceId": "sample-spaceId",
+  "mode": "all_enabled",
+  "entries": [
+    {
+      "sourceKind": "builtin_integration",
+      "sourceId": "sample-sourceId",
+      "state": "enabled"
+    }
+  ]
+}

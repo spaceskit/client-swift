@@ -1,6 +1,6 @@
 {
   "apiVersion": "sample-apiVersion",
   "spaceId": "sample-spaceId",
-  "mode": "collaborator",
+  "mode": "read_only",
   "expiresInSeconds": 3.14
 }

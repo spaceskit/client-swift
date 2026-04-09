@@ -1,0 +1,8 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "idempotencyKey": "sample-idempotencyKey",
+  "draftId": "sample-draftId",
+  "name": "sample-name",
+  "description": "sample-description",
+  "requestPrompt": "sample-requestPrompt"
+}

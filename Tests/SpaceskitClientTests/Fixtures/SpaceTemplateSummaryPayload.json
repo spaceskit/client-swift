@@ -1,7 +1,9 @@
 {
   "templateId": "sample-templateId",
   "title": "sample-title",
-  "communicationMode": null,
+  "communicationMode": "async_notes",
+  "conversationTopology": "direct",
+  "promptPackId": "sample-promptPackId",
   "agentPresetIds": [
     "sample-agentPresetIds"
   ],

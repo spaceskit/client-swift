@@ -1,0 +1,5 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "agentDefinitionId": "sample-agentDefinitionId",
+  "workspaceContext": "sample-workspaceContext"
+}

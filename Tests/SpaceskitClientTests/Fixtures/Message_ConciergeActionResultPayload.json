@@ -1,0 +1,13 @@
+{
+  "type": "test_conciergeactionresultpayload",
+  "id": "msg-conciergeactionresultpayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "requestId": "sample-requestId",
+    "status": "ok",
+    "payload": {
+      "example": true
+    },
+    "error": "sample-error"
+  }
+}

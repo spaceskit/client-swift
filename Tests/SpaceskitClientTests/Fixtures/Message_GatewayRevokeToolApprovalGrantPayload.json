@@ -1,0 +1,13 @@
+{
+  "type": "test_gatewayrevoketoolapprovalgrantpayload",
+  "id": "msg-gatewayrevoketoolapprovalgrantpayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "principalId": "sample-principalId",
+    "deviceId": "sample-deviceId",
+    "spaceId": "sample-spaceId",
+    "toolId": "sample-toolId",
+    "reason": "sample-reason"
+  }
+}

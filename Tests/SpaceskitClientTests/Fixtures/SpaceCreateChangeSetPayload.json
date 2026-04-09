@@ -3,7 +3,7 @@
   "spaceId": "sample-spaceId",
   "title": "sample-title",
   "description": "sample-description",
-  "adapter": null,
+  "adapter": "filesystem",
   "targetBranch": "sample-targetBranch",
   "expiresInSeconds": 3.14
 }

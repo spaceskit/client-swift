@@ -1,0 +1,6 @@
+{
+  "apiVersion": "sample-apiVersion",
+  "callId": "sample-callId",
+  "deviceId": "sample-deviceId",
+  "platform": "sample-platform"
+}

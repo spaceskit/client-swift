@@ -1,14 +1,14 @@
 {
   "bindingId": "sample-bindingId",
   "connectorId": "sample-connectorId",
-  "bindingType": null,
+  "bindingType": "inbound_route",
   "selector": {
     "key1": "value1"
   },
-  "targetType": null,
+  "targetType": "main_orchestrator",
   "targetSpaceId": "sample-targetSpaceId",
   "allowedActions": [
-    null
+    "notify"
   ],
   "capabilityTypes": [
     "sample-capabilityTypes"

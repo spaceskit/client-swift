@@ -1,18 +1,18 @@
 {
   "type": "test_gatewayupsertknowledgebaseentryresponsepayload",
   "id": "msg-gatewayupsertknowledgebaseentryresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "entry": {
       "entryId": "sample-entryId",
       "name": "sample-name",
-      "kind": null,
+      "kind": "web",
       "uri": "sample-uri",
       "description": "sample-description",
       "tags": [
         "sample-tags"
       ],
-      "scopeType": null,
+      "scopeType": "global",
       "spaceId": "sample-spaceId",
       "createdAt": "sample-createdAt",
       "updatedAt": "sample-updatedAt"

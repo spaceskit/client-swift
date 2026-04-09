@@ -1,0 +1,38 @@
+{
+  "event": {
+    "callId": "sample-callId",
+    "state": "ringing",
+    "platform": "sample-platform",
+    "deviceId": "sample-deviceId",
+    "displayName": "sample-displayName",
+    "ttsMode": "apple_native",
+    "muted": true,
+    "targetGatewayId": "sample-targetGatewayId",
+    "transcriptDelta": "sample-transcriptDelta",
+    "assistantTextDelta": "sample-assistantTextDelta",
+    "urgency": "passive",
+    "handoffToken": {
+      "token": "sample-token",
+      "callId": "sample-callId",
+      "sourceDeviceId": "sample-sourceDeviceId",
+      "destinationPlatform": "sample-destinationPlatform",
+      "destinationDeviceId": "sample-destinationDeviceId",
+      "destinationClientId": "sample-destinationClientId",
+      "resumeUrl": "sample-resumeUrl",
+      "expiresAt": "sample-expiresAt",
+      "signature": "sample-signature"
+    },
+    "metrics": {
+      "callSetupMs": 3.14,
+      "sttFirstPartialMs": 3.14,
+      "llmFirstTokenMs": 3.14,
+      "ttsFirstAudioMs": 3.14,
+      "routeChangeCount": 3.14,
+      "handoffCount": 3.14,
+      "providerFallbackCount": 3.14
+    },
+    "reason": "sample-reason",
+    "emittedAt": "sample-emittedAt",
+    "ts": "sample-ts"
+  }
+}

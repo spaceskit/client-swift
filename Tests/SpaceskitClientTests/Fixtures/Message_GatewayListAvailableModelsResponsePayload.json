@@ -1,25 +1,25 @@
 {
   "type": "test_gatewaylistavailablemodelsresponsepayload",
   "id": "msg-gatewaylistavailablemodelsresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "providers": [
       {
         "providerId": "sample-providerId",
         "displayName": "sample-displayName",
-        "group": null,
-        "integrationClass": null,
-        "status": null,
+        "group": "cloud",
+        "integrationClass": "cloud",
+        "status": "installed",
         "hasApiKey": true,
         "requiresApiKey": true,
         "baseURL": "sample-baseURL",
-        "detectionStatus": null,
+        "detectionStatus": "available",
         "detectionError": "sample-detectionError",
         "models": [
           {
             "id": "sample-id",
             "displayName": "sample-displayName",
-            "source": null,
+            "source": "detected",
             "available": true,
             "contextWindow": 3.14
           }

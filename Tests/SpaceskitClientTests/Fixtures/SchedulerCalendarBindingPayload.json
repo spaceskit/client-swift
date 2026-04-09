@@ -1,0 +1,9 @@
+{
+  "providerId": "sample-providerId",
+  "calendarId": "sample-calendarId",
+  "eventId": "sample-eventId",
+  "syncStatus": "pending",
+  "driftStatus": "none",
+  "driftMessage": "sample-driftMessage",
+  "lastSyncedAt": "sample-lastSyncedAt"
+}

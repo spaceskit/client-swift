@@ -1,7 +1,7 @@
 {
   "type": "test_turntracepayload",
   "id": "msg-turntracepayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "spaceId": "sample-spaceId",
     "turnId": "sample-turnId",
@@ -27,6 +27,24 @@
         "agentId": "sample-agentId",
         "startedAt": "sample-startedAt",
         "completedAt": "sample-completedAt"
+      }
+    ],
+    "activities": [
+      {
+        "activityId": "sample-activityId",
+        "seq": 42,
+        "eventType": "sample-eventType",
+        "agentId": "sample-agentId",
+        "title": "sample-title",
+        "detail": "sample-detail",
+        "status": "running",
+        "visibility": "observable",
+        "toolCallId": "sample-toolCallId",
+        "toolName": "sample-toolName",
+        "createdAt": "sample-createdAt",
+        "payload": {
+          "key1": "value1"
+        }
       }
     ],
     "artifactIds": [

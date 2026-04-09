@@ -1,6 +1,6 @@
 {
   "changeSetId": "sample-changeSetId",
-  "adapter": null,
+  "adapter": "filesystem",
   "appliedPaths": [
     "sample-appliedPaths"
   ],

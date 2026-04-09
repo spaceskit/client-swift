@@ -1,0 +1,10 @@
+{
+  "type": "test_gatewaysetmemorydefaultspayload",
+  "id": "msg-gatewaysetmemorydefaultspayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "defaultExperienceCapture": null,
+    "defaultSpacePrivacyMode": "STANDARD"
+  }
+}

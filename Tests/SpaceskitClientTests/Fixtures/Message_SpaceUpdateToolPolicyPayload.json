@@ -1,0 +1,22 @@
+{
+  "type": "test_spaceupdatetoolpolicypayload",
+  "id": "msg-spaceupdatetoolpolicypayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId",
+    "rules": [
+      {
+        "selectorKind": "capability",
+        "selectorId": "sample-selectorId",
+        "state": "enabled"
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "state": "enabled"
+      }
+    ]
+  }
+}

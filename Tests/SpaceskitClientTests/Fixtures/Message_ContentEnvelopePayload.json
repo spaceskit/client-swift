@@ -1,0 +1,29 @@
+{
+  "type": "test_contentenvelopepayload",
+  "id": "msg-contentenvelopepayload-001",
+  "ts": "2026-03-13T22:07:19.233Z",
+  "payload": {
+    "schemaVersion": null,
+    "kind": "rich_content",
+    "primaryMimeType": "sample-primaryMimeType",
+    "previewText": "sample-previewText",
+    "supportsInline": true,
+    "parts": [
+      {
+        "type": "text",
+        "mimeType": "sample-mimeType",
+        "text": "sample-text",
+        "data": "sample-data",
+        "uri": "sample-uri",
+        "title": "sample-title",
+        "previewText": "sample-previewText",
+        "metadata": {
+          "key1": "value1"
+        }
+      }
+    ],
+    "metadata": {
+      "key1": "value1"
+    }
+  }
+}

@@ -3,10 +3,10 @@
   "idempotencyKey": "sample-idempotencyKey",
   "jobId": "sample-jobId",
   "name": "sample-name",
-  "status": null,
+  "status": "active",
   "timezone": "sample-timezone",
   "schedulePreset": {
-    "kind": null,
+    "kind": "hourly",
     "intervalHours": 3.14,
     "minute": 3.14,
     "hour": 3.14,
@@ -15,12 +15,24 @@
     ]
   },
   "action": {
-    "type": null,
+    "type": "space_prompt",
     "promptText": "sample-promptText",
     "targetAgentId": "sample-targetAgentId"
   },
   "primarySpaceId": "sample-primarySpaceId",
   "relatedSpaceIds": [
     "sample-relatedSpaceIds"
-  ]
+  ],
+  "executionTarget": {
+    "mode": "existing_space"
+  },
+  "calendarBinding": {
+    "providerId": "sample-providerId",
+    "calendarId": "sample-calendarId",
+    "eventId": "sample-eventId",
+    "syncStatus": "pending",
+    "driftStatus": "none",
+    "driftMessage": "sample-driftMessage",
+    "lastSyncedAt": "sample-lastSyncedAt"
+  }
 }

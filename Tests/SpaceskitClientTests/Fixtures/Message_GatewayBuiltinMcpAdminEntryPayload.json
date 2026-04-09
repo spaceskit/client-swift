@@ -1,0 +1,20 @@
+{
+  "type": "test_gatewaybuiltinmcpadminentrypayload",
+  "id": "msg-gatewaybuiltinmcpadminentrypayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "enabled": true,
+    "allowTargetSpaceOverride": true,
+    "allowedTools": [
+      "sample-allowedTools"
+    ],
+    "runtimeState": {
+      "endpointPath": "sample-endpointPath",
+      "effectiveEnabled": true,
+      "bootstrapDefaultEnabled": true,
+      "authMode": "strict",
+      "tokenIssuerAvailable": true,
+      "defaultTargetSpaceId": "sample-defaultTargetSpaceId"
+    }
+  }
+}

@@ -96,238 +96,238 @@
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/CFNetwork.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CFNetwork-28WVLLM162JOLUCPVXK0ZUNZD.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CFNetwork-2CZK3B9I54KF2ZZMM1LXILI6H.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CFNetwork"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/CoreFoundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CoreFoundation-7D5H2JITWKTLTPCOAJ865ISD6.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CoreFoundation-5R00OAY3B189KGMXUUF7X9KHI.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreFoundation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/CoreServices.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CoreServices-BZY3UB1RBXWKNT66ATR3PMA9C.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/CoreServices-2WM8VK1L6JIGW3QAXWOUG4QZD.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreServices"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/Darwin.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Darwin-2JYV3QGO6S46UWC704F54DI8H.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Darwin-72P0XQ4FFVCIYUPVEIABAZZC5.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Darwin"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/DiskArbitration.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/DiskArbitration-6GIM7V55UTHUPOWB4GXMK0U4B.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/DiskArbitration-4KDAP6OSKCW0QS0N4E1F3D3A3.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "DiskArbitration"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/dispatch.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Dispatch-E379ZZO3I8DR2IUAOUL6G398E.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Dispatch-6RC2L1S7HWSS9FG14L6K4VU6M.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Dispatch"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/Foundation.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Foundation-9RR2ZR7UPCEZ42R3Z0AMIW6KV.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Foundation-7E6TU5U16OWCPQJ2KR9NZWSWM.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Foundation"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/IOKit.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/IOKit-2PHKKCAOP5SAGPLS2CBTCDZBU.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/IOKit-8XBIXPLB76AJ32OFQH620ZUHE.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "IOKit"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/LocalAuthentication.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/LocalAuthentication-8AAXIH3NZNICCUVES6QJOL4KU.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/LocalAuthentication-CCBIRLHJG8M4IH2O12COALJZC.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "LocalAuthentication"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinBasic.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/MachO-1ED876LZH3CMV6HXVLR3V01XB.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/MachO-Z64AGFC0SQBTHQQJN2Q6SG74.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "MachO"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/ObjectiveC.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ObjectiveC-79VTGS2AEUS9L82TPAAIO1N43.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ObjectiveC-Q281Q27MDGQ6XZTSB4I2LO17.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ObjectiveC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/System\/Library\/Frameworks\/Security.framework\/Modules\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Security-E5JPQYEV648M9TBP7GRDXJM45.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/Security-BKKMCH66X0I87UNKAFXQDY828.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "Security"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/SwiftShims-3PQOSBRVQKDIFS76XX58EAQFD.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/SwiftShims-CCMZ2RHX37YX9JRWLBWVKH49S.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "SwiftShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/xpc.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/XPC-5WX7BAR6ATA50LGX6815PDZ8Z.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/XPC-9X5ZV17DD1HFF5D1OL1MDOM7U.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "XPC"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_AvailabilityInternal-7I73BS0O2H5JWX2OA1SHO5E54.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_AvailabilityInternal-7VDGGGVO45JHWXLB1E6R7GBU1.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_AvailabilityInternal"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_float-CQE2GWIE4KOS16Q4P4QDL7EDN.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_float-B23ZHXBP6R4GLJ381KOYATMMI.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_float"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_inttypes-83ERWDNSOXAYB6MAVMHOUIWO7.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_inttypes-EGKZJ04L82PVEBTICX2EVXUHY.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_inttypes"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_limits-AU1S0WWPT3AN3IUKR58QH5FEB.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_limits-BK3LG0CUN6XYYKU9BEIWJWQ6B.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_limits"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdarg-CHPT2YMXKFOM1IB9CRPP2DZJD.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdarg-E4XFRRWJY79FBM2L7TRB66T3N.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdarg"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdbool-546P3HWRWSGG25313TSE0AED7.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdbool-B4D9NZU4FXVDRJDAP4H6OHVQA.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdbool"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stddef-6ZA1BV3M83J8RM722I0KK3T3H.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stddef-E84C99ZYXW0I0T3242NU3JR6C.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stddef"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdint-4L555RBQ04G284IVVJH3RNV6Z.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_Builtin_stdint-79VOOU5HHCQYONSRY815IFMGC.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_Builtin_stdint"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinFoundation1.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation1-1WT8TI8S05Y4P1PDA3KWMBH8L.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation1-2TITGEULVWCAJI1UPFL8F2FDB.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation1"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation2-ATX4DAO5K597NZE7H136Q4CPS.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation2-A9G1628UQPK3B4ABSE05AP2Y7.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation2"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinFoundation3.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation3-CI884THXMFJFDGRKEBCU9BJ35.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_DarwinFoundation3-EK0LXUFMMH7702G09SL2UZEP8.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation3"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_SwiftConcurrencyShims-9IG3M8WT7B2ZE9V9JGUWTMVK0.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/_SwiftConcurrencyShims-5Q59OSGE8BNQO10B9MCWNJAP.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_SwiftConcurrencyShims"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/launch.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/launch-C37LGTXDOR1D425YSYRCD89X8.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/launch-EK64CFGKLXCWF3JMEY7I456GW.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "launch"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/libDER\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/libDER-BBZEB8YWQYVUAOSYWXKMHSU9Z.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/libDER-E2U6KMJG7NYDWO2NJF6ZSZQON.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "libDER"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/libkern.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/libkern-35FCYE9B68Y9PR9FJK0YZMSK0.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/libkern-9CIV6SQASRX12QVQIMX6T1KEG.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "libkern"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/os_object-ANEBPBZP7DJR6LLO1BFIL1Q01.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/os_object-D2VBYIUSPMOBFQQY3N3VCIH4T.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_object"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/os.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/os_workgroup-EN486OP4U329NGY77APQYVXQ3.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/os_workgroup-1IVTO30AEIU0GFH4QMHO6TJLK.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "os_workgroup"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ptrauth-5S80USXR4DYDYY3JCODU0A878.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ptrauth-WQO25PBVWSDUHMO0XTEKB41Y.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrauth"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/clang\/17\/include\/module.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ptrcheck-2ATAQCXO676VJUMNYKAPMUU91.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/ptrcheck-9L0S012O0L0E7E3M9KIL1Y9H.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "ptrcheck"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/MacOSX.platform\/Developer\/SDKs\/MacOSX.sdk\/usr\/include\/DarwinFoundation2.modulemap",
-    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/sys_types-3Z5UIW8BD7YJ82DO7TA08KTX.pcm",
+    "clangModulePath" : "\/Users\/caruso\/code\/spaces\/client-swift\/build\/SwiftExplicitPrecompiledModules\/sys_types-7GALJ229DVIWN5JO9OYPIDTAH.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "sys_types"

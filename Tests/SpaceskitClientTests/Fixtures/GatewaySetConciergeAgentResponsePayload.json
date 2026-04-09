@@ -1,0 +1,19 @@
+{
+  "state": {
+    "spaceId": "concierge-space",
+    "spaceUid": "aaaa1111-2222-3333-4444-555555555555",
+    "conciergeAgentId": "concierge-agent",
+    "conciergeAgentDefinitionId": "concierge-profile",
+    "conciergeProfileId": "concierge-profile",
+    "assignedAgentDefinitionId": "concierge-profile",
+    "assignedProfileId": "concierge-profile",
+    "providerHint": "openai",
+    "modelHint": "openai/gpt-4.1",
+    "status": "healthy",
+    "repaired": false,
+    "fallbackApplied": false,
+    "fallbackReason": null,
+    "runtimeIssueReason": null,
+    "updatedAt": "2026-03-29T12:00:00.000Z"
+  }
+}

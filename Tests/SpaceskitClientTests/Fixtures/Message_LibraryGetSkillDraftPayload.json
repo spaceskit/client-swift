@@ -1,0 +1,9 @@
+{
+  "type": "test_librarygetskilldraftpayload",
+  "id": "msg-librarygetskilldraftpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "draftId": "sample-draftId"
+  }
+}

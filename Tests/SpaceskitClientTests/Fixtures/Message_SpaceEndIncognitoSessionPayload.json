@@ -1,0 +1,9 @@
+{
+  "type": "test_spaceendincognitosessionpayload",
+  "id": "msg-spaceendincognitosessionpayload-001",
+  "ts": "2026-03-13T22:07:19.233Z",
+  "payload": {
+    "apiVersion": "sample-apiVersion",
+    "spaceId": "sample-spaceId"
+  }
+}

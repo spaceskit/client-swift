@@ -1,0 +1,14 @@
+{
+  "type": "test_skilldraftpayload",
+  "id": "msg-skilldraftpayload-001",
+  "ts": "2026-03-13T22:07:19.235Z",
+  "payload": {
+    "draftId": "sample-draftId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "requestPrompt": "sample-requestPrompt",
+    "contentMarkdown": "sample-contentMarkdown",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  }
+}

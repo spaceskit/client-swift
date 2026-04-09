@@ -1,14 +1,14 @@
 {
   "type": "test_gatewaysetmainagentpayload",
   "id": "msg-gatewaysetmainagentpayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "apiVersion": "sample-apiVersion",
     "spaceId": "sample-spaceId",
-    "selectionMode": null,
+    "selectionMode": "provider_model",
     "providerId": "sample-providerId",
     "modelId": "sample-modelId",
-    "sourceProfileId": "sample-sourceProfileId",
-    "copyPersonality": true
+    "sourceAgentDefinitionId": "sample-sourceAgentDefinitionId",
+    "applyPersonaInstructions": true
   }
 }

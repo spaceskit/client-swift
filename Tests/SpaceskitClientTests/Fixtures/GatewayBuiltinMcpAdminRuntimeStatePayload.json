@@ -1,0 +1,8 @@
+{
+  "endpointPath": "sample-endpointPath",
+  "effectiveEnabled": true,
+  "bootstrapDefaultEnabled": true,
+  "authMode": "strict",
+  "tokenIssuerAvailable": true,
+  "defaultTargetSpaceId": "sample-defaultTargetSpaceId"
+}

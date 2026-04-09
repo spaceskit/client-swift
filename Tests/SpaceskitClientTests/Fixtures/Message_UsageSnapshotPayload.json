@@ -1,10 +1,10 @@
 {
   "type": "test_usagesnapshotpayload",
   "id": "msg-usagesnapshotpayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "computedAt": "sample-computedAt",
-    "currency": null,
+    "currency": "USD",
     "windows": null,
     "last7d": {
       "inputTokens": 3.14,

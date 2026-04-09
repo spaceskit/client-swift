@@ -1,0 +1,22 @@
+{
+  "policy": {
+    "scopeType": "gateway",
+    "scopeId": "sample-scopeId",
+    "rules": [
+      {
+        "selectorKind": "capability",
+        "selectorId": "sample-selectorId",
+        "state": "enabled"
+      }
+    ],
+    "dangerousCapabilities": [
+      {
+        "capabilityId": "managed_shell",
+        "state": "enabled"
+      }
+    ],
+    "policyVersion": "sample-policyVersion",
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "spaceId": "space-1",
+  "spaceUid": "space-uid-1",
+  "entries": [
+    {
+      "entryId": "entry-1",
+      "source": "event_log",
+      "category": "status",
+      "turnId": "turn-1",
+      "eventType": "turn.started",
+      "title": "Turn started",
+      "visibility": "visible",
+      "createdAt": "2026-03-17T08:00:00.000Z",
+      "seq": 1,
+      "payload": {}
+    },
+    {
+      "entryId": "entry-2",
+      "source": "memory",
+      "category": "memory",
+      "turnId": "turn-1",
+      "eventType": "memory_context.loaded",
+      "title": "Memory context loaded",
+      "detail": "3 memories",
+      "status": "completed",
+      "visibility": "visible",
+      "createdAt": "2026-03-17T08:00:01.000Z",
+      "seq": 2,
+      "payload": {
+        "provider": "default",
+        "resultCount": 3
+      }
+    }
+  ],
+  "total": 2,
+  "nextOffset": 2
+}

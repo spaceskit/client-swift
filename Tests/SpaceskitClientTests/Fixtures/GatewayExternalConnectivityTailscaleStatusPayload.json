@@ -1,0 +1,17 @@
+{
+  "cliAvailable": true,
+  "version": "sample-version",
+  "backendState": "sample-backendState",
+  "health": [
+    "sample-health"
+  ],
+  "hostName": "sample-hostName",
+  "dnsName": "sample-dnsName",
+  "magicDnsSuffix": "sample-magicDnsSuffix",
+  "tailscaleIps": [
+    "sample-tailscaleIps"
+  ],
+  "serveConfigured": true,
+  "serveTarget": "sample-serveTarget",
+  "servePort": 42
+}

@@ -1,11 +1,13 @@
 {
   "type": "test_spacetemplatesummarypayload",
   "id": "msg-spacetemplatesummarypayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "templateId": "sample-templateId",
     "title": "sample-title",
-    "communicationMode": null,
+    "communicationMode": "async_notes",
+    "conversationTopology": "direct",
+    "promptPackId": "sample-promptPackId",
     "agentPresetIds": [
       "sample-agentPresetIds"
     ],

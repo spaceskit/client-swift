@@ -1,7 +1,7 @@
 {
   "type": "test_effectivetoolmatrixpayload",
   "id": "msg-effectivetoolmatrixpayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.236Z",
   "payload": {
     "spaceId": "sample-spaceId",
     "principalId": "sample-principalId",

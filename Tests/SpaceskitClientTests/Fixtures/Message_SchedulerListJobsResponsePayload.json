@@ -1,17 +1,17 @@
 {
   "type": "test_schedulerlistjobsresponsepayload",
   "id": "msg-schedulerlistjobsresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "jobs": [
       {
         "jobId": "sample-jobId",
         "name": "sample-name",
-        "status": null,
+        "status": "active",
         "enabled": true,
         "cronExpression": "sample-cronExpression",
         "schedulePreset": {
-          "kind": null,
+          "kind": "hourly",
           "intervalHours": 3.14,
           "minute": 3.14,
           "hour": 3.14,
@@ -21,7 +21,7 @@
         },
         "timezone": "sample-timezone",
         "action": {
-          "type": null,
+          "type": "space_prompt",
           "promptText": "sample-promptText",
           "targetAgentId": "sample-targetAgentId"
         },
@@ -29,7 +29,7 @@
         "invalidReason": "sample-invalidReason",
         "nextRunAt": "sample-nextRunAt",
         "lastRunAt": "sample-lastRunAt",
-        "lastRunStatus": null,
+        "lastRunStatus": "running",
         "lastErrorCode": "sample-lastErrorCode",
         "lastErrorMessage": "sample-lastErrorMessage",
         "createdByPrincipalId": "sample-createdByPrincipalId",
@@ -43,7 +43,19 @@
             "isPrimary": true,
             "linkedAt": "sample-linkedAt"
           }
-        ]
+        ],
+        "executionTarget": {
+          "mode": "existing_space"
+        },
+        "calendarBinding": {
+          "providerId": "sample-providerId",
+          "calendarId": "sample-calendarId",
+          "eventId": "sample-eventId",
+          "syncStatus": "pending",
+          "driftStatus": "none",
+          "driftMessage": "sample-driftMessage",
+          "lastSyncedAt": "sample-lastSyncedAt"
+        }
       }
     ]
   }

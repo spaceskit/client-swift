@@ -1,0 +1,9 @@
+{
+  "callSetupMs": 3.14,
+  "sttFirstPartialMs": 3.14,
+  "llmFirstTokenMs": 3.14,
+  "ttsFirstAudioMs": 3.14,
+  "routeChangeCount": 3.14,
+  "handoffCount": 3.14,
+  "providerFallbackCount": 3.14
+}

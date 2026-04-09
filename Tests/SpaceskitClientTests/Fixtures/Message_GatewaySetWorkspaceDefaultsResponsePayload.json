@@ -1,0 +1,11 @@
+{
+  "type": "test_gatewaysetworkspacedefaultsresponsepayload",
+  "id": "msg-gatewaysetworkspacedefaultsresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "defaults": {
+      "spaceHomeRoot": "sample-spaceHomeRoot",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

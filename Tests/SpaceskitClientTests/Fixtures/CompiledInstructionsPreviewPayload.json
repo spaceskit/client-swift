@@ -1,0 +1,13 @@
+{
+  "agentDefinitionId": "sample-agentDefinitionId",
+  "personaId": "sample-personaId",
+  "sections": [
+    {
+      "key": "system_scaffold",
+      "title": "sample-title",
+      "content": "sample-content"
+    }
+  ],
+  "compiledText": "sample-compiledText",
+  "generatedAt": "sample-generatedAt"
+}

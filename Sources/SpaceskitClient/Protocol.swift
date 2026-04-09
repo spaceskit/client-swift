@@ -1,6 +1,6 @@
-// Protocol.swift — WebSocket compatibility types mirroring server/protocol.ts.
-// Canonical cross-process contracts now live in /proto and this file remains
-// the legacy JSON transport surface until generated Swift contracts replace it.
+// Protocol.swift — handwritten WebSocket transport types for Spaceskit.
+// Canonical cross-process contracts live in /proto; this file keeps the
+// remaining first-party Swift transport aligned without shim-generated code.
 
 import Foundation
 
@@ -39,11 +39,39 @@ public struct ExecuteTurnPayload: Codable, Sendable {
     public let spaceUid: String
     public let input: String
     public let targetAgentId: String?
+    public let replyToTurnId: String?
+    public let mode: String?
+    public let effort: String?
+    public let accessMode: String?
 
-    public init(spaceUid: String, input: String, targetAgentId: String? = nil) {
+    public init(
+        spaceUid: String,
+        input: String,
+        targetAgentId: String? = nil,
+        replyToTurnId: String? = nil,
+        mode: String? = nil,
+        effort: String? = nil,
+        accessMode: String? = nil
+    ) {
         self.spaceUid = spaceUid
         self.input = input
         self.targetAgentId = targetAgentId
+        self.replyToTurnId = replyToTurnId
+        self.mode = mode
+        self.effort = effort
+        self.accessMode = accessMode
+    }
+
+    public init(_ options: ExecuteTurnOptions) {
+        self.init(
+            spaceUid: options.spaceUid,
+            input: options.input,
+            targetAgentId: options.targetAgentId,
+            replyToTurnId: options.replyToTurnId,
+            mode: options.mode,
+            effort: options.effort,
+            accessMode: options.accessMode
+        )
     }
 }
 
@@ -52,17 +80,62 @@ public struct ResumeFeedbackPayload: Codable, Sendable {
     public let turnId: String
     public let response: String
     public let revision: String?
+    public let approvalGrant: ApprovalGrantPayload?
 
-    public init(spaceUid: String, turnId: String, response: FeedbackResponse, revision: String? = nil) {
+    public init(
+        spaceUid: String,
+        turnId: String,
+        response: FeedbackResponse,
+        revision: String? = nil,
+        approvalGrant: ApprovalGrantPayload? = nil
+    ) {
         self.spaceUid = spaceUid
         self.turnId = turnId
         self.response = response.rawValue
         self.revision = revision
+        self.approvalGrant = approvalGrant
+    }
+}
+
+public struct ApprovalGrantPayload: Codable, Sendable {
+    public let mode: GatewayToolApprovalGrantMode
+    public let ttlSeconds: Int?
+
+    public init(
+        mode: GatewayToolApprovalGrantMode,
+        ttlSeconds: Int? = nil
+    ) {
+        self.mode = mode
+        self.ttlSeconds = ttlSeconds
     }
 }
 
 public struct SubscribePayload: Codable, Sendable {
     public let spaceUids: [String]
+
+    public init(spaceUids: [String]) {
+        self.spaceUids = spaceUids
+    }
+}
+
+public struct SubscribeDeniedSpace: Codable, Sendable {
+    public let spaceUid: String
+    public let reason: String
+
+    public init(spaceUid: String, reason: String) {
+        self.spaceUid = spaceUid
+        self.reason = reason
+    }
+}
+
+public struct SubscribeResponsePayload: Codable, Sendable {
+    public let subscribedSpaceUids: [String]
+    public let denied: [SubscribeDeniedSpace]
+
+    public init(subscribedSpaceUids: [String], denied: [SubscribeDeniedSpace]) {
+        self.subscribedSpaceUids = subscribedSpaceUids
+        self.denied = denied
+    }
 }
 
 public struct CapabilityInvokePayload: Codable, Sendable {
@@ -88,6 +161,8 @@ public struct SpaceCreatePayload: Codable, Sendable {
     public let spaceType: String?
     public let name: String
     public let goal: String?
+    public let conversationTopology: String?
+    public let promptPackId: String?
     public let turnModel: String?
     public let templateId: String?
     public let templateRevision: Int?
@@ -96,6 +171,8 @@ public struct SpaceCreatePayload: Codable, Sendable {
     public let visibility: String?
     public let turnModelConfig: [String: AnyCodable]?
     public let maxTurns: Int?
+    public let thinkingCapturePolicy: ThinkingCapturePolicy?
+    public let memoryPolicy: SpaceMemoryPolicy?
     public let moderatorProfileId: String?
     public let initialAgents: [SpaceCreateInitialAgentPayload]?
 
@@ -108,6 +185,8 @@ public struct SpaceCreatePayload: Codable, Sendable {
         spaceType: String? = nil,
         name: String,
         goal: String? = nil,
+        conversationTopology: String? = nil,
+        promptPackId: String? = nil,
         turnModel: String? = nil,
         templateId: String? = nil,
         templateRevision: Int? = nil,
@@ -116,6 +195,8 @@ public struct SpaceCreatePayload: Codable, Sendable {
         visibility: String? = nil,
         turnModelConfig: [String: Any]? = nil,
         maxTurns: Int? = nil,
+        thinkingCapturePolicy: ThinkingCapturePolicy? = nil,
+        memoryPolicy: SpaceMemoryPolicy? = nil,
         moderatorProfileId: String? = nil,
         initialAgents: [SpaceCreateInitialAgentPayload]? = nil
     ) {
@@ -127,6 +208,8 @@ public struct SpaceCreatePayload: Codable, Sendable {
         self.spaceType = spaceType
         self.name = name
         self.goal = goal
+        self.conversationTopology = conversationTopology
+        self.promptPackId = promptPackId
         self.turnModel = turnModel
         self.templateId = templateId
         self.templateRevision = templateRevision
@@ -135,12 +218,94 @@ public struct SpaceCreatePayload: Codable, Sendable {
         self.visibility = visibility
         self.turnModelConfig = turnModelConfig?.mapValues { AnyCodable($0) }
         self.maxTurns = maxTurns
+        self.thinkingCapturePolicy = thinkingCapturePolicy
+        self.memoryPolicy = memoryPolicy
         self.moderatorProfileId = moderatorProfileId
         self.initialAgents = initialAgents
     }
 }
 
 public struct SpaceGetPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceUpdateMetadataPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let name: String?
+    public let goal: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        name: String? = nil,
+        goal: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.name = name
+        self.goal = goal
+    }
+}
+
+public struct SpaceSetThinkingCapturePolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let thinkingCapturePolicy: ThinkingCapturePolicy
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        thinkingCapturePolicy: ThinkingCapturePolicy
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.thinkingCapturePolicy = thinkingCapturePolicy
+    }
+}
+
+public struct SpaceGetMemoryPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceSetMemoryPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+    public let memoryPolicy: SpaceMemoryPolicy
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        spaceId: String,
+        memoryPolicy: SpaceMemoryPolicy
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+        self.memoryPolicy = memoryPolicy
+    }
+}
+
+public struct SpaceEndIncognitoSessionPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String
 
@@ -169,12 +334,39 @@ public struct SpaceListPayload: Codable, Sendable {
     }
 }
 
+public struct SpaceArchivePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, idempotencyKey: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceDeletePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, idempotencyKey: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.spaceId = spaceId
+    }
+}
+
 public struct SpaceAddAgentPayload: Codable, Sendable {
     public let apiVersion: String?
     public let idempotencyKey: String?
     public let spaceId: String
     public let agentId: String
-    public let profileId: String
+    public let agentDefinitionId: String?
+    public let profileId: String?
+    public let safetyProfileId: String?
+    public let toolPolicyOverride: ToolAccessPolicy?
     public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
@@ -182,12 +374,32 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
     public let turnOrder: Int?
     public let isPrimary: Bool?
 
+    private enum CodingKeys: String, CodingKey {
+        case apiVersion
+        case idempotencyKey
+        case spaceId
+        case agentId
+        case agentDefinitionId
+        case profileId
+        case safetyProfileId
+        case toolPolicyOverride
+        case securityScope
+        case spawnContext
+        case contextOverrides
+        case role
+        case turnOrder
+        case isPrimary
+    }
+
     public init(
         apiVersion: String? = nil,
         idempotencyKey: String? = nil,
         spaceId: String,
         agentId: String,
-        profileId: String,
+        agentDefinitionId: String? = nil,
+        profileId: String? = nil,
+        safetyProfileId: String? = nil,
+        toolPolicyOverride: ToolAccessPolicy? = nil,
         securityScope: [String: Any]? = nil,
         spawnContext: String? = nil,
         contextOverrides: [String: Any]? = nil,
@@ -199,13 +411,34 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
         self.idempotencyKey = idempotencyKey
         self.spaceId = spaceId
         self.agentId = agentId
-        self.profileId = profileId
+        self.agentDefinitionId = agentDefinitionId ?? profileId
+        self.profileId = profileId ?? agentDefinitionId
+        self.safetyProfileId = safetyProfileId
+        self.toolPolicyOverride = toolPolicyOverride
         self.securityScope = securityScope?.mapValues { AnyCodable($0) }
         self.spawnContext = spawnContext
         self.contextOverrides = contextOverrides?.mapValues { AnyCodable($0) }
         self.role = role
         self.turnOrder = turnOrder
         self.isPrimary = isPrimary
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(apiVersion, forKey: .apiVersion)
+        try container.encodeIfPresent(idempotencyKey, forKey: .idempotencyKey)
+        try container.encode(spaceId, forKey: .spaceId)
+        try container.encode(agentId, forKey: .agentId)
+        try container.encodeIfPresent(agentDefinitionId ?? profileId, forKey: .agentDefinitionId)
+        try container.encodeIfPresent(profileId ?? agentDefinitionId, forKey: .profileId)
+        try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
+        try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
+        try container.encodeIfPresent(securityScope, forKey: .securityScope)
+        try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
+        try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
+        try container.encodeIfPresent(role, forKey: .role)
+        try container.encodeIfPresent(turnOrder, forKey: .turnOrder)
+        try container.encodeIfPresent(isPrimary, forKey: .isPrimary)
     }
 }
 
@@ -233,7 +466,10 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
     public let idempotencyKey: String?
     public let spaceId: String
     public let agentId: String
+    public let agentDefinitionId: String?
     public let profileId: String?
+    public let safetyProfileId: String?
+    public let toolPolicyOverride: ToolAccessPolicy?
     public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
@@ -242,12 +478,33 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
     public let isPrimary: Bool?
     public let resetSession: Bool?
 
+    private enum CodingKeys: String, CodingKey {
+        case apiVersion
+        case idempotencyKey
+        case spaceId
+        case agentId
+        case agentDefinitionId
+        case profileId
+        case safetyProfileId
+        case toolPolicyOverride
+        case securityScope
+        case spawnContext
+        case contextOverrides
+        case role
+        case turnOrder
+        case isPrimary
+        case resetSession
+    }
+
     public init(
         apiVersion: String? = nil,
         idempotencyKey: String? = nil,
         spaceId: String,
         agentId: String,
+        agentDefinitionId: String? = nil,
         profileId: String? = nil,
+        safetyProfileId: String? = nil,
+        toolPolicyOverride: ToolAccessPolicy? = nil,
         securityScope: [String: Any]? = nil,
         spawnContext: String? = nil,
         contextOverrides: [String: Any]? = nil,
@@ -260,7 +517,10 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         self.idempotencyKey = idempotencyKey
         self.spaceId = spaceId
         self.agentId = agentId
-        self.profileId = profileId
+        self.agentDefinitionId = agentDefinitionId ?? profileId
+        self.profileId = profileId ?? agentDefinitionId
+        self.safetyProfileId = safetyProfileId
+        self.toolPolicyOverride = toolPolicyOverride
         self.securityScope = securityScope?.mapValues { AnyCodable($0) }
         self.spawnContext = spawnContext
         self.contextOverrides = contextOverrides?.mapValues { AnyCodable($0) }
@@ -269,28 +529,115 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         self.isPrimary = isPrimary
         self.resetSession = resetSession
     }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(apiVersion, forKey: .apiVersion)
+        try container.encodeIfPresent(idempotencyKey, forKey: .idempotencyKey)
+        try container.encode(spaceId, forKey: .spaceId)
+        try container.encode(agentId, forKey: .agentId)
+        try container.encodeIfPresent(agentDefinitionId ?? profileId, forKey: .agentDefinitionId)
+        try container.encodeIfPresent(profileId ?? agentDefinitionId, forKey: .profileId)
+        try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
+        try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
+        try container.encodeIfPresent(securityScope, forKey: .securityScope)
+        try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
+        try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
+        try container.encodeIfPresent(role, forKey: .role)
+        try container.encodeIfPresent(turnOrder, forKey: .turnOrder)
+        try container.encodeIfPresent(isPrimary, forKey: .isPrimary)
+        try container.encodeIfPresent(resetSession, forKey: .resetSession)
+    }
 }
 
 public struct SpaceSetOrchestratorPayload: Codable, Sendable {
     public let apiVersion: String?
     public let idempotencyKey: String?
+    public let agentDefinitionId: String?
     public let spaceId: String
-    public let profileId: String
+    public let profileId: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case apiVersion
+        case idempotencyKey
+        case agentDefinitionId
+        case spaceId
+        case profileId
+    }
 
     public init(
         apiVersion: String? = nil,
         idempotencyKey: String? = nil,
         spaceId: String,
-        profileId: String
+        agentDefinitionId: String? = nil,
+        profileId: String? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
+        self.agentDefinitionId = agentDefinitionId ?? profileId
         self.spaceId = spaceId
-        self.profileId = profileId
+        self.profileId = profileId ?? agentDefinitionId
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(apiVersion, forKey: .apiVersion)
+        try container.encodeIfPresent(idempotencyKey, forKey: .idempotencyKey)
+        try container.encodeIfPresent(agentDefinitionId ?? profileId, forKey: .agentDefinitionId)
+        try container.encode(spaceId, forKey: .spaceId)
+        try container.encodeIfPresent(profileId ?? agentDefinitionId, forKey: .profileId)
     }
 }
 
 public struct SpaceListAgentAssignmentsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceGetMcpEndpointPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(apiVersion: String? = nil, spaceId: String) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceSetMcpEndpointPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let transport: SpaceMcpTransport
+    public let endpoint: String
+    public let args: [String]?
+    public let secretRef: String?
+    public let enabled: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        transport: SpaceMcpTransport,
+        endpoint: String,
+        args: [String]? = nil,
+        secretRef: String? = nil,
+        enabled: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.transport = transport
+        self.endpoint = endpoint
+        self.args = args
+        self.secretRef = secretRef
+        self.enabled = enabled
+    }
+}
+
+public struct SpaceClearMcpEndpointPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String
 
@@ -366,6 +713,16 @@ public struct SpaceSetWorkspacePayload: Codable, Sendable {
     public init(apiVersion: String? = nil, spaceId: String, workspaceRoot: String? = nil) {
         self.apiVersion = apiVersion
         self.spaceId = spaceId
+        self.workspaceRoot = workspaceRoot
+    }
+}
+
+public struct SpaceOpenWorkspacePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let workspaceRoot: String
+
+    public init(apiVersion: String? = nil, workspaceRoot: String) {
+        self.apiVersion = apiVersion
         self.workspaceRoot = workspaceRoot
     }
 }
@@ -477,60 +834,7 @@ public struct SpaceListOrchestrationJournalPayload: Codable, Sendable {
     }
 }
 
-public struct ProfileCreatePayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let idempotencyKey: String?
-    public let profileId: String?
-    public let name: String
-    public let description: String?
-    public let personalityPrompt: String?
-    public let defaultSkillIds: [String]?
-    public let providerHint: String?
-    public let modelHint: String?
-    public let modelConfig: ProfileModelConfig?
-    public let canModerate: Bool?
-    public let isDefault: Bool?
-
-    public init(
-        apiVersion: String? = nil,
-        idempotencyKey: String? = nil,
-        profileId: String? = nil,
-        name: String,
-        description: String? = nil,
-        personalityPrompt: String? = nil,
-        defaultSkillIds: [String]? = nil,
-        providerHint: String? = nil,
-        modelHint: String? = nil,
-        modelConfig: ProfileModelConfig? = nil,
-        canModerate: Bool? = nil,
-        isDefault: Bool? = nil
-    ) {
-        self.apiVersion = apiVersion
-        self.idempotencyKey = idempotencyKey
-        self.profileId = profileId
-        self.name = name
-        self.description = description
-        self.personalityPrompt = personalityPrompt
-        self.defaultSkillIds = defaultSkillIds
-        self.providerHint = providerHint
-        self.modelHint = modelHint
-        self.modelConfig = modelConfig
-        self.canModerate = canModerate
-        self.isDefault = isDefault
-    }
-}
-
-public struct ProfileGetPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let profileId: String
-
-    public init(apiVersion: String? = nil, profileId: String) {
-        self.apiVersion = apiVersion
-        self.profileId = profileId
-    }
-}
-
-public struct ProfileListPayload: Codable, Sendable {
+public struct IdentityListAgentDefinitionsPayload: Codable, Sendable {
     public let apiVersion: String?
     public let includeArchived: Bool?
 
@@ -540,164 +844,315 @@ public struct ProfileListPayload: Codable, Sendable {
     }
 }
 
-public struct ProfileUpdatePayload: Codable, Sendable {
+public struct IdentityGetAgentDefinitionPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let agentDefinitionId: String
+
+    public init(apiVersion: String? = nil, agentDefinitionId: String) {
+        self.apiVersion = apiVersion
+        self.agentDefinitionId = agentDefinitionId
+    }
+}
+
+public struct IdentityCreateAgentDefinitionPayload: Codable, Sendable {
     public let apiVersion: String?
     public let idempotencyKey: String?
-    public let profileId: String
-    public let name: String?
+    public let agentDefinitionId: String?
+    public let personaId: String?
+    public let name: String
     public let description: String?
-    public let personalityPrompt: String?
+    public let instructions: String?
     public let defaultSkillIds: [String]?
     public let providerHint: String?
     public let modelHint: String?
     public let modelConfig: ProfileModelConfig?
-    public let canModerate: Bool?
     public let isDefault: Bool?
 
     public init(
         apiVersion: String? = nil,
         idempotencyKey: String? = nil,
-        profileId: String,
-        name: String? = nil,
+        agentDefinitionId: String? = nil,
+        personaId: String? = nil,
+        name: String,
         description: String? = nil,
-        personalityPrompt: String? = nil,
+        instructions: String? = nil,
         defaultSkillIds: [String]? = nil,
         providerHint: String? = nil,
         modelHint: String? = nil,
         modelConfig: ProfileModelConfig? = nil,
-        canModerate: Bool? = nil,
         isDefault: Bool? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
-        self.profileId = profileId
+        self.agentDefinitionId = agentDefinitionId
+        self.personaId = personaId
         self.name = name
         self.description = description
-        self.personalityPrompt = personalityPrompt
+        self.instructions = instructions
         self.defaultSkillIds = defaultSkillIds
         self.providerHint = providerHint
         self.modelHint = modelHint
         self.modelConfig = modelConfig
-        self.canModerate = canModerate
         self.isDefault = isDefault
     }
 }
 
-public struct ProfileArchivePayload: Codable, Sendable {
+public struct IdentityUpdateAgentDefinitionPayload: Codable, Sendable {
     public let apiVersion: String?
     public let idempotencyKey: String?
-    public let profileId: String
+    public let agentDefinitionId: String
+    public let personaId: String?
+    public let name: String?
+    public let description: String?
+    public let instructions: String?
+    public let defaultSkillIds: [String]?
+    public let providerHint: String?
+    public let modelHint: String?
+    public let modelConfig: ProfileModelConfig?
+    public let isDefault: Bool?
 
     public init(
         apiVersion: String? = nil,
         idempotencyKey: String? = nil,
-        profileId: String
+        agentDefinitionId: String,
+        personaId: String? = nil,
+        name: String? = nil,
+        description: String? = nil,
+        instructions: String? = nil,
+        defaultSkillIds: [String]? = nil,
+        providerHint: String? = nil,
+        modelHint: String? = nil,
+        modelConfig: ProfileModelConfig? = nil,
+        isDefault: Bool? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
+        self.agentDefinitionId = agentDefinitionId
+        self.personaId = personaId
+        self.name = name
+        self.description = description
+        self.instructions = instructions
+        self.defaultSkillIds = defaultSkillIds
+        self.providerHint = providerHint
+        self.modelHint = modelHint
+        self.modelConfig = modelConfig
+        self.isDefault = isDefault
+    }
+}
+
+public struct IdentityArchiveAgentDefinitionPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let agentDefinitionId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        agentDefinitionId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.agentDefinitionId = agentDefinitionId
+    }
+}
+
+public struct IdentityListPersonasPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let includeArchived: Bool?
+
+    public init(apiVersion: String? = nil, includeArchived: Bool? = nil) {
+        self.apiVersion = apiVersion
+        self.includeArchived = includeArchived
+    }
+}
+
+public struct IdentityGetPersonaPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let personaId: String
+
+    public init(apiVersion: String? = nil, personaId: String) {
+        self.apiVersion = apiVersion
+        self.personaId = personaId
+    }
+}
+
+public struct IdentityCreatePersonaPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let personaId: String?
+    public let name: String
+    public let description: String?
+    public let tone: String?
+    public let style: String?
+    public let emotionalLayer: String?
+    public let constraints: [String]?
+    public let instructions: String?
+    public let isDefault: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        personaId: String? = nil,
+        name: String,
+        description: String? = nil,
+        tone: String? = nil,
+        style: String? = nil,
+        emotionalLayer: String? = nil,
+        constraints: [String]? = nil,
+        instructions: String? = nil,
+        isDefault: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.personaId = personaId
+        self.name = name
+        self.description = description
+        self.tone = tone
+        self.style = style
+        self.emotionalLayer = emotionalLayer
+        self.constraints = constraints
+        self.instructions = instructions
+        self.isDefault = isDefault
+    }
+}
+
+public struct IdentityUpdatePersonaPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let personaId: String
+    public let name: String?
+    public let description: String?
+    public let tone: String?
+    public let style: String?
+    public let emotionalLayer: String?
+    public let constraints: [String]?
+    public let instructions: String?
+    public let isDefault: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        personaId: String,
+        name: String? = nil,
+        description: String? = nil,
+        tone: String? = nil,
+        style: String? = nil,
+        emotionalLayer: String? = nil,
+        constraints: [String]? = nil,
+        instructions: String? = nil,
+        isDefault: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.personaId = personaId
+        self.name = name
+        self.description = description
+        self.tone = tone
+        self.style = style
+        self.emotionalLayer = emotionalLayer
+        self.constraints = constraints
+        self.instructions = instructions
+        self.isDefault = isDefault
+    }
+}
+
+public struct IdentityArchivePersonaPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let personaId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        personaId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.personaId = personaId
+    }
+}
+
+public struct IdentityPreviewCompiledInstructionsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let agentDefinitionId: String
+    public let workspaceContext: String?
+
+    public init(
+        apiVersion: String? = nil,
+        agentDefinitionId: String,
+        workspaceContext: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.agentDefinitionId = agentDefinitionId
+        self.workspaceContext = workspaceContext
+    }
+}
+
+public struct IdentityPreviewRuntimeSystemPromptPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let agentId: String?
+    public let profileId: String?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        agentId: String? = nil,
+        profileId: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.agentId = agentId
         self.profileId = profileId
     }
 }
 
-public struct PresetListPayload: Codable, Sendable {
+// MARK: - System Prompt Matrix Preview
+
+public struct IdentityPreviewSystemPromptMatrixPayload: Codable, Sendable {
     public let apiVersion: String?
-    public let kind: String?
-    public let source: String?
-    public let tags: [String]?
-
-    public init(
-        apiVersion: String? = nil,
-        kind: String? = nil,
-        source: String? = nil,
-        tags: [String]? = nil
-    ) {
-        self.apiVersion = apiVersion
-        self.kind = kind
-        self.source = source
-        self.tags = tags
-    }
-}
-
-public struct PresetGetPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let presetId: String
-
-    public init(apiVersion: String? = nil, presetId: String) {
-        self.apiVersion = apiVersion
-        self.presetId = presetId
-    }
-}
-
-public struct PresetApplyToSpacePayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let idempotencyKey: String?
-    public let presetId: String
-    public let targetSpaceId: String?
+    public let agentDefinitionId: String
     public let spaceId: String?
-    public let resourceId: String?
-    public let name: String?
-    public let goal: String?
-    public let workspaceRoot: String?
-    public let visibility: String?
+    public let agentId: String?
 
     public init(
         apiVersion: String? = nil,
-        idempotencyKey: String? = nil,
-        presetId: String,
-        targetSpaceId: String? = nil,
+        agentDefinitionId: String,
         spaceId: String? = nil,
-        resourceId: String? = nil,
-        name: String? = nil,
-        goal: String? = nil,
-        workspaceRoot: String? = nil,
-        visibility: String? = nil
+        agentId: String? = nil
     ) {
         self.apiVersion = apiVersion
-        self.idempotencyKey = idempotencyKey
-        self.presetId = presetId
-        self.targetSpaceId = targetSpaceId
+        self.agentDefinitionId = agentDefinitionId
         self.spaceId = spaceId
-        self.resourceId = resourceId
-        self.name = name
-        self.goal = goal
-        self.workspaceRoot = workspaceRoot
-        self.visibility = visibility
+        self.agentId = agentId
     }
 }
 
-public struct PresetSaveAgentPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let presetId: String?
-    public let title: String
-    public let description: String?
-    public let defaultAgents: [TemplateAgentDefinition]?
-    public let tags: [String]?
-
-    public init(
-        apiVersion: String? = nil,
-        presetId: String? = nil,
-        title: String,
-        description: String? = nil,
-        defaultAgents: [TemplateAgentDefinition]? = nil,
-        tags: [String]? = nil
-    ) {
-        self.apiVersion = apiVersion
-        self.presetId = presetId
-        self.title = title
-        self.description = description
-        self.defaultAgents = defaultAgents
-        self.tags = tags
-    }
+public enum PromptBudgetClass: String, Codable, Sendable, CaseIterable {
+    case full
+    case compact
+    case minimal
+    case cli
 }
 
-public struct PresetArchiveAgentPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let presetId: String
+public struct SystemPromptVariant: Codable, Sendable, Identifiable {
+    public var id: String { budgetClass.rawValue }
+    public let budgetClass: PromptBudgetClass
+    public let label: String
+    public let tokenEstimate: Int
+    public let sections: [CompiledInstructionSection]
+    public let compiledText: String
+}
 
-    public init(apiVersion: String? = nil, presetId: String) {
-        self.apiVersion = apiVersion
-        self.presetId = presetId
-    }
+public struct SystemPromptMatrix: Codable, Sendable {
+    public let agentDefinitionId: String
+    public let personaId: String?
+    public let generatedAt: String
+    public let variants: [SystemPromptVariant]
+}
+
+public struct IdentityPreviewSystemPromptMatrixResponsePayload: Codable, Sendable {
+    public let matrix: SystemPromptMatrix
 }
 
 public struct SpacePreviewTemplatePayload: Codable, Sendable {
@@ -762,6 +1217,8 @@ public struct SpaceSaveTemplatePayload: Codable, Sendable {
     public let title: String
     public let description: String?
     public let communicationMode: String?
+    public let conversationTopology: String?
+    public let promptPackId: String?
     public let baseAgents: [TemplateAgentDefinition]?
     public let agentPresetIds: [String]?
     public let sourceSpaceId: String?
@@ -773,6 +1230,8 @@ public struct SpaceSaveTemplatePayload: Codable, Sendable {
         title: String,
         description: String? = nil,
         communicationMode: String? = nil,
+        conversationTopology: String? = nil,
+        promptPackId: String? = nil,
         baseAgents: [TemplateAgentDefinition]? = nil,
         agentPresetIds: [String]? = nil,
         sourceSpaceId: String? = nil,
@@ -783,10 +1242,413 @@ public struct SpaceSaveTemplatePayload: Codable, Sendable {
         self.title = title
         self.description = description
         self.communicationMode = communicationMode
+        self.conversationTopology = conversationTopology
+        self.promptPackId = promptPackId
         self.baseAgents = baseAgents
         self.agentPresetIds = agentPresetIds
         self.sourceSpaceId = sourceSpaceId
         self.tags = tags
+    }
+}
+
+public struct SpaceTemplateListPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let includeArchived: Bool?
+    public let includeSystem: Bool?
+
+    public init(apiVersion: String? = nil, includeArchived: Bool? = nil, includeSystem: Bool? = nil) {
+        self.apiVersion = apiVersion
+        self.includeArchived = includeArchived
+        self.includeSystem = includeSystem
+    }
+}
+
+public struct SpaceTemplateGetPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let templateId: String
+
+    public init(apiVersion: String? = nil, templateId: String) {
+        self.apiVersion = apiVersion
+        self.templateId = templateId
+    }
+}
+
+public struct SpaceTemplatePreviewPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let templateId: String
+    public let resourceId: String?
+    public let name: String?
+    public let goal: String?
+
+    public init(
+        apiVersion: String? = nil,
+        templateId: String,
+        resourceId: String? = nil,
+        name: String? = nil,
+        goal: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.templateId = templateId
+        self.resourceId = resourceId
+        self.name = name
+        self.goal = goal
+    }
+}
+
+public struct SpaceTemplateCreateSpacePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let templateId: String
+    public let spaceId: String?
+    public let resourceId: String
+    public let name: String?
+    public let goal: String?
+    public let visibility: String?
+    public let workspaceRoot: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        templateId: String,
+        spaceId: String? = nil,
+        resourceId: String,
+        name: String? = nil,
+        goal: String? = nil,
+        visibility: String? = nil,
+        workspaceRoot: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.templateId = templateId
+        self.spaceId = spaceId
+        self.resourceId = resourceId
+        self.name = name
+        self.goal = goal
+        self.visibility = visibility
+        self.workspaceRoot = workspaceRoot
+    }
+}
+
+public struct SpaceTemplateSavePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let templateId: String?
+    public let name: String
+    public let description: String?
+    public let communicationMode: String?
+    public let conversationTopology: String?
+    public let promptPackId: String?
+    public let baseAgents: [TemplateAgentDefinition]?
+    public let sourceSpaceId: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        templateId: String? = nil,
+        name: String,
+        description: String? = nil,
+        communicationMode: String? = nil,
+        conversationTopology: String? = nil,
+        promptPackId: String? = nil,
+        baseAgents: [TemplateAgentDefinition]? = nil,
+        sourceSpaceId: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.templateId = templateId
+        self.name = name
+        self.description = description
+        self.communicationMode = communicationMode
+        self.conversationTopology = conversationTopology
+        self.promptPackId = promptPackId
+        self.baseAgents = baseAgents
+        self.sourceSpaceId = sourceSpaceId
+    }
+}
+
+public struct SpaceTemplateArchivePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let templateId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        templateId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.templateId = templateId
+    }
+}
+
+// MARK: - Gateway Skill Catalog
+
+public struct GatewaySkillListPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let query: String?
+    public let tags: [String]?
+    public let status: String?
+    public let limit: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        query: String? = nil,
+        tags: [String]? = nil,
+        status: String? = nil,
+        limit: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.query = query
+        self.tags = tags
+        self.status = status
+        self.limit = limit
+    }
+}
+
+public struct GatewaySkillEntry: Codable, Sendable, Identifiable {
+    public let skillId: String
+    public let name: String
+    public let description: String?
+    public let contentMarkdown: String?
+    public let sourceRef: String?
+    public let tags: [String]
+    public let status: String
+    public let createdAt: String
+    public let updatedAt: String
+
+    public var id: String { skillId }
+}
+
+public struct GatewaySkillListResponsePayload: Codable, Sendable {
+    public let skills: [GatewaySkillEntry]
+}
+
+// MARK: - Library (Legacy)
+
+public struct LibraryListEntriesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let query: String?
+    public let tags: [String]?
+    public let status: LibraryEntryStatus?
+    public let sourceKinds: [LibrarySourceKind]?
+    public let includeArchived: Bool?
+    public let includeContent: Bool?
+    public let limit: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        query: String? = nil,
+        tags: [String]? = nil,
+        status: LibraryEntryStatus? = nil,
+        sourceKinds: [LibrarySourceKind]? = nil,
+        includeArchived: Bool? = nil,
+        includeContent: Bool? = nil,
+        limit: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.query = query
+        self.tags = tags
+        self.status = status
+        self.sourceKinds = sourceKinds
+        self.includeArchived = includeArchived
+        self.includeContent = includeContent
+        self.limit = limit
+    }
+}
+
+public struct LibraryGetEntryPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let entryId: String
+    public let includeContent: Bool?
+
+    public init(apiVersion: String? = nil, entryId: String, includeContent: Bool? = nil) {
+        self.apiVersion = apiVersion
+        self.entryId = entryId
+        self.includeContent = includeContent
+    }
+}
+
+public struct LibrarySaveSkillPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let entryId: String?
+    public let skillId: String?
+    public let name: String
+    public let description: String?
+    public let contentMarkdown: String
+    public let tags: [String]?
+    public let sourceKind: LibrarySourceKind?
+    public let sourceRef: String?
+    public let status: LibraryEntryStatus?
+    public let enabled: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        entryId: String? = nil,
+        skillId: String? = nil,
+        name: String,
+        description: String? = nil,
+        contentMarkdown: String,
+        tags: [String]? = nil,
+        sourceKind: LibrarySourceKind? = nil,
+        sourceRef: String? = nil,
+        status: LibraryEntryStatus? = nil,
+        enabled: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.entryId = entryId
+        self.skillId = skillId
+        self.name = name
+        self.description = description
+        self.contentMarkdown = contentMarkdown
+        self.tags = tags
+        self.sourceKind = sourceKind
+        self.sourceRef = sourceRef
+        self.status = status
+        self.enabled = enabled
+    }
+}
+
+public struct LibraryImportEntryPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let entryId: String
+    public let skillId: String?
+    public let name: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        entryId: String,
+        skillId: String? = nil,
+        name: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.entryId = entryId
+        self.skillId = skillId
+        self.name = name
+    }
+}
+
+public struct LibraryArchiveEntryPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let entryId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        entryId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.entryId = entryId
+    }
+}
+
+public struct LibrarySetEntryEnabledPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let entryId: String
+    public let enabled: Bool
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        entryId: String,
+        enabled: Bool
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.entryId = entryId
+        self.enabled = enabled
+    }
+}
+
+public struct LibraryDeleteEntryPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let entryId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        entryId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.entryId = entryId
+    }
+}
+
+public struct LibraryScanEntriesPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct LibraryListSkillDraftsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct LibraryGetSkillDraftPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let draftId: String
+
+    public init(apiVersion: String? = nil, draftId: String) {
+        self.apiVersion = apiVersion
+        self.draftId = draftId
+    }
+}
+
+public struct LibraryCreateSkillDraftPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let draftId: String?
+    public let name: String?
+    public let description: String?
+    public let requestPrompt: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        draftId: String? = nil,
+        name: String? = nil,
+        description: String? = nil,
+        requestPrompt: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.draftId = draftId
+        self.name = name
+        self.description = description
+        self.requestPrompt = requestPrompt
+    }
+}
+
+public struct LibraryDeleteSkillDraftPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let draftId: String
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        draftId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.draftId = draftId
     }
 }
 
@@ -896,8 +1758,8 @@ public struct GatewaySetMainAgentPayload: Codable, Sendable {
     public let selectionMode: MainAgentSelectionMode
     public let providerId: String?
     public let modelId: String?
-    public let sourceProfileId: String?
-    public let copyPersonality: Bool?
+    public let sourceAgentDefinitionId: String?
+    public let applyPersonaInstructions: Bool?
 
     public init(
         apiVersion: String? = nil,
@@ -905,77 +1767,287 @@ public struct GatewaySetMainAgentPayload: Codable, Sendable {
         selectionMode: MainAgentSelectionMode,
         providerId: String? = nil,
         modelId: String? = nil,
-        sourceProfileId: String? = nil,
-        copyPersonality: Bool? = nil
+        sourceAgentDefinitionId: String? = nil,
+        applyPersonaInstructions: Bool? = nil
     ) {
         self.apiVersion = apiVersion
         self.spaceId = spaceId
         self.selectionMode = selectionMode
         self.providerId = providerId
         self.modelId = modelId
-        self.sourceProfileId = sourceProfileId
-        self.copyPersonality = copyPersonality
+        self.sourceAgentDefinitionId = sourceAgentDefinitionId
+        self.applyPersonaInstructions = applyPersonaInstructions
+    }
+}
+
+public struct GatewayGetConciergeAgentPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String?
+    public let repairIfMissing: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String? = nil,
+        repairIfMissing: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.repairIfMissing = repairIfMissing
+    }
+}
+
+public struct GatewaySetConciergeAgentPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String?
+    public let selectionMode: ConciergeAgentSelectionMode
+    public let providerId: String?
+    public let modelId: String?
+    public let sourceAgentDefinitionId: String?
+    public let applyPersonaInstructions: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String? = nil,
+        selectionMode: ConciergeAgentSelectionMode,
+        providerId: String? = nil,
+        modelId: String? = nil,
+        sourceAgentDefinitionId: String? = nil,
+        applyPersonaInstructions: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.selectionMode = selectionMode
+        self.providerId = providerId
+        self.modelId = modelId
+        self.sourceAgentDefinitionId = sourceAgentDefinitionId
+        self.applyPersonaInstructions = applyPersonaInstructions
     }
 }
 
 public struct GatewayListAvailableModelsPayload: Codable, Sendable {
     public let apiVersion: String?
     public let providerId: String?
+    public let refresh: Bool?
 
-    public init(apiVersion: String? = nil, providerId: String? = nil) {
+    public init(apiVersion: String? = nil, providerId: String? = nil, refresh: Bool? = nil) {
         self.apiVersion = apiVersion
         self.providerId = providerId
+        self.refresh = refresh
     }
 }
 
 public struct GatewayListProviderCatalogsPayload: Codable, Sendable {
     public let apiVersion: String?
     public let providerId: String?
+    public let refresh: Bool?
 
-    public init(apiVersion: String? = nil, providerId: String? = nil) {
+    public init(apiVersion: String? = nil, providerId: String? = nil, refresh: Bool? = nil) {
         self.apiVersion = apiVersion
         self.providerId = providerId
+        self.refresh = refresh
     }
 }
 
-public struct GatewayCreateIntegrationRequestPayload: Codable, Sendable {
+public struct GatewayListToolsPayload: Codable, Sendable {
     public let apiVersion: String?
-    public let integrationClass: GatewayIntegrationClass
-    public let requestedName: String
-    public let useCase: String?
-    public let sourceURL: String?
-    public let notes: String?
 
-    public init(
-        apiVersion: String? = nil,
-        integrationClass: GatewayIntegrationClass,
-        requestedName: String,
-        useCase: String? = nil,
-        sourceURL: String? = nil,
-        notes: String? = nil
-    ) {
+    public init(apiVersion: String? = nil) {
         self.apiVersion = apiVersion
-        self.integrationClass = integrationClass
-        self.requestedName = requestedName
-        self.useCase = useCase
-        self.sourceURL = sourceURL
-        self.notes = notes
     }
 }
 
-public struct GatewayListIntegrationRequestsPayload: Codable, Sendable {
+public struct GatewayGetToolPayload: Codable, Sendable {
     public let apiVersion: String?
-    public let integrationClass: GatewayIntegrationClass?
-    public let limit: Int?
+    public let toolId: String
+
+    public init(apiVersion: String? = nil, toolId: String) {
+        self.apiVersion = apiVersion
+        self.toolId = toolId
+    }
+}
+
+public struct GatewayScaffoldToolPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let id: String
+    public let displayName: String
+    public let description: String
+    public let outputMode: String
 
     public init(
         apiVersion: String? = nil,
-        integrationClass: GatewayIntegrationClass? = nil,
-        limit: Int? = nil
+        id: String,
+        displayName: String,
+        description: String,
+        outputMode: String
     ) {
         self.apiVersion = apiVersion
-        self.integrationClass = integrationClass
-        self.limit = limit
+        self.id = id
+        self.displayName = displayName
+        self.description = description
+        self.outputMode = outputMode
+    }
+}
+
+public struct GatewayRegisterToolPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let schemaVersion: Int?
+    public let id: String
+    public let displayName: String
+    public let description: String
+    public let bundleId: String?
+    public let bundleDisplayName: String?
+    public let bundleDescription: String?
+    public let toolGroupId: String?
+    public let toolGroupDisplayName: String?
+    public let executable: String
+    public let argsTemplate: [String]
+    public let inputSchema: [String: AnyCodable]
+    public let instructions: String?
+    public let examples: [GatewayToolExample]?
+    public let timeoutMs: Int?
+    public let maxOutputBytes: Int?
+    public let cwdMode: String
+    public let fixedCwd: String?
+    public let outputMode: String
+    public let dangerLevel: GatewayToolDangerLevel?
+    public let readme: String?
+    public let enabled: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        schemaVersion: Int? = nil,
+        id: String,
+        displayName: String,
+        description: String,
+        bundleId: String? = nil,
+        bundleDisplayName: String? = nil,
+        bundleDescription: String? = nil,
+        toolGroupId: String? = nil,
+        toolGroupDisplayName: String? = nil,
+        executable: String,
+        argsTemplate: [String],
+        inputSchema: [String: Any] = [:],
+        instructions: String? = nil,
+        examples: [GatewayToolExample]? = nil,
+        timeoutMs: Int? = nil,
+        maxOutputBytes: Int? = nil,
+        cwdMode: String,
+        fixedCwd: String? = nil,
+        outputMode: String,
+        dangerLevel: GatewayToolDangerLevel? = nil,
+        readme: String? = nil,
+        enabled: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.schemaVersion = schemaVersion
+        self.id = id
+        self.displayName = displayName
+        self.description = description
+        self.bundleId = bundleId
+        self.bundleDisplayName = bundleDisplayName
+        self.bundleDescription = bundleDescription
+        self.toolGroupId = toolGroupId
+        self.toolGroupDisplayName = toolGroupDisplayName
+        self.executable = executable
+        self.argsTemplate = argsTemplate
+        self.inputSchema = inputSchema.mapValues { AnyCodable($0) }
+        self.instructions = instructions
+        self.examples = examples
+        self.timeoutMs = timeoutMs
+        self.maxOutputBytes = maxOutputBytes
+        self.cwdMode = cwdMode
+        self.fixedCwd = fixedCwd
+        self.outputMode = outputMode
+        self.dangerLevel = dangerLevel
+        self.readme = readme
+        self.enabled = enabled
+    }
+}
+
+public struct GatewayRemoveToolPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let toolId: String
+
+    public init(apiVersion: String? = nil, toolId: String) {
+        self.apiVersion = apiVersion
+        self.toolId = toolId
+    }
+}
+
+public struct GatewaySetToolEnabledPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let toolId: String
+    public let enabled: Bool
+
+    public init(
+        apiVersion: String? = nil,
+        toolId: String,
+        enabled: Bool
+    ) {
+        self.apiVersion = apiVersion
+        self.toolId = toolId
+        self.enabled = enabled
+    }
+}
+
+public struct GatewayRescanJiraCliToolsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewayListToolApprovalGrantsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let principalId: String?
+    public let deviceId: String?
+    public let spaceId: String?
+    public let toolId: String?
+    public let includeRevoked: Bool?
+    public let includeExpired: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        principalId: String? = nil,
+        deviceId: String? = nil,
+        spaceId: String? = nil,
+        toolId: String? = nil,
+        includeRevoked: Bool? = nil,
+        includeExpired: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.principalId = principalId
+        self.deviceId = deviceId
+        self.spaceId = spaceId
+        self.toolId = toolId
+        self.includeRevoked = includeRevoked
+        self.includeExpired = includeExpired
+    }
+}
+
+public struct GatewayRevokeToolApprovalGrantPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let principalId: String?
+    public let deviceId: String?
+    public let spaceId: String
+    public let toolId: String
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        principalId: String? = nil,
+        deviceId: String? = nil,
+        spaceId: String,
+        toolId: String,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.principalId = principalId
+        self.deviceId = deviceId
+        self.spaceId = spaceId
+        self.toolId = toolId
+        self.reason = reason
     }
 }
 
@@ -999,6 +2071,66 @@ public struct GatewayGetLocalUsageTelemetryPayload: Codable, Sendable {
     }
 }
 
+public struct GatewayGetWorkspaceDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewaySetWorkspaceDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceHomeRoot: String?
+
+    public init(apiVersion: String? = nil, spaceHomeRoot: String? = nil) {
+        self.apiVersion = apiVersion
+        self.spaceHomeRoot = spaceHomeRoot
+    }
+}
+
+public struct GatewayGetMemoryDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewaySetMemoryDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let defaultExperienceCapture: SpaceExperienceCaptureMode
+    public let defaultSpacePrivacyMode: SpacePrivacyMode?
+
+    public init(
+        apiVersion: String? = nil,
+        defaultExperienceCapture: SpaceExperienceCaptureMode,
+        defaultSpacePrivacyMode: SpacePrivacyMode? = .standard
+    ) {
+        self.apiVersion = apiVersion
+        self.defaultExperienceCapture = defaultExperienceCapture
+        self.defaultSpacePrivacyMode = defaultSpacePrivacyMode
+    }
+}
+
+public struct GatewayGetExternalConnectivityPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewaySetExternalConnectivityPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let mode: String
+
+    public init(apiVersion: String? = nil, mode: String) {
+        self.apiVersion = apiVersion
+        self.mode = mode
+    }
+}
+
 public struct GatewayGetProviderSettingsPayload: Codable, Sendable {
     public let apiVersion: String?
     public let providerId: String
@@ -1015,10 +2147,11 @@ public struct GatewaySetProviderConfigPayload: Codable, Sendable {
     public let model: String?
     public let apiKey: String?
     public let apiKeySecretRef: String?
+    public let authMode: GatewayProviderAuthMode?
     public let baseURL: String?
+    public let executablePath: String?
     public let allowedModels: [String]?
     public let allowCustomModel: Bool?
-    public let nativeCliToolsEnabled: Bool?
 
     public init(
         apiVersion: String? = nil,
@@ -1026,20 +2159,22 @@ public struct GatewaySetProviderConfigPayload: Codable, Sendable {
         model: String? = nil,
         apiKey: String? = nil,
         apiKeySecretRef: String? = nil,
+        authMode: GatewayProviderAuthMode? = nil,
         baseURL: String? = nil,
+        executablePath: String? = nil,
         allowedModels: [String]? = nil,
-        allowCustomModel: Bool? = nil,
-        nativeCliToolsEnabled: Bool? = nil
+        allowCustomModel: Bool? = nil
     ) {
         self.apiVersion = apiVersion
         self.providerId = providerId
         self.model = model
         self.apiKey = apiKey
         self.apiKeySecretRef = apiKeySecretRef
+        self.authMode = authMode
         self.baseURL = baseURL
+        self.executablePath = executablePath
         self.allowedModels = allowedModels
         self.allowCustomModel = allowCustomModel
-        self.nativeCliToolsEnabled = nativeCliToolsEnabled
     }
 }
 
@@ -1049,10 +2184,11 @@ public struct GatewayUpdateProviderSettingsPayload: Codable, Sendable {
     public let model: String?
     public let apiKey: String?
     public let apiKeySecretRef: String?
+    public let authMode: GatewayProviderAuthMode?
     public let baseURL: String?
+    public let executablePath: String?
     public let allowedModels: [String]?
     public let allowCustomModel: Bool?
-    public let nativeCliToolsEnabled: Bool?
 
     public init(
         apiVersion: String? = nil,
@@ -1060,20 +2196,22 @@ public struct GatewayUpdateProviderSettingsPayload: Codable, Sendable {
         model: String? = nil,
         apiKey: String? = nil,
         apiKeySecretRef: String? = nil,
+        authMode: GatewayProviderAuthMode? = nil,
         baseURL: String? = nil,
+        executablePath: String? = nil,
         allowedModels: [String]? = nil,
-        allowCustomModel: Bool? = nil,
-        nativeCliToolsEnabled: Bool? = nil
+        allowCustomModel: Bool? = nil
     ) {
         self.apiVersion = apiVersion
         self.providerId = providerId
         self.model = model
         self.apiKey = apiKey
         self.apiKeySecretRef = apiKeySecretRef
+        self.authMode = authMode
         self.baseURL = baseURL
+        self.executablePath = executablePath
         self.allowedModels = allowedModels
         self.allowCustomModel = allowCustomModel
-        self.nativeCliToolsEnabled = nativeCliToolsEnabled
     }
 }
 
@@ -1167,6 +2305,30 @@ public struct GatewayDeleteSecretRefPayload: Codable, Sendable {
     }
 }
 
+public struct GatewayListInterconnectorsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewayRescanInterconnectorsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewayGetIntegrationsSnapshotPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
 public struct GatewayListConnectorFamiliesPayload: Codable, Sendable {
     public let apiVersion: String?
 
@@ -1238,6 +2400,31 @@ public struct GatewayRemoveConnectorPayload: Codable, Sendable {
     public init(apiVersion: String? = nil, connectorId: String) {
         self.apiVersion = apiVersion
         self.connectorId = connectorId
+    }
+}
+
+public struct ConnectorSubmitInboundEventPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let connectorId: String
+    public let eventType: String
+    public let selector: [String: AnyCodable]?
+    public let snapshot: [String: AnyCodable]?
+    public let input: String?
+
+    public init(
+        apiVersion: String? = nil,
+        connectorId: String,
+        eventType: String,
+        selector: [String: Any]? = nil,
+        snapshot: [String: Any]? = nil,
+        input: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.connectorId = connectorId
+        self.eventType = eventType
+        self.selector = selector?.mapValues { AnyCodable($0) }
+        self.snapshot = snapshot?.mapValues { AnyCodable($0) }
+        self.input = input
     }
 }
 
@@ -1351,6 +2538,146 @@ public struct GatewayUpdateConnectorPolicyPayload: Codable, Sendable {
     }
 }
 
+public struct GatewayGetToolPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewayUpdateToolPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let rules: [ToolAccessRule]?
+    public let dangerousCapabilities: [DangerousCapabilityRule]?
+    public let updatedBy: String?
+
+    public init(
+        apiVersion: String? = nil,
+        rules: [ToolAccessRule]? = nil,
+        dangerousCapabilities: [DangerousCapabilityRule]? = nil,
+        updatedBy: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.rules = rules
+        self.dangerousCapabilities = dangerousCapabilities
+        self.updatedBy = updatedBy
+    }
+}
+
+public struct GatewayListSafetyProfilesPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct SpaceGetEffectiveToolsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let agentId: String?
+    public let accessMode: String?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        agentId: String? = nil,
+        accessMode: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.agentId = agentId
+        self.accessMode = accessMode
+    }
+}
+
+public struct SpaceGetEffectiveToolAccessPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let agentId: String?
+    public let accessMode: String?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        agentId: String? = nil,
+        accessMode: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.agentId = agentId
+        self.accessMode = accessMode
+    }
+}
+
+public struct SpaceGetToolPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceUpdateToolPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let rules: [ToolAccessRule]?
+    public let dangerousCapabilities: [DangerousCapabilityRule]?
+    public let guestAccessPreset: String?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        rules: [ToolAccessRule]? = nil,
+        dangerousCapabilities: [DangerousCapabilityRule]? = nil,
+        guestAccessPreset: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.rules = rules
+        self.dangerousCapabilities = dangerousCapabilities
+        self.guestAccessPreset = guestAccessPreset
+    }
+}
+
+public struct SpaceGetConnectorPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+    }
+}
+
+public struct SpaceUpdateConnectorPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let spaceId: String
+    public let mode: SpaceConnectorPolicyMode
+    public let entries: [SpaceConnectorPolicyEntry]?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        mode: SpaceConnectorPolicyMode,
+        entries: [SpaceConnectorPolicyEntry]? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.mode = mode
+        self.entries = entries
+    }
+}
+
 public struct GatewayTestConnectorPayload: Codable, Sendable {
     public let apiVersion: String?
     public let connectorId: String
@@ -1457,14 +2784,82 @@ public struct SpaceCreateInitialAgentPayload: Codable, Sendable {
 
 public struct SpaceCreateResponsePayload: Codable, Sendable {
     public let space: SpaceConfig
+
+    private enum CodingKeys: String, CodingKey {
+        case space
+    }
+
+    public init(space: SpaceConfig) {
+        self.space = space
+    }
+
+    public init(from decoder: Decoder) throws {
+        if let container = try? decoder.container(keyedBy: CodingKeys.self),
+           let wrapped = try container.decodeIfPresent(SpaceConfig.self, forKey: .space) {
+            self.space = wrapped
+            return
+        }
+        self.space = try SpaceConfig(from: decoder)
+    }
 }
 
 public struct SpaceGetResponsePayload: Codable, Sendable {
     public let space: SpaceConfig
+
+    private enum CodingKeys: String, CodingKey {
+        case space
+    }
+
+    public init(space: SpaceConfig) {
+        self.space = space
+    }
+
+    public init(from decoder: Decoder) throws {
+        if let container = try? decoder.container(keyedBy: CodingKeys.self),
+           let wrapped = try container.decodeIfPresent(SpaceConfig.self, forKey: .space) {
+            self.space = wrapped
+            return
+        }
+        self.space = try SpaceConfig(from: decoder)
+    }
+}
+
+public struct SpaceGetMemoryPolicyResponsePayload: Codable, Sendable {
+    public let spaceId: String
+    public let memoryPolicy: SpaceMemoryPolicy
 }
 
 public struct SpaceListResponsePayload: Codable, Sendable {
     public let spaces: [SpaceConfig]
+
+    private enum CodingKeys: String, CodingKey {
+        case spaces
+    }
+
+    public init(spaces: [SpaceConfig]) {
+        self.spaces = spaces
+    }
+
+    public init(from decoder: Decoder) throws {
+        if let container = try? decoder.container(keyedBy: CodingKeys.self),
+           let wrapped = try container.decodeIfPresent([SpaceConfig].self, forKey: .spaces) {
+            self.spaces = wrapped
+            return
+        }
+        self.spaces = try [SpaceConfig](from: decoder)
+    }
+}
+
+public struct SpaceArchiveResponsePayload: Codable, Sendable {
+    public let space: SpaceConfig
+    public let archived: Bool
+}
+
+public struct SpaceDeleteResponsePayload: Codable, Sendable {
+    public let spaceId: String
+    public let spaceUid: String
+    public let deleted: Bool
+    public let space: SpaceConfig?
 }
 
 public struct SpaceAddAgentResponsePayload: Codable, Sendable {
@@ -1485,8 +2880,43 @@ public struct SpaceUpdateAgentAssignmentResponsePayload: Codable, Sendable {
     public let space: SpaceConfig?
 }
 
+public struct SpaceUpdateMetadataResponsePayload: Codable, Sendable {
+    public let space: SpaceConfig
+}
+
+public struct SpaceSetThinkingCapturePolicyResponsePayload: Codable, Sendable {
+    public let space: SpaceConfig
+}
+
+public struct SpaceSetMemoryPolicyResponsePayload: Codable, Sendable {
+    public let space: SpaceConfig
+}
+
+public struct SpaceEndIncognitoSessionResponsePayload: Codable, Sendable {
+    public let space: SpaceConfig
+    public let ended: Bool
+    public let reason: String
+    public let purgedAt: String?
+    public let sessionId: String?
+}
+
 public struct SpaceListAgentAssignmentsResponsePayload: Codable, Sendable {
     public let assignments: [SpaceAgentAssignment]
+}
+
+public struct SpaceGetMcpEndpointResponsePayload: Codable, Sendable {
+    public let spaceId: String
+    public let endpoint: SpaceMcpEndpoint?
+    public let fallbackEnabled: Bool
+}
+
+public struct SpaceSetMcpEndpointResponsePayload: Codable, Sendable {
+    public let endpoint: SpaceMcpEndpoint
+}
+
+public struct SpaceClearMcpEndpointResponsePayload: Codable, Sendable {
+    public let spaceId: String
+    public let cleared: Bool
 }
 
 public struct SpaceAddSkillResponsePayload: Codable, Sendable {
@@ -1518,6 +2948,10 @@ public struct SpaceGetWorkspaceResponsePayload: Codable, Sendable {
 
 public struct SpaceSetWorkspaceResponsePayload: Codable, Sendable {
     public let workspace: SpaceWorkspace
+}
+
+public struct SpaceOpenWorkspaceResponsePayload: Codable, Sendable {
+    public let result: SpaceOpenWorkspaceResult
 }
 
 public struct SpaceAddResourceResponsePayload: Codable, Sendable {
@@ -1553,40 +2987,59 @@ public struct SpaceListOrchestrationJournalResponsePayload: Codable, Sendable {
     public let nextOffset: Int?
 }
 
-public struct ProfileCreateResponsePayload: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct IdentityListAgentDefinitionsResponsePayload: Codable, Sendable {
+    public let agentDefinitions: [AgentDefinitionSummary]
+}
+
+public struct IdentityGetAgentDefinitionResponsePayload: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
+}
+
+public struct IdentityCreateAgentDefinitionResponsePayload: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let created: Bool
 }
 
-public struct ProfileGetResponsePayload: Codable, Sendable {
-    public let profile: ProfileSummary
-}
-
-public struct ProfileListResponsePayload: Codable, Sendable {
-    public let profiles: [ProfileSummary]
-}
-
-public struct ProfileUpdateResponsePayload: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct IdentityUpdateAgentDefinitionResponsePayload: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let newRevision: Int
 }
 
-public struct ProfileArchiveResponsePayload: Codable, Sendable {
-    public let profile: ProfileSummary
+public struct IdentityArchiveAgentDefinitionResponsePayload: Codable, Sendable {
+    public let agentDefinition: AgentDefinitionSummary
     public let archived: Bool
 }
 
-public struct PresetListResponsePayload: Codable, Sendable {
-    public let presets: [PresetSummary]
+public struct IdentityListPersonasResponsePayload: Codable, Sendable {
+    public let personas: [PersonaSummary]
 }
 
-public struct PresetGetResponsePayload: Codable, Sendable {
-    public let preset: PresetDetail
+public struct IdentityGetPersonaResponsePayload: Codable, Sendable {
+    public let persona: PersonaSummary
 }
 
-public typealias PresetApplyToSpaceResultPayload = PresetApplyToSpaceResult
-public typealias PresetSaveAgentResponsePayload = PresetSaveAgentResult
-public typealias PresetArchiveAgentResponsePayload = PresetArchiveAgentResult
+public struct IdentityCreatePersonaResponsePayload: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let created: Bool
+}
+
+public struct IdentityUpdatePersonaResponsePayload: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let newRevision: Int
+}
+
+public struct IdentityArchivePersonaResponsePayload: Codable, Sendable {
+    public let persona: PersonaSummary
+    public let archived: Bool
+}
+
+public struct IdentityPreviewCompiledInstructionsResponsePayload: Codable, Sendable {
+    public let preview: CompiledInstructionsPreview
+}
+
+public struct IdentityPreviewRuntimeSystemPromptResponsePayload: Codable, Sendable {
+    public let preview: RuntimeSystemPromptPreview
+}
 
 public struct SpacePreviewTemplateResponsePayload: Codable, Sendable {
     public let template: SpaceTemplateSummary
@@ -1596,6 +3049,90 @@ public struct SpacePreviewTemplateResponsePayload: Codable, Sendable {
 
 public typealias SpaceCreateFromTemplateResultPayload = SpaceCreateFromTemplateResult
 public typealias SpaceSaveTemplateResultPayload = SpaceSaveTemplateResult
+
+public struct SpaceTemplateListResponsePayload: Codable, Sendable {
+    public let templates: [SpaceTemplateRecord]
+}
+
+public struct SpaceTemplateGetResponsePayload: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+}
+
+public struct SpaceTemplatePreviewResponsePayload: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let resolved: SpaceTemplatePreviewResolved
+    public let warnings: [String]
+}
+
+public struct SpaceTemplateCreateSpaceResponsePayload: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let space: SpaceConfig
+}
+
+public struct SpaceTemplateSaveResponsePayload: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let created: Bool
+}
+
+public struct SpaceTemplateArchiveResponsePayload: Codable, Sendable {
+    public let template: SpaceTemplateRecord
+    public let archived: Bool
+}
+
+public struct LibraryListEntriesResponsePayload: Codable, Sendable {
+    public let entries: [LibraryEntry]
+}
+
+public struct LibraryGetEntryResponsePayload: Codable, Sendable {
+    public let entry: LibraryEntry
+}
+
+public struct LibrarySaveSkillResponsePayload: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let created: Bool
+}
+
+public struct LibraryImportEntryResponsePayload: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let created: Bool
+}
+
+public struct LibraryArchiveEntryResponsePayload: Codable, Sendable {
+    public let entry: LibraryEntry
+    public let archived: Bool
+}
+
+public struct LibrarySetEntryEnabledResponsePayload: Codable, Sendable {
+    public let entry: LibraryEntry
+}
+
+public struct LibraryDeleteEntryResponsePayload: Codable, Sendable {
+    public let entryId: String
+    public let deleted: Bool
+}
+
+public struct LibraryScanEntriesResponsePayload: Codable, Sendable {
+    public let entries: [LibraryEntry]
+    public let scannedAt: String
+}
+
+public struct LibraryListSkillDraftsResponsePayload: Codable, Sendable {
+    public let drafts: [SkillDraft]
+}
+
+public struct LibraryGetSkillDraftResponsePayload: Codable, Sendable {
+    public let draft: SkillDraft
+}
+
+public struct LibraryCreateSkillDraftResponsePayload: Codable, Sendable {
+    public let draft: SkillDraft
+    public let created: Bool
+}
+
+public struct LibraryDeleteSkillDraftResponsePayload: Codable, Sendable {
+    public let draftId: String
+    public let deleted: Bool
+}
 
 public struct AuthRegisterDeviceResponsePayload: Codable, Sendable {
     public let device: DeviceIdentity
@@ -1638,6 +3175,40 @@ public struct GatewaySetMainAgentResponsePayload: Codable, Sendable {
     public let state: GatewayMainAgentState
 }
 
+public struct GatewayGetConciergeAgentResponsePayload: Codable, Sendable {
+    public let state: GatewayConciergeAgentState
+}
+
+public struct GatewaySetConciergeAgentResponsePayload: Codable, Sendable {
+    public let state: GatewayConciergeAgentState
+}
+
+public struct GatewayGetWorkspaceDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayWorkspaceDefaults
+}
+
+public struct GatewaySetWorkspaceDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayWorkspaceDefaults
+}
+
+public struct GatewayGetMemoryDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayMemoryDefaults
+}
+
+public struct GatewaySetMemoryDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayMemoryDefaults
+}
+
+public struct GatewayGetExternalConnectivityResponsePayload: Codable, Sendable {
+    public let settings: GatewayExternalConnectivitySettings
+    public let status: GatewayExternalConnectivityStatus
+}
+
+public struct GatewaySetExternalConnectivityResponsePayload: Codable, Sendable {
+    public let settings: GatewayExternalConnectivitySettings
+    public let status: GatewayExternalConnectivityStatus
+}
+
 public struct GatewayListAvailableModelsResponsePayload: Codable, Sendable {
     public let providers: [GatewayModelProviderCatalog]
     public let generatedAt: String
@@ -1648,13 +3219,65 @@ public struct GatewayListProviderCatalogsResponsePayload: Codable, Sendable {
     public let generatedAt: String
 }
 
-public struct GatewayCreateIntegrationRequestResponsePayload: Codable, Sendable {
-    public let request: GatewayIntegrationRequest
+public struct GatewayListToolsResponsePayload: Codable, Sendable {
+    public let tools: [GatewayTool]
 }
 
-public struct GatewayListIntegrationRequestsResponsePayload: Codable, Sendable {
-    public let requests: [GatewayIntegrationRequest]
+public struct GatewayGetToolResponsePayload: Codable, Sendable {
+    public let tool: GatewayTool?
 }
+
+public struct GatewayScaffoldToolResponsePayload: Codable, Sendable {
+    public let manifest: GatewayRegisterToolPayload
+    public let readme: String
+}
+
+public struct GatewayRegisterToolResponsePayload: Codable, Sendable {
+    public let tool: GatewayTool
+}
+
+public struct GatewayRemoveToolResponsePayload: Codable, Sendable {
+    public let toolId: String
+    public let removed: Bool
+}
+
+public struct GatewaySetToolEnabledResponsePayload: Codable, Sendable {
+    public let tools: [GatewayTool]
+}
+
+public struct GatewayInterconnectorBundle: Codable, Sendable {
+    public let bundleId: String
+    public let bundleDisplayName: String
+    public let bundleDescription: String?
+    public let availabilityStatus: GatewayInterconnectorAvailabilityStatus
+    public let detected: Bool
+    public let executablePath: String?
+    public let installHint: String?
+    public let toolIds: [String]
+    public let toolCount: Int
+    public let managedEnabled: Bool
+    public let healthStatus: GatewayToolHealthStatus
+    public let healthMessage: String?
+    public let updatedAt: String
+}
+
+public struct GatewayListInterconnectorsResponsePayload: Codable, Sendable {
+    public let interconnectors: [GatewayInterconnectorBundle]
+    public let generatedAt: String
+}
+
+public struct GatewayRescanInterconnectorsResponsePayload: Codable, Sendable {
+    public let interconnectors: [GatewayInterconnectorBundle]
+    public let generatedAt: String
+}
+
+public typealias GatewayRescanJiraCliToolsResponsePayload = GatewayJiraCliRescanResult
+
+public struct GatewayListToolApprovalGrantsResponsePayload: Codable, Sendable {
+    public let grants: [GatewayToolApprovalGrant]
+}
+
+public typealias GatewayRevokeToolApprovalGrantResponsePayload = GatewayRevokeToolApprovalGrantResult
 
 public struct GatewayGetProviderTelemetryResponsePayload: Codable, Sendable {
     public let telemetry: [ProviderTelemetry]
@@ -1692,6 +3315,42 @@ public struct GatewayFactoryResetResponsePayload: Codable, Sendable {
 
 public typealias SpaceResetResponsePayload = SpaceResetResult
 
+public struct SpaceGetEffectiveToolsResponsePayload: Codable, Sendable {
+    public let matrix: EffectiveToolMatrix
+}
+
+public struct SpaceGetEffectiveToolAccessResponsePayload: Codable, Sendable {
+    public let access: EffectiveToolAccess
+}
+
+public struct SpaceGetToolPolicyResponsePayload: Codable, Sendable {
+    public let policy: ToolAccessPolicy
+}
+
+public struct SpaceUpdateToolPolicyResponsePayload: Codable, Sendable {
+    public let policy: ToolAccessPolicy
+}
+
+public struct SpaceGetConnectorPolicyResponsePayload: Codable, Sendable {
+    public let policy: SpaceConnectorPolicy
+}
+
+public struct SpaceUpdateConnectorPolicyResponsePayload: Codable, Sendable {
+    public let policy: SpaceConnectorPolicy
+}
+
+public struct GatewayGetToolPolicyResponsePayload: Codable, Sendable {
+    public let policy: ToolAccessPolicy
+}
+
+public struct GatewayUpdateToolPolicyResponsePayload: Codable, Sendable {
+    public let policy: ToolAccessPolicy
+}
+
+public struct GatewayListSafetyProfilesResponsePayload: Codable, Sendable {
+    public let profiles: [SafetyProfileDefinition]
+}
+
 public struct GatewayProvisionLocalProfileResponsePayload: Codable, Sendable {
     public let profileId: String
     public let profileName: String
@@ -1710,6 +3369,172 @@ public struct GatewayListSecretRefsResponsePayload: Codable, Sendable {
 
 public typealias GatewayDeleteSecretRefResponsePayload = GatewayDeleteSecretRefResult
 
+public enum GatewayBuiltinMcpAdminAuthMode: String, Codable, Sendable, Equatable {
+    case strict
+    case compat
+    case unavailable
+}
+
+public enum GatewayInterconnectorAvailabilityStatus: String, Codable, Sendable {
+    case active
+    case degraded
+    case inactive
+}
+
+public enum GatewayIntegrationGroupId: String, Codable, Sendable {
+    case builtInIntegrations = "built_in_integrations"
+    case builtInMcpAdmin = "built_in_mcp_admin"
+    case mcpServers = "mcp_servers"
+    case cliTools = "cli_tools"
+    case externalConnectors = "external_connectors"
+}
+
+public enum GatewayIntegrationEntryKind: String, Codable, Sendable {
+    case builtInIntegration = "built_in_integration"
+    case builtInMcpAdmin = "built_in_mcp_admin"
+    case mcpServer = "mcp_server"
+    case cliTool = "cli_tool"
+    case connectorFamily = "connector_family"
+    case connector = "connector"
+}
+
+public enum GatewayIntegrationBadgeTone: String, Codable, Sendable {
+    case green
+    case blue
+    case orange
+    case red
+    case gray
+}
+
+public struct GatewayIntegrationBadge: Codable, Sendable {
+    public let text: String
+    public let tone: GatewayIntegrationBadgeTone?
+
+    public init(
+        text: String,
+        tone: GatewayIntegrationBadgeTone? = nil
+    ) {
+        self.text = text
+        self.tone = tone
+    }
+}
+
+public struct GatewayBuiltinIntegrationEntry: Codable, Sendable {
+    public let integrationId: String
+    public let displayName: String
+    public let description: String?
+    public let enabled: Bool
+    public let capabilityTypes: [String]
+    public let managementSummary: String?
+    public let runtimeAvailable: Bool?
+    public let runtimeStatus: String?
+    public let runtimeStatusMessage: String?
+    public let providerIds: [String]?
+}
+
+public struct GatewayBuiltinMcpAdminRuntimeState: Codable, Sendable, Equatable {
+    public let endpointPath: String
+    public let effectiveEnabled: Bool
+    public let bootstrapDefaultEnabled: Bool
+    public let authMode: GatewayBuiltinMcpAdminAuthMode
+    public let tokenIssuerAvailable: Bool
+    public let defaultTargetSpaceId: String
+
+    public init(
+        endpointPath: String,
+        effectiveEnabled: Bool,
+        bootstrapDefaultEnabled: Bool,
+        authMode: GatewayBuiltinMcpAdminAuthMode,
+        tokenIssuerAvailable: Bool,
+        defaultTargetSpaceId: String
+    ) {
+        self.endpointPath = endpointPath
+        self.effectiveEnabled = effectiveEnabled
+        self.bootstrapDefaultEnabled = bootstrapDefaultEnabled
+        self.authMode = authMode
+        self.tokenIssuerAvailable = tokenIssuerAvailable
+        self.defaultTargetSpaceId = defaultTargetSpaceId
+    }
+}
+
+public struct GatewayBuiltinMcpAdminEntry: Codable, Sendable {
+    public let enabled: Bool
+    public let allowTargetSpaceOverride: Bool
+    public let allowedTools: [String]
+    public let runtimeState: GatewayBuiltinMcpAdminRuntimeState?
+}
+
+public struct GatewayIntegrationCliToolEntry: Codable, Sendable {
+    public let tool: GatewayTool
+    public let activeApprovalGrantCount: Int
+}
+
+public struct GatewayIntegrationMcpServerEntry: Codable, Sendable {
+    public let spaceId: String
+    public let spaceName: String
+    public let endpoint: SpaceMcpEndpoint
+}
+
+public struct GatewayIntegrationConnectorFamilyEntry: Codable, Sendable {
+    public let family: GatewayConnectorFamily
+    public let configuredConnectorCount: Int
+    public let policy: GatewayConnectorPolicy?
+}
+
+public struct GatewayIntegrationConnectorEntry: Codable, Sendable {
+    public let connector: GatewayConnector
+    public let family: GatewayConnectorFamily
+    public let bindings: [GatewayConnectorBinding]
+    public let policy: GatewayConnectorPolicy?
+}
+
+public struct GatewayIntegrationEntry: Codable, Sendable {
+    public let entryId: String
+    public let kind: GatewayIntegrationEntryKind
+    public let title: String
+    public let subtitle: String?
+    public let badges: [GatewayIntegrationBadge]
+    public let builtinIntegration: GatewayBuiltinIntegrationEntry?
+    public let builtinMcpAdmin: GatewayBuiltinMcpAdminEntry?
+    public let mcpServer: GatewayIntegrationMcpServerEntry?
+    public let cliTool: GatewayIntegrationCliToolEntry?
+    public let connectorFamily: GatewayIntegrationConnectorFamilyEntry?
+    public let connector: GatewayIntegrationConnectorEntry?
+}
+
+public struct GatewayIntegrationGroup: Codable, Sendable {
+    public let groupId: GatewayIntegrationGroupId
+    public let title: String
+    public let summary: String?
+    public let entries: [GatewayIntegrationEntry]
+}
+
+public struct GatewayIntegrationsSnapshot: Codable, Sendable {
+    public let groups: [GatewayIntegrationGroup]
+    public let supportedInterconnectors: [GatewayInterconnectorBundle]?
+    public let connectorFamilyPolicies: [String: GatewayConnectorPolicy]?
+    public let connectorPolicies: [String: GatewayConnectorPolicy]?
+    public let generatedAt: String
+
+    public init(
+        groups: [GatewayIntegrationGroup],
+        supportedInterconnectors: [GatewayInterconnectorBundle]? = nil,
+        connectorFamilyPolicies: [String: GatewayConnectorPolicy]? = nil,
+        connectorPolicies: [String: GatewayConnectorPolicy]? = nil,
+        generatedAt: String
+    ) {
+        self.groups = groups
+        self.supportedInterconnectors = supportedInterconnectors
+        self.connectorFamilyPolicies = connectorFamilyPolicies
+        self.connectorPolicies = connectorPolicies
+        self.generatedAt = generatedAt
+    }
+}
+
+public struct GatewayGetIntegrationsSnapshotResponsePayload: Codable, Sendable {
+    public let snapshot: GatewayIntegrationsSnapshot
+}
+
 public struct GatewayListConnectorFamiliesResponsePayload: Codable, Sendable {
     public let families: [GatewayConnectorFamily]
 }
@@ -1725,6 +3550,21 @@ public struct GatewayUpsertConnectorResponsePayload: Codable, Sendable {
 public struct GatewayRemoveConnectorResponsePayload: Codable, Sendable {
     public let connectorId: String
     public let removed: Bool
+}
+
+public struct ConnectorInboundRouteResult: Codable, Sendable {
+    public let route: String
+    public let targetType: String
+    public let targetSpaceId: String?
+    public let bindingId: String?
+    public let matchedScore: Int?
+}
+
+public struct ConnectorInboundEventResultPayload: Codable, Sendable {
+    public let ok: Bool
+    public let route: ConnectorInboundRouteResult?
+    public let turnId: String?
+    public let directives: [String: AnyCodable]
 }
 
 public struct GatewayListConnectorBindingsResponsePayload: Codable, Sendable {
@@ -1825,91 +3665,6 @@ public struct GatewayUpdatePolicyResponsePayload: Codable, Sendable {
     public let policy: GatewayPolicy
 }
 
-public struct GatewaySkillListPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let query: String?
-    public let tags: [String]?
-    public let status: String?
-    public let limit: Int?
-
-    public init(
-        apiVersion: String? = nil,
-        query: String? = nil,
-        tags: [String]? = nil,
-        status: String? = nil,
-        limit: Int? = nil
-    ) {
-        self.apiVersion = apiVersion
-        self.query = query
-        self.tags = tags
-        self.status = status
-        self.limit = limit
-    }
-}
-
-public struct GatewaySkillListResponsePayload: Codable, Sendable {
-    public let skills: [GatewaySkillEntry]
-}
-
-public struct GatewaySkillGetPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let skillId: String
-
-    public init(apiVersion: String? = nil, skillId: String) {
-        self.apiVersion = apiVersion
-        self.skillId = skillId
-    }
-}
-
-public struct GatewaySkillGetResponsePayload: Codable, Sendable {
-    public let skill: GatewaySkillEntry
-}
-
-public struct GatewaySkillUpsertPayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let skillId: String?
-    public let name: String
-    public let description: String?
-    public let contentMarkdown: String
-    public let sourceRef: String?
-    public let tags: [String]?
-    public let status: GatewaySkillStatus?
-
-    public init(
-        apiVersion: String? = nil,
-        skillId: String? = nil,
-        name: String,
-        description: String? = nil,
-        contentMarkdown: String,
-        sourceRef: String? = nil,
-        tags: [String]? = nil,
-        status: GatewaySkillStatus? = nil
-    ) {
-        self.apiVersion = apiVersion
-        self.skillId = skillId
-        self.name = name
-        self.description = description
-        self.contentMarkdown = contentMarkdown
-        self.sourceRef = sourceRef
-        self.tags = tags
-        self.status = status
-    }
-}
-
-public typealias GatewaySkillUpsertResponsePayload = GatewaySkillUpsertResult
-
-public struct GatewaySkillDeletePayload: Codable, Sendable {
-    public let apiVersion: String?
-    public let skillId: String
-
-    public init(apiVersion: String? = nil, skillId: String) {
-        self.apiVersion = apiVersion
-        self.skillId = skillId
-    }
-}
-
-public typealias GatewaySkillDeleteResponsePayload = GatewaySkillDeleteResult
-
 public struct GatewayListKnowledgeBaseEntriesPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String?
@@ -2001,6 +3756,8 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
     public let action: SchedulerAction
     public let primarySpaceId: String
     public let relatedSpaceIds: [String]?
+    public let executionTarget: SchedulerExecutionTarget?
+    public let calendarBinding: SchedulerCalendarBinding?
 
     public init(
         apiVersion: String? = nil,
@@ -2010,7 +3767,9 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
         schedulePreset: SchedulerSchedulePreset,
         action: SchedulerAction,
         primarySpaceId: String,
-        relatedSpaceIds: [String]? = nil
+        relatedSpaceIds: [String]? = nil,
+        executionTarget: SchedulerExecutionTarget? = nil,
+        calendarBinding: SchedulerCalendarBinding? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
@@ -2020,6 +3779,8 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
         self.action = action
         self.primarySpaceId = primarySpaceId
         self.relatedSpaceIds = relatedSpaceIds
+        self.executionTarget = executionTarget
+        self.calendarBinding = calendarBinding
     }
 }
 
@@ -2075,6 +3836,8 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
     public let action: SchedulerAction?
     public let primarySpaceId: String?
     public let relatedSpaceIds: [String]?
+    public let executionTarget: SchedulerExecutionTarget?
+    public let calendarBinding: SchedulerCalendarBinding?
 
     public init(
         apiVersion: String? = nil,
@@ -2086,7 +3849,9 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
         schedulePreset: SchedulerSchedulePreset? = nil,
         action: SchedulerAction? = nil,
         primarySpaceId: String? = nil,
-        relatedSpaceIds: [String]? = nil
+        relatedSpaceIds: [String]? = nil,
+        executionTarget: SchedulerExecutionTarget? = nil,
+        calendarBinding: SchedulerCalendarBinding? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
@@ -2098,6 +3863,8 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
         self.action = action
         self.primarySpaceId = primarySpaceId
         self.relatedSpaceIds = relatedSpaceIds
+        self.executionTarget = executionTarget
+        self.calendarBinding = calendarBinding
     }
 }
 
@@ -2478,11 +4245,93 @@ public struct SyncPullResourcesResponsePayload: Codable, Sendable {
     public let skippedCount: Int
 }
 
+public struct SubscribeNotificationsPayload: Codable, Sendable {
+    public let categories: [String]
+
+    public init(categories: [String]) {
+        self.categories = categories
+    }
+}
+
+public struct UnsubscribeNotificationsPayload: Codable, Sendable {
+    public let categories: [String]
+
+    public init(categories: [String]) {
+        self.categories = categories
+    }
+}
+
+public struct NotificationSubscriptionResponsePayload: Codable, Sendable {
+    public let categories: [String]
+}
+
+public enum ConciergeActionRequestType: String, Codable, Sendable {
+    case createSpace = "create_space"
+    case openWorkspace = "open_workspace"
+    case updateSpace = "update_space"
+    case addAgent = "add_agent"
+    case removeAgent = "remove_agent"
+    case runSpacePrompt = "run_space_prompt"
+    case draftSchedulerJob = "draft_scheduler_job"
+}
+
+public struct AppConciergeActionRequestPayload: Codable, Sendable {
+    public let requestId: String
+    public let action: ConciergeActionRequestType
+    public let gatewayId: String?
+    public let params: [String: AnyCodable]?
+
+    public init(
+        requestId: String,
+        action: ConciergeActionRequestType,
+        gatewayId: String? = nil,
+        params: [String: AnyCodable]? = nil
+    ) {
+        self.requestId = requestId
+        self.action = action
+        self.gatewayId = gatewayId
+        self.params = params
+    }
+}
+
+public enum ConciergeActionResultStatus: String, Codable, Sendable {
+    case ok
+    case error
+}
+
+public struct ConciergeActionResultPayload: Codable, Sendable {
+    public let requestId: String
+    public let status: ConciergeActionResultStatus
+    public let payload: [String: AnyCodable]?
+    public let error: String?
+
+    public init(
+        requestId: String,
+        status: ConciergeActionResultStatus,
+        payload: [String: Any]? = nil,
+        error: String? = nil
+    ) {
+        self.requestId = requestId
+        self.status = status
+        self.payload = payload?.mapValues { AnyCodable($0) }
+        self.error = error
+    }
+}
+
+public struct ConciergeActionResultAckPayload: Codable, Sendable {
+    public let acknowledged: Bool
+    public let requestId: String
+}
+
 public struct SpeechStartPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String
-    public let spaceUid: String
+    public let spaceUid: String?
     public let sessionId: String?
+    public let locale: String?
+    public let sourceDevice: String?
+    public let enableTranscription: Bool?
+    public let enablePlayback: Bool?
     public let agentId: String?
     public let autoSubmitTurns: Bool?
     public let preferredSource: String?
@@ -2493,18 +4342,101 @@ public struct SpeechStartPayload: Codable, Sendable {
     public let allowByokFallback: Bool?
     public let allowLocalFallback: Bool?
     public let allowAppleSpeechFallback: Bool?
+    public let sttPreferences: SpeechRoutePreferences?
+    public let ttsPreferences: SpeechRoutePreferences?
+
+    public init(
+        apiVersion: String? = nil,
+        spaceId: String,
+        spaceUid: String? = nil,
+        sessionId: String? = nil,
+        locale: String? = nil,
+        sourceDevice: String? = nil,
+        enableTranscription: Bool? = nil,
+        enablePlayback: Bool? = nil,
+        agentId: String? = nil,
+        autoSubmitTurns: Bool? = nil,
+        preferredSource: String? = nil,
+        preferredProviderId: String? = nil,
+        byokProviderId: String? = nil,
+        localModelProviderId: String? = nil,
+        appleSpeechProviderId: String? = nil,
+        allowByokFallback: Bool? = nil,
+        allowLocalFallback: Bool? = nil,
+        allowAppleSpeechFallback: Bool? = nil,
+        sttPreferences: SpeechRoutePreferences? = nil,
+        ttsPreferences: SpeechRoutePreferences? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.sessionId = sessionId
+        self.locale = locale
+        self.sourceDevice = sourceDevice
+        self.enableTranscription = enableTranscription
+        self.enablePlayback = enablePlayback
+        self.agentId = agentId
+        self.autoSubmitTurns = autoSubmitTurns
+        self.preferredSource = preferredSource
+        self.preferredProviderId = preferredProviderId
+        self.byokProviderId = byokProviderId
+        self.localModelProviderId = localModelProviderId
+        self.appleSpeechProviderId = appleSpeechProviderId
+        self.allowByokFallback = allowByokFallback
+        self.allowLocalFallback = allowLocalFallback
+        self.allowAppleSpeechFallback = allowAppleSpeechFallback
+        self.sttPreferences = sttPreferences
+        self.ttsPreferences = ttsPreferences
+    }
 }
 
 public struct SpeechAudioChunkPayload: Codable, Sendable {
     public let apiVersion: String?
     public let sessionId: String
     public let sequence: Int
+    public let sequenceNo: Int?
     public let audioBase64: String
+    public let sampleRateHz: Int?
+    public let channels: Int?
+    public let codec: String?
     public let audioDurationSeconds: Double?
     public let ttsChars: Int?
     public let ttsSeconds: Double?
     public let transcriptText: String?
     public let isFinal: Bool?
+    public let engineMetrics: SpeechEngineMetrics?
+
+    public init(
+        apiVersion: String? = nil,
+        sessionId: String,
+        sequence: Int,
+        sequenceNo: Int? = nil,
+        audioBase64: String,
+        sampleRateHz: Int? = nil,
+        channels: Int? = nil,
+        codec: String? = nil,
+        audioDurationSeconds: Double? = nil,
+        ttsChars: Int? = nil,
+        ttsSeconds: Double? = nil,
+        transcriptText: String? = nil,
+        isFinal: Bool? = nil,
+        engineMetrics: SpeechEngineMetrics? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.sessionId = sessionId
+        self.sequence = sequence
+        self.sequenceNo = sequenceNo
+        self.audioBase64 = audioBase64
+        self.sampleRateHz = sampleRateHz
+        self.channels = channels
+        self.codec = codec
+        self.audioDurationSeconds = audioDurationSeconds
+        self.ttsChars = ttsChars
+        self.ttsSeconds = ttsSeconds
+        self.transcriptText = transcriptText
+        self.isFinal = isFinal
+        self.engineMetrics = engineMetrics
+    }
 }
 
 public struct SpeechControlPayload: Codable, Sendable {
@@ -2520,6 +4452,197 @@ public struct SpeechEventResponsePayload: Codable, Sendable {
 
 public struct SpeechEventsResponsePayload: Codable, Sendable {
     public let events: [SpeechSessionEvent]
+}
+
+public struct ConciergeCallStartPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let deviceId: String?
+    public let platform: String
+    public let ttsMode: String?
+    public let targetGatewayId: String?
+    public let displayName: String?
+    public let handoffContext: ConciergeCallHandoffContext?
+    public let spaceId: String?
+    public let spaceUid: String?
+    public let targetAgentId: String?
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        deviceId: String? = nil,
+        platform: String,
+        ttsMode: String? = nil,
+        targetGatewayId: String? = nil,
+        displayName: String? = nil,
+        handoffContext: ConciergeCallHandoffContext? = nil,
+        spaceId: String? = nil,
+        spaceUid: String? = nil,
+        targetAgentId: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.deviceId = deviceId
+        self.platform = platform
+        self.ttsMode = ttsMode
+        self.targetGatewayId = targetGatewayId
+        self.displayName = displayName
+        self.handoffContext = handoffContext
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.targetAgentId = targetAgentId
+    }
+}
+
+public struct ConciergeCallAnswerPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let deviceId: String?
+    public let platform: String?
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        deviceId: String? = nil,
+        platform: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.deviceId = deviceId
+        self.platform = platform
+    }
+}
+
+public struct ConciergeCallEndPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.reason = reason
+    }
+}
+
+public struct ConciergeCallSetMutedPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let muted: Bool
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        muted: Bool
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.muted = muted
+    }
+}
+
+public struct ConciergeCallAudioChunkPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let sequence: Int
+    public let audioBase64: String
+    public let audioDurationSeconds: Double?
+    public let sampleRateHz: Int?
+    public let channels: Int?
+    public let codec: String?
+    public let transcriptText: String?
+    public let isFinal: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        sequence: Int,
+        audioBase64: String,
+        audioDurationSeconds: Double? = nil,
+        sampleRateHz: Int? = nil,
+        channels: Int? = nil,
+        codec: String? = nil,
+        transcriptText: String? = nil,
+        isFinal: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.sequence = sequence
+        self.audioBase64 = audioBase64
+        self.audioDurationSeconds = audioDurationSeconds
+        self.sampleRateHz = sampleRateHz
+        self.channels = channels
+        self.codec = codec
+        self.transcriptText = transcriptText
+        self.isFinal = isFinal
+    }
+}
+
+public struct ConciergeCallControlPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let command: String
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        callId: String,
+        command: String,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.callId = callId
+        self.command = command
+        self.reason = reason
+    }
+}
+
+public struct ConciergeCallHandoffPreparePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let sourceDeviceId: String?
+    public let destinationPlatform: String
+    public let destinationDeviceId: String?
+    public let destinationClientId: String?
+    public let resumeUrl: String?
+}
+
+public struct ConciergeCallHandoffAcceptPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let callId: String
+    public let handoffToken: String
+    public let deviceId: String?
+    public let platform: String?
+}
+
+public struct ConciergeCallRegisterPushPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let deviceId: String?
+    public let platform: String
+    public let pushToken: String
+    public let voipTopic: String?
+    public let proactiveOptIn: Bool?
+}
+
+public struct ConciergeCallEventResponsePayload: Codable, Sendable {
+    public let event: ConciergeCallEvent
+}
+
+public struct ConciergeCallEventsResponsePayload: Codable, Sendable {
+    public let events: [ConciergeCallEvent]
+}
+
+public struct ConciergeCallHandoffPrepareResponsePayload: Codable, Sendable {
+    public let event: ConciergeCallEvent
+    public let handoffToken: ConciergeCallHandoffToken
+}
+
+public struct ConciergeCallRegisterPushResponsePayload: Codable, Sendable {
+    public let registration: ConciergeVoipPushRegistration
 }
 
 // MARK: - Adapter Payloads
@@ -2654,6 +4777,28 @@ public struct AuthResultPayload: Codable, Sendable {
     public let reason: String?
 }
 
+public struct AppNavigatePayload: Codable, Sendable {
+    public let destination: String
+    public let gatewayId: String?
+    public let spaceId: String?
+    public let jobId: String?
+    public let promptText: String?
+
+    public init(
+        destination: String,
+        gatewayId: String? = nil,
+        spaceId: String? = nil,
+        jobId: String? = nil,
+        promptText: String? = nil
+    ) {
+        self.destination = destination
+        self.gatewayId = gatewayId
+        self.spaceId = spaceId
+        self.jobId = jobId
+        self.promptText = promptText
+    }
+}
+
 // MARK: - Inter-Agent Messaging Payloads
 
 /// Send a message directly to a specific agent within a space.
@@ -2749,16 +4894,24 @@ public enum MessageType {
     // Client → Gateway
     public static let authenticate = "authenticate"
     public static let executeTurn = "execute_turn"
+    public static let cancelTurn = "cancel_turn"
     public static let resumeFeedback = "resume_feedback"
     public static let subscribe = "subscribe"
     public static let capabilityInvoke = "capability_invoke"
     public static let spaceCreate = "space.create"
     public static let spaceGet = "space.get"
     public static let spaceList = "space.list"
+    public static let spaceArchive = "space.archive"
+    public static let spaceDelete = "space.delete"
+    public static let spaceUpdateMetadata = "space.update_metadata"
     public static let spaceAddAgent = "space.add_agent"
     public static let spaceRemoveAgent = "space.remove_agent"
     public static let spaceUpdateAgentAssignment = "space.update_agent_assignment"
     public static let spaceSetOrchestrator = "space.set_orchestrator"
+    public static let spaceSetThinkingCapturePolicy = "space.set_thinking_capture_policy"
+    public static let spaceGetMemoryPolicy = "space.get_memory_policy"
+    public static let spaceSetMemoryPolicy = "space.set_memory_policy"
+    public static let spaceEndIncognitoSession = "space.end_incognito_session"
     public static let spaceListAgentAssignments = "space.list_agent_assignments"
     public static let spaceGetMcpEndpoint = "space.get_mcp_endpoint"
     public static let spaceSetMcpEndpoint = "space.set_mcp_endpoint"
@@ -2770,34 +4923,76 @@ public enum MessageType {
     public static let spaceListSkills = "space.list_skills"
     public static let spaceGetWorkspace = "space.get_workspace"
     public static let spaceSetWorkspace = "space.set_workspace"
+    public static let spaceOpenWorkspace = "space.open_workspace"
     public static let spaceAddResource = "space.add_resource"
     public static let spaceRemoveResource = "space.remove_resource"
     public static let spaceListResources = "space.list_resources"
     public static let spaceListTurns = "space.list_turns"
     public static let spaceListOrchestrationJournal = "space.list_orchestration_journal"
-    public static let profileCreate = "profile.create"
-    public static let profileGet = "profile.get"
-    public static let profileList = "profile.list"
-    public static let profileUpdate = "profile.update"
-    public static let profileArchive = "profile.archive"
-    public static let presetList = "preset.list"
-    public static let presetGet = "preset.get"
-    public static let presetApplyToSpace = "preset.apply_to_space"
-    public static let presetSaveAgent = "preset.save_agent"
-    public static let presetArchiveAgent = "preset.archive_agent"
+    public static let identityListAgentDefinitions = "identity.list_agent_definitions"
+    public static let identityGetAgentDefinition = "identity.get_agent_definition"
+    public static let identityCreateAgentDefinition = "identity.create_agent_definition"
+    public static let identityUpdateAgentDefinition = "identity.update_agent_definition"
+    public static let identityArchiveAgentDefinition = "identity.archive_agent_definition"
+    public static let identityListPersonas = "identity.list_personas"
+    public static let identityGetPersona = "identity.get_persona"
+    public static let identityCreatePersona = "identity.create_persona"
+    public static let identityUpdatePersona = "identity.update_persona"
+    public static let identityArchivePersona = "identity.archive_persona"
+    public static let identityPreviewCompiledInstructions = "identity.preview_compiled_instructions"
+    public static let identityPreviewRuntimeSystemPrompt = "identity.preview_runtime_system_prompt"
+    public static let identityPreviewSystemPromptMatrix = "identity.preview_system_prompt_matrix"
+    public static let spaceListTemplates = "space.list_templates"
+    public static let spaceGetTemplate = "space.get_template"
     public static let spacePreviewTemplate = "space.preview_template"
     public static let spaceCreateFromTemplate = "space.create_from_template"
     public static let spaceSaveTemplate = "space.save_template"
+    public static let spaceArchiveTemplate = "space.archive_template"
+    public static let spaceTemplateList = "space_template.list"
+    public static let spaceTemplateGet = "space_template.get"
+    public static let spaceTemplatePreview = "space_template.preview"
+    public static let spaceTemplateCreateSpace = "space_template.create_space"
+    public static let spaceTemplateSave = "space_template.save"
+    public static let spaceTemplateArchive = "space_template.archive"
+    public static let libraryListEntries = "library.list_entries"
+    public static let libraryGetEntry = "library.get_entry"
+    public static let librarySaveSkill = "library.save_skill"
+    public static let libraryImportEntry = "library.import_entry"
+    public static let libraryArchiveEntry = "library.archive_entry"
+    public static let librarySetEntryEnabled = "library.set_entry_enabled"
+    public static let libraryDeleteEntry = "library.delete_entry"
+    public static let libraryScanEntries = "library.scan_entries"
+    public static let libraryListSkillDrafts = "library.list_skill_drafts"
+    public static let libraryGetSkillDraft = "library.get_skill_draft"
+    public static let libraryCreateSkillDraft = "library.create_skill_draft"
+    public static let libraryDeleteSkillDraft = "library.delete_skill_draft"
     public static let gatewayDiscoverLocalAgents = "gateway.discover_local_agents"
     public static let gatewayListProviderConfigs = "gateway.list_provider_configs"
     public static let gatewayGetMainAgent = "gateway.get_main_agent"
     public static let gatewaySetMainAgent = "gateway.set_main_agent"
+    public static let gatewayGetConciergeAgent = "gateway.get_concierge_agent"
+    public static let gatewaySetConciergeAgent = "gateway.set_concierge_agent"
     public static let gatewayListAvailableModels = "gateway.list_available_models"
     public static let gatewayListProviderCatalogs = "gateway.list_provider_catalogs"
-    public static let gatewayCreateIntegrationRequest = "gateway.create_integration_request"
-    public static let gatewayListIntegrationRequests = "gateway.list_integration_requests"
+    public static let gatewayListInterconnectors = "gateway.list_interconnectors"
+    public static let gatewayRescanInterconnectors = "gateway.rescan_interconnectors"
+    public static let toolList = "tool.list"
+    public static let toolGet = "tool.get"
+    public static let toolScaffold = "tool.scaffold"
+    public static let toolRegister = "tool.register"
+    public static let toolRemove = "tool.remove"
+    public static let toolSetEnabled = "tool.set_enabled"
+    public static let toolRescanJira = "tool.rescan_jira"
+    public static let toolListGrants = "tool.list_grants"
+    public static let toolRevokeGrant = "tool.revoke_grant"
     public static let gatewayGetProviderTelemetry = "gateway.get_provider_telemetry"
     public static let gatewayGetLocalUsageTelemetry = "gateway.get_local_usage_telemetry"
+    public static let gatewayGetWorkspaceDefaults = "gateway.get_workspace_defaults"
+    public static let gatewaySetWorkspaceDefaults = "gateway.set_workspace_defaults"
+    public static let gatewayGetMemoryDefaults = "gateway.get_memory_defaults"
+    public static let gatewaySetMemoryDefaults = "gateway.set_memory_defaults"
+    public static let gatewayGetExternalConnectivity = "gateway.get_external_connectivity"
+    public static let gatewaySetExternalConnectivity = "gateway.set_external_connectivity"
     public static let gatewayGetProviderSettings = "gateway.get_provider_settings"
     public static let gatewayUpdateProviderSettings = "gateway.update_provider_settings"
     public static let gatewaySetProviderConfig = "gateway.set_provider_config"
@@ -2807,25 +5002,28 @@ public enum MessageType {
     public static let gatewayPutSecretRef = "gateway.put_secret_ref"
     public static let gatewayListSecretRefs = "gateway.list_secret_refs"
     public static let gatewayDeleteSecretRef = "gateway.delete_secret_ref"
+    public static let gatewayGetIntegrationsSnapshot = "gateway.get_integrations_snapshot"
     public static let gatewayListConnectorFamilies = "gateway.list_connector_families"
     public static let gatewayListConnectors = "gateway.list_connectors"
     public static let gatewayUpsertConnector = "gateway.upsert_connector"
     public static let gatewayRemoveConnector = "gateway.remove_connector"
+    public static let connectorSubmitInboundEvent = "connector.submit_inbound_event"
+    public static let connectorInboundEventResult = "connector.inbound_event_result"
     public static let gatewayListConnectorBindings = "gateway.list_connector_bindings"
     public static let gatewayUpsertConnectorBinding = "gateway.upsert_connector_binding"
     public static let gatewayRemoveConnectorBinding = "gateway.remove_connector_binding"
     public static let gatewayGetConnectorPolicy = "gateway.get_connector_policy"
     public static let gatewayUpdateConnectorPolicy = "gateway.update_connector_policy"
+    public static let gatewayGetToolPolicy = "gateway.get_tool_policy"
+    public static let gatewayUpdateToolPolicy = "gateway.update_tool_policy"
+    public static let gatewayListSafetyProfiles = "gateway.list_safety_profiles"
     public static let gatewayTestConnector = "gateway.test_connector"
     public static let gatewayGetPolicy = "gateway.get_policy"
     public static let gatewayUpdatePolicy = "gateway.update_policy"
-    public static let gatewaySkillList = "gateway.skill_list"
-    public static let gatewaySkillGet = "gateway.skill_get"
-    public static let gatewaySkillUpsert = "gateway.skill_upsert"
-    public static let gatewaySkillDelete = "gateway.skill_delete"
     public static let gatewayKbListEntries = "gateway.kb_list_entries"
     public static let gatewayKbUpsertEntry = "gateway.kb_upsert_entry"
     public static let gatewayKbDeleteEntry = "gateway.kb_delete_entry"
+    public static let gatewaySkillList = "gateway.skill_list"
     public static let gatewayListCapabilityGrants = "gateway.list_capability_grants"
     public static let gatewayGrantCapability = "gateway.grant_capability"
     public static let gatewayRevokeCapability = "gateway.revoke_capability"
@@ -2859,12 +5057,33 @@ public enum MessageType {
     public static let spaceGetQuota = "space.get_quota"
     public static let spaceUpdateQuotaPolicy = "space.update_quota_policy"
     public static let spaceGetUsage = "space.get_usage"
+    public static let spaceListActivityLog = "space.list_activity_log"
     public static let spaceGetTurnTrace = "space.get_turn_trace"
     public static let spaceListArtifacts = "space.list_artifacts"
     public static let spaceGetArtifact = "space.get_artifact"
+    public static let spaceGetDebugArtifact = "space.get_debug_artifact"
+    public static let spaceListExperiences = "space.list_experiences"
+    public static let spaceGetExperience = "space.get_experience"
+    public static let spaceListInsights = "space.list_insights"
+    public static let spaceGetInsight = "space.get_insight"
+    public static let spaceAcceptInsight = "space.accept_insight"
+    public static let spaceRejectInsight = "space.reject_insight"
+    public static let spaceDismissInsight = "space.dismiss_insight"
+    public static let spaceGetSpaceAgentNotes = "space.get_space_agent_notes"
+    public static let spaceUpdateSpaceAgentNotes = "space.update_space_agent_notes"
+    public static let spaceGetUserProfile = "space.get_user_profile"
+    public static let spaceUpdateUserProfile = "space.update_user_profile"
+    public static let spaceListMemories = "space.list_memories"
+    public static let spaceDeleteMemory = "space.delete_memory"
+    public static let spaceUpdateMemoryImportance = "space.update_memory_importance"
     public static let spaceReset = "space.reset"
     public static let spaceResetAgentUsageSession = "space.reset_agent_usage_session"
     public static let spaceGetEffectiveTools = "space.get_effective_tools"
+    public static let spaceGetEffectiveToolAccess = "space.get_effective_tool_access"
+    public static let spaceGetToolPolicy = "space.get_tool_policy"
+    public static let spaceUpdateToolPolicy = "space.update_tool_policy"
+    public static let spaceGetConnectorPolicy = "space.get_connector_policy"
+    public static let spaceUpdateConnectorPolicy = "space.update_connector_policy"
     public static let authRegisterDevice = "auth.register_device"
     public static let authRotateDeviceKey = "auth.rotate_device_key"
     public static let authRevokeDevice = "auth.revoke_device"
@@ -2877,6 +5096,15 @@ public enum MessageType {
     public static let speechStart = "speech.start"
     public static let speechAudioChunk = "speech.audio_chunk"
     public static let speechControl = "speech.control"
+    public static let conciergeCallStart = "concierge.call.start"
+    public static let conciergeCallAnswer = "concierge.call.answer"
+    public static let conciergeCallEnd = "concierge.call.end"
+    public static let conciergeCallSetMuted = "concierge.call.set_muted"
+    public static let conciergeCallAudioChunk = "concierge.call.audio_chunk"
+    public static let conciergeCallControl = "concierge.call.control"
+    public static let conciergeCallHandoffPrepare = "concierge.call.handoff.prepare"
+    public static let conciergeCallHandoffAccept = "concierge.call.handoff.accept"
+    public static let conciergeCallRegisterPush = "concierge.call.register_push"
     public static let ping = "ping"
 
     // Adapter ↔ Gateway
@@ -2894,14 +5122,18 @@ public enum MessageType {
     public static let spaceState = "space_state"
     public static let spaceAgentUpdated = "space.agent_updated"
     public static let notification = "notification"
+    public static let appNavigate = "app.navigate"
+    public static let appConciergeActionRequest = "app.concierge_action_request"
     public static let orchestratorEvent = "orchestrator.event"
     public static let speechEvent = "speech.event"
+    public static let conciergeCallEvent = "concierge.call.event"
     public static let error = "error"
     public static let pong = "pong"
 
     // Notifications
     public static let subscribeNotifications = "subscribe_notifications"
     public static let unsubscribeNotifications = "unsubscribe_notifications"
+    public static let conciergeActionResult = "concierge.action_result"
 
     // Inter-Agent Messaging
     public static let agentMessage = "agent_message"

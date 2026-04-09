@@ -1,0 +1,8 @@
+{
+  "provider": "tailscale",
+  "label": "sample-label",
+  "host": "sample-host",
+  "port": 42,
+  "websocketUrl": "sample-websocketUrl",
+  "healthUrl": "sample-healthUrl"
+}

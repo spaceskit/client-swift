@@ -1,5 +1,5 @@
 {
-  "version": null,
+  "version": "v2",
   "relayInviteId": "sample-relayInviteId",
   "relayUrl": "sample-relayUrl",
   "spaceIdHint": "sample-spaceIdHint",

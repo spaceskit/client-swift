@@ -1,7 +1,7 @@
 {
   "type": "test_spacesharejoinresponsepayload",
   "id": "msg-spacesharejoinresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.235Z",
   "payload": {
     "participant": {
       "participantId": "sample-participantId",
@@ -9,7 +9,7 @@
       "spaceUid": "sample-spaceUid",
       "principalId": "sample-principalId",
       "principalType": "sample-principalType",
-      "mode": "collaborator",
+      "mode": "read_only",
       "status": "active",
       "joinedViaInviteId": "sample-joinedViaInviteId",
       "deviceId": "sample-deviceId",

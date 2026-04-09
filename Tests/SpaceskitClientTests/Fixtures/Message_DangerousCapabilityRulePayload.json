@@ -1,0 +1,9 @@
+{
+  "type": "test_dangerouscapabilityrulepayload",
+  "id": "msg-dangerouscapabilityrulepayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "capabilityId": "managed_shell",
+    "state": "enabled"
+  }
+}

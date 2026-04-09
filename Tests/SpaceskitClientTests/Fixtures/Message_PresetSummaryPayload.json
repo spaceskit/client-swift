@@ -1,13 +1,13 @@
 {
   "type": "test_presetsummarypayload",
   "id": "msg-presetsummarypayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-12T12:11:51.519Z",
   "payload": {
     "presetId": "sample-presetId",
-    "kind": null,
+    "kind": "agent",
     "title": "sample-title",
     "description": "sample-description",
-    "source": null,
+    "source": "system",
     "version": 3.14,
     "tags": [
       "sample-tags"

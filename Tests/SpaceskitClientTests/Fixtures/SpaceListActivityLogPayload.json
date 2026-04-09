@@ -1,0 +1,7 @@
+{
+  "apiVersion": "v1",
+  "spaceId": "space-1",
+  "limit": 50,
+  "offset": 0,
+  "includeSystem": true
+}

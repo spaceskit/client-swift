@@ -1,0 +1,36 @@
+{
+  "type": "test_identitygetagentdefinitionresponsepayload",
+  "id": "msg-identitygetagentdefinitionresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "agentDefinition": {
+      "agentDefinitionId": "sample-agentDefinitionId",
+      "personaId": "sample-personaId",
+      "name": "sample-name",
+      "description": "sample-description",
+      "instructions": "sample-instructions",
+      "defaultSkillIds": [
+        "sample-defaultSkillIds"
+      ],
+      "providerHint": "sample-providerHint",
+      "modelHint": "sample-modelHint",
+      "modelConfig": {
+        "preferredModels": [
+          "sample-preferredModels"
+        ],
+        "fallbackModels": [
+          "sample-fallbackModels"
+        ],
+        "constraints": {
+          "key1": "value1"
+        }
+      },
+      "isDefault": true,
+      "status": "active",
+      "activeRevision": 3.14,
+      "source": "sample-source",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

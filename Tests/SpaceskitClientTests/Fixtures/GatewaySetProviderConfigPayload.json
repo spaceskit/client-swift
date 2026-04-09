@@ -5,9 +5,9 @@
   "apiKey": "sample-apiKey",
   "apiKeySecretRef": "sample-apiKeySecretRef",
   "baseURL": "sample-baseURL",
+  "executablePath": "sample-executablePath",
   "allowedModels": [
     "sample-allowedModels"
   ],
-  "allowCustomModel": true,
-  "nativeCliToolsEnabled": true
+  "allowCustomModel": true
 }

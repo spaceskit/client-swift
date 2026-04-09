@@ -1,11 +1,11 @@
 {
   "type": "test_adaptercapabilityprovider",
   "id": "msg-adaptercapabilityprovider-001",
-  "ts": "2026-03-07T07:22:02.375Z",
+  "ts": "2026-03-13T22:07:19.236Z",
   "payload": {
     "id": "sample-id",
     "name": "sample-name",
-    "source": null,
+    "source": "adapter",
     "capabilityType": "sample-capabilityType",
     "operations": [
       "sample-operations"

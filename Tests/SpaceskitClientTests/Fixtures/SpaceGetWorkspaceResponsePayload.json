@@ -10,7 +10,8 @@
     "workPath": "/tmp/spaces/sample-space/.space/work",
     "sharedContextPath": "/tmp/spaces/sample-space/.space/shared-context",
     "scratchpadsPath": "/tmp/spaces/sample-space/.space/scratchpads",
-    "layoutVersion": 2,
+    "artifactsPath": "/tmp/spaces/sample-space/.space/artifacts",
+    "layoutVersion": 3,
     "gitRepoDetected": true,
     "metadataStatus": "ready",
     "updatedAt": "2026-03-06T18:44:23.062Z"

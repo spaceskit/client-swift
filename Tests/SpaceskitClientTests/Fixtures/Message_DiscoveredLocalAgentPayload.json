@@ -1,13 +1,16 @@
 {
   "type": "test_discoveredlocalagentpayload",
   "id": "msg-discoveredlocalagentpayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "id": "sample-id",
     "name": "sample-name",
     "detected": true,
     "executablePath": "sample-executablePath",
     "appPath": "sample-appPath",
+    "version": "sample-version",
+    "resolutionSource": "manual",
+    "manualPathConfigured": true,
     "serviceReachable": true,
     "recommendedProviderId": "sample-recommendedProviderId",
     "recommendedModel": "sample-recommendedModel",

@@ -1,0 +1,7 @@
+{
+  "apiVersion": "v1",
+  "spaceId": "concierge-space",
+  "selectionMode": "provider_model",
+  "providerId": "openai",
+  "modelId": "gpt-4.1"
+}

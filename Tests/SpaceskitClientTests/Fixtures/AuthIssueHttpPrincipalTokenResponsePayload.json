@@ -1,6 +1,6 @@
 {
   "token": "sample-token",
-  "tokenType": null,
+  "tokenType": "Bearer",
   "principalId": "sample-principalId",
   "deviceId": "sample-deviceId",
   "issuedAt": "sample-issuedAt",

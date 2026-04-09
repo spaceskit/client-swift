@@ -1,0 +1,8 @@
+{
+  "requestId": "sample-requestId",
+  "action": "create_space",
+  "gatewayId": "sample-gatewayId",
+  "params": {
+    "key1": "value1"
+  }
+}

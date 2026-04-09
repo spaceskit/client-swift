@@ -1,0 +1,16 @@
+{
+  "integrationId": "sample-integrationId",
+  "displayName": "sample-displayName",
+  "description": "sample-description",
+  "enabled": true,
+  "capabilityTypes": [
+    "sample-capabilityTypes"
+  ],
+  "managementSummary": "sample-managementSummary",
+  "runtimeAvailable": true,
+  "runtimeStatus": "available",
+  "runtimeStatusMessage": "sample-runtimeStatusMessage",
+  "providerIds": [
+    "sample-providerIds"
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "computedAt": "sample-computedAt",
-  "currency": null,
+  "currency": "USD",
   "windows": null,
   "last7d": {
     "inputTokens": 3.14,

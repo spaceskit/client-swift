@@ -1,0 +1,12 @@
+{
+  "type": "text",
+  "mimeType": "sample-mimeType",
+  "text": "sample-text",
+  "data": "sample-data",
+  "uri": "sample-uri",
+  "title": "sample-title",
+  "previewText": "sample-previewText",
+  "metadata": {
+    "key1": "value1"
+  }
+}

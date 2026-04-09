@@ -1,11 +1,12 @@
 {
   "type": "test_agentpresetconfigpayload",
   "id": "msg-agentpresetconfigpayload-001",
-  "ts": "2026-03-07T07:22:02.373Z",
+  "ts": "2026-03-12T12:11:51.519Z",
   "payload": {
     "defaultAgents": [
       {
         "agentId": "sample-agentId",
+        "agentDefinitionId": "sample-agentDefinitionId",
         "profileId": "sample-profileId",
         "role": "participant",
         "turnOrder": 3.14,

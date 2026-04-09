@@ -1,0 +1,10 @@
+{
+  "type": "test_effectivedangerouscapabilitypayload",
+  "id": "msg-effectivedangerouscapabilitypayload-001",
+  "ts": "2026-03-13T22:07:19.236Z",
+  "payload": {
+    "capabilityId": "managed_shell",
+    "enabled": true,
+    "source": "profile"
+  }
+}

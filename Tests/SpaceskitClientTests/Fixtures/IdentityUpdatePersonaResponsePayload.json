@@ -1,0 +1,21 @@
+{
+  "persona": {
+    "personaId": "sample-personaId",
+    "name": "sample-name",
+    "description": "sample-description",
+    "tone": "sample-tone",
+    "style": "sample-style",
+    "emotionalLayer": "sample-emotionalLayer",
+    "constraints": [
+      "sample-constraints"
+    ],
+    "instructions": "sample-instructions",
+    "isDefault": true,
+    "status": "active",
+    "activeRevision": 3.14,
+    "source": "sample-source",
+    "createdAt": "sample-createdAt",
+    "updatedAt": "sample-updatedAt"
+  },
+  "newRevision": 3.14
+}

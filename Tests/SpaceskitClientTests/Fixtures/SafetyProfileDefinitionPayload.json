@@ -1,0 +1,19 @@
+{
+  "profileId": "safe",
+  "displayName": "sample-displayName",
+  "description": "sample-description",
+  "rules": [
+    {
+      "selectorKind": "capability",
+      "selectorId": "sample-selectorId",
+      "state": "enabled"
+    }
+  ],
+  "dangerousCapabilities": [
+    {
+      "capabilityId": "managed_shell",
+      "state": "enabled"
+    }
+  ],
+  "updatedAt": "sample-updatedAt"
+}

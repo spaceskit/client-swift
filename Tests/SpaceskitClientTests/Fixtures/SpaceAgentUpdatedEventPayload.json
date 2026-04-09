@@ -2,7 +2,9 @@
   "spaceId": "sample-spaceId",
   "spaceUid": "sample-spaceUid",
   "agentId": "sample-agentId",
+  "oldAgentDefinitionId": "sample-oldAgentDefinitionId",
   "oldProfileId": "sample-oldProfileId",
+  "newAgentDefinitionId": "sample-newAgentDefinitionId",
   "newProfileId": "sample-newProfileId",
   "updatedAt": "sample-updatedAt"
 }

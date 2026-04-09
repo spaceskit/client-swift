@@ -1,0 +1,5 @@
+{
+  "capabilityId": "managed_shell",
+  "enabled": true,
+  "source": "profile"
+}

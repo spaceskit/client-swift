@@ -1,0 +1,26 @@
+{
+  "type": "test_gatewayintegrationmcpserverentrypayload",
+  "id": "msg-gatewayintegrationmcpserverentrypayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "spaceId": "sample-spaceId",
+    "spaceName": "sample-spaceName",
+    "endpoint": {
+      "endpointId": "sample-endpointId",
+      "spaceId": "sample-spaceId",
+      "transport": "sse",
+      "endpoint": "sample-endpoint",
+      "args": [
+        "sample-args"
+      ],
+      "secretRef": "sample-secretRef",
+      "enabled": true,
+      "healthStatus": "unknown",
+      "healthMessage": "sample-healthMessage",
+      "lastConnectedAt": "sample-lastConnectedAt",
+      "lastErrorAt": "sample-lastErrorAt",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    }
+  }
+}

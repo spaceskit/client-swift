@@ -1,0 +1,26 @@
+{
+  "type": "test_identityupdatepersonaresponsepayload",
+  "id": "msg-identityupdatepersonaresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "persona": {
+      "personaId": "sample-personaId",
+      "name": "sample-name",
+      "description": "sample-description",
+      "tone": "sample-tone",
+      "style": "sample-style",
+      "emotionalLayer": "sample-emotionalLayer",
+      "constraints": [
+        "sample-constraints"
+      ],
+      "instructions": "sample-instructions",
+      "isDefault": true,
+      "status": "active",
+      "activeRevision": 3.14,
+      "source": "sample-source",
+      "createdAt": "sample-createdAt",
+      "updatedAt": "sample-updatedAt"
+    },
+    "newRevision": 3.14
+  }
+}

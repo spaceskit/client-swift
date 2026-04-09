@@ -1,0 +1,23 @@
+{
+  "type": "test_gatewaylisttoolapprovalgrantsresponsepayload",
+  "id": "msg-gatewaylisttoolapprovalgrantsresponsepayload-001",
+  "ts": "2026-03-13T22:07:19.234Z",
+  "payload": {
+    "grants": [
+      {
+        "principalId": "sample-principalId",
+        "deviceId": "sample-deviceId",
+        "spaceId": "sample-spaceId",
+        "toolId": "sample-toolId",
+        "mode": null,
+        "source": "sample-source",
+        "reason": "sample-reason",
+        "grantedBy": "sample-grantedBy",
+        "grantedAt": "sample-grantedAt",
+        "expiresAt": "sample-expiresAt",
+        "revokedAt": "sample-revokedAt",
+        "updatedAt": "sample-updatedAt"
+      }
+    ]
+  }
+}

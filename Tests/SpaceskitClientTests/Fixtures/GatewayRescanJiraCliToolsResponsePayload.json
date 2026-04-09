@@ -1,0 +1,13 @@
+{
+  "detected": true,
+  "toolCount": 3.14,
+  "toolIds": [
+    "sample-toolIds"
+  ],
+  "removedToolIds": [
+    "sample-removedToolIds"
+  ],
+  "healthStatus": "unknown",
+  "healthMessage": "sample-healthMessage",
+  "executablePath": "sample-executablePath"
+}

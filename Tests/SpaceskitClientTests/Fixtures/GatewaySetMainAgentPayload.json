@@ -1,9 +1,9 @@
 {
   "apiVersion": "sample-apiVersion",
   "spaceId": "sample-spaceId",
-  "selectionMode": null,
+  "selectionMode": "provider_model",
   "providerId": "sample-providerId",
   "modelId": "sample-modelId",
-  "sourceProfileId": "sample-sourceProfileId",
-  "copyPersonality": true
+  "sourceAgentDefinitionId": "sample-sourceAgentDefinitionId",
+  "applyPersonaInstructions": true
 }

@@ -1,0 +1,13 @@
+{
+  "budgetClass": "full",
+  "label": "sample-label",
+  "tokenEstimate": 3.14,
+  "sections": [
+    {
+      "key": "system_scaffold",
+      "title": "sample-title",
+      "content": "sample-content"
+    }
+  ],
+  "compiledText": "sample-compiledText"
+}

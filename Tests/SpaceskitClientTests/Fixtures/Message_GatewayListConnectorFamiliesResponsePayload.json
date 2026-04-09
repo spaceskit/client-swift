@@ -1,15 +1,15 @@
 {
   "type": "test_gatewaylistconnectorfamiliesresponsepayload",
   "id": "msg-gatewaylistconnectorfamiliesresponsepayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-13T22:07:19.234Z",
   "payload": {
     "families": [
       {
         "familyId": "sample-familyId",
         "displayName": "sample-displayName",
-        "kind": null,
-        "runtime": null,
-        "trustClass": null,
+        "kind": "channel",
+        "runtime": "adapter",
+        "trustClass": "embedded_safe",
         "embeddedEnabled": true,
         "capabilityTypes": [
           "sample-capabilityTypes"

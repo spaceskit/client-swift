@@ -1,0 +1,18 @@
+{
+  "insights": [
+    {
+      "insightId": "insight-1",
+      "spaceId": "space-1",
+      "experienceId": "exp-1",
+      "agentId": "agent-main",
+      "title": "Prioritize explicit acceptance criteria",
+      "summary": "Prompt quality improves when acceptance criteria are explicit.",
+      "rationale": "Observed in 8/10 turns.",
+      "status": "proposed",
+      "createdAt": "2026-03-17T08:11:00.000Z",
+      "updatedAt": "2026-03-17T08:11:00.000Z"
+    }
+  ],
+  "total": 1,
+  "nextOffset": null
+}

@@ -1,10 +1,10 @@
 {
   "type": "test_gatewayintegrationrequestpayload",
   "id": "msg-gatewayintegrationrequestpayload-001",
-  "ts": "2026-03-07T07:22:02.374Z",
+  "ts": "2026-03-12T06:31:54.407Z",
   "payload": {
     "integrationRequestId": "sample-integrationRequestId",
-    "integrationClass": null,
+    "integrationClass": "cloud",
     "requestedName": "sample-requestedName",
     "useCase": "sample-useCase",
     "sourceURL": "sample-sourceURL",

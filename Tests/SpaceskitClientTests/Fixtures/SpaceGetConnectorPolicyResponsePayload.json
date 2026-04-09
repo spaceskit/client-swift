@@ -1,0 +1,16 @@
+{
+  "policy": {
+    "spaceId": "sample-spaceId",
+    "mode": "all_enabled",
+    "entries": [
+      {
+        "sourceKind": "builtin_integration",
+        "sourceId": "sample-sourceId",
+        "state": "enabled"
+      }
+    ],
+    "policyVersion": "sample-policyVersion",
+    "updatedBy": "sample-updatedBy",
+    "updatedAt": "sample-updatedAt"
+  }
+}
