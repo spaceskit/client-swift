@@ -39,7 +39,9 @@ public struct ExecuteTurnPayload: Codable, Sendable {
     public let spaceUid: String
     public let input: String
     public let targetAgentId: String?
+    public let targetAgentIds: [String]?
     public let replyToTurnId: String?
+    public let conversationTopology: ConversationTopology?
     public let mode: String?
     public let effort: String?
     public let accessMode: String?
@@ -48,7 +50,9 @@ public struct ExecuteTurnPayload: Codable, Sendable {
         spaceUid: String,
         input: String,
         targetAgentId: String? = nil,
+        targetAgentIds: [String]? = nil,
         replyToTurnId: String? = nil,
+        conversationTopology: ConversationTopology? = nil,
         mode: String? = nil,
         effort: String? = nil,
         accessMode: String? = nil
@@ -56,7 +60,9 @@ public struct ExecuteTurnPayload: Codable, Sendable {
         self.spaceUid = spaceUid
         self.input = input
         self.targetAgentId = targetAgentId
+        self.targetAgentIds = targetAgentIds
         self.replyToTurnId = replyToTurnId
+        self.conversationTopology = conversationTopology
         self.mode = mode
         self.effort = effort
         self.accessMode = accessMode
@@ -67,7 +73,9 @@ public struct ExecuteTurnPayload: Codable, Sendable {
             spaceUid: options.spaceUid,
             input: options.input,
             targetAgentId: options.targetAgentId,
+            targetAgentIds: options.targetAgentIds,
             replyToTurnId: options.replyToTurnId,
+            conversationTopology: options.conversationTopology,
             mode: options.mode,
             effort: options.effort,
             accessMode: options.accessMode
@@ -1736,6 +1744,30 @@ public struct GatewayListProviderConfigsPayload: Codable, Sendable {
     }
 }
 
+public struct GatewayGetRuntimeDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct GatewaySetRuntimeDefaultsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let main: GatewayRuntimeDefaultSelection?
+    public let concierge: GatewayRuntimeDefaultSelection?
+
+    public init(
+        apiVersion: String? = nil,
+        main: GatewayRuntimeDefaultSelection? = nil,
+        concierge: GatewayRuntimeDefaultSelection? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.main = main
+        self.concierge = concierge
+    }
+}
+
 public struct GatewayGetMainAgentPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String?
@@ -2064,10 +2096,12 @@ public struct GatewayGetProviderTelemetryPayload: Codable, Sendable {
 public struct GatewayGetLocalUsageTelemetryPayload: Codable, Sendable {
     public let apiVersion: String?
     public let providerId: String?
+    public let providerIds: [String]?
 
-    public init(apiVersion: String? = nil, providerId: String? = nil) {
+    public init(apiVersion: String? = nil, providerId: String? = nil, providerIds: [String]? = nil) {
         self.apiVersion = apiVersion
         self.providerId = providerId
+        self.providerIds = providerIds
     }
 }
 
@@ -3167,6 +3201,16 @@ public struct GatewayListProviderConfigsResponsePayload: Codable, Sendable {
     public let configs: [GatewayProviderRuntimeConfig]
 }
 
+public struct GatewayGetRuntimeDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayRuntimeDefaults
+}
+
+public struct GatewaySetRuntimeDefaultsResponsePayload: Codable, Sendable {
+    public let defaults: GatewayRuntimeDefaults
+    public let mainAgentState: GatewayMainAgentState
+    public let conciergeAgentState: GatewayConciergeAgentState
+}
+
 public struct GatewayGetMainAgentResponsePayload: Codable, Sendable {
     public let state: GatewayMainAgentState
 }
@@ -3758,6 +3802,7 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
     public let relatedSpaceIds: [String]?
     public let executionTarget: SchedulerExecutionTarget?
     public let calendarBinding: SchedulerCalendarBinding?
+    public let evalConfig: SchedulerEvalConfig??
 
     public init(
         apiVersion: String? = nil,
@@ -3769,7 +3814,8 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
         primarySpaceId: String,
         relatedSpaceIds: [String]? = nil,
         executionTarget: SchedulerExecutionTarget? = nil,
-        calendarBinding: SchedulerCalendarBinding? = nil
+        calendarBinding: SchedulerCalendarBinding? = nil,
+        evalConfig: SchedulerEvalConfig?? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
@@ -3781,6 +3827,7 @@ public struct SchedulerCreateJobPayload: Codable, Sendable {
         self.relatedSpaceIds = relatedSpaceIds
         self.executionTarget = executionTarget
         self.calendarBinding = calendarBinding
+        self.evalConfig = evalConfig
     }
 }
 
@@ -3825,6 +3872,18 @@ public struct SchedulerListJobsResponsePayload: Codable, Sendable {
     public let jobs: [SchedulerJob]
 }
 
+public struct SchedulerListEvalDefinitionsPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct SchedulerListEvalDefinitionsResponsePayload: Codable, Sendable {
+    public let definitions: [SchedulerEvalDefinition]
+}
+
 public struct SchedulerUpdateJobPayload: Codable, Sendable {
     public let apiVersion: String?
     public let idempotencyKey: String?
@@ -3838,6 +3897,7 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
     public let relatedSpaceIds: [String]?
     public let executionTarget: SchedulerExecutionTarget?
     public let calendarBinding: SchedulerCalendarBinding?
+    public let evalConfig: SchedulerEvalConfig??
 
     public init(
         apiVersion: String? = nil,
@@ -3851,7 +3911,8 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
         primarySpaceId: String? = nil,
         relatedSpaceIds: [String]? = nil,
         executionTarget: SchedulerExecutionTarget? = nil,
-        calendarBinding: SchedulerCalendarBinding? = nil
+        calendarBinding: SchedulerCalendarBinding? = nil,
+        evalConfig: SchedulerEvalConfig?? = nil
     ) {
         self.apiVersion = apiVersion
         self.idempotencyKey = idempotencyKey
@@ -3865,6 +3926,7 @@ public struct SchedulerUpdateJobPayload: Codable, Sendable {
         self.relatedSpaceIds = relatedSpaceIds
         self.executionTarget = executionTarget
         self.calendarBinding = calendarBinding
+        self.evalConfig = evalConfig
     }
 }
 
@@ -3975,6 +4037,335 @@ public struct SchedulerRunNowPayload: Codable, Sendable {
 public struct SchedulerRunNowResponsePayload: Codable, Sendable {
     public let run: SchedulerJobRun
     public let job: SchedulerJob
+}
+
+public struct WorkbenchListQueuePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let limit: Int?
+
+    public init(apiVersion: String? = nil, limit: Int? = nil) {
+        self.apiVersion = apiVersion
+        self.limit = limit
+    }
+}
+
+public struct WorkbenchListQueueResponsePayload: Codable, Sendable {
+    public let items: [WorkbenchQueueItem]
+}
+
+public struct WorkbenchGetQueueItemPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let queueItemId: String
+
+    public init(apiVersion: String? = nil, queueItemId: String) {
+        self.apiVersion = apiVersion
+        self.queueItemId = queueItemId
+    }
+}
+
+public struct WorkbenchGetQueueItemResponsePayload: Codable, Sendable {
+    public let item: WorkbenchQueueItem
+}
+
+public struct WorkbenchCreateBatchPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let name: String
+    public let queueItemIds: [String]
+    public let executionMode: WorkbenchExecutionMode?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        name: String,
+        queueItemIds: [String],
+        executionMode: WorkbenchExecutionMode? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.name = name
+        self.queueItemIds = queueItemIds
+        self.executionMode = executionMode
+    }
+}
+
+public struct WorkbenchCreateBatchResponsePayload: Codable, Sendable {
+    public let batch: WorkbenchBatch
+}
+
+public struct WorkbenchListBatchesPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let limit: Int?
+
+    public init(apiVersion: String? = nil, limit: Int? = nil) {
+        self.apiVersion = apiVersion
+        self.limit = limit
+    }
+}
+
+public struct WorkbenchListBatchesResponsePayload: Codable, Sendable {
+    public let batches: [WorkbenchBatch]
+}
+
+public struct WorkbenchUpdateBatchPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let batchId: String
+    public let name: String?
+    public let queueItemIds: [String]?
+    public let executionMode: WorkbenchExecutionMode?
+    public let status: WorkbenchBatchStatus?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        batchId: String,
+        name: String? = nil,
+        queueItemIds: [String]? = nil,
+        executionMode: WorkbenchExecutionMode? = nil,
+        status: WorkbenchBatchStatus? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.batchId = batchId
+        self.name = name
+        self.queueItemIds = queueItemIds
+        self.executionMode = executionMode
+        self.status = status
+    }
+}
+
+public struct WorkbenchUpdateBatchResponsePayload: Codable, Sendable {
+    public let batch: WorkbenchBatch
+}
+
+public struct WorkbenchStartRunPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let queueItemId: String
+    public let batchId: String?
+    public let executionMode: WorkbenchExecutionMode?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        queueItemId: String,
+        batchId: String? = nil,
+        executionMode: WorkbenchExecutionMode? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.queueItemId = queueItemId
+        self.batchId = batchId
+        self.executionMode = executionMode
+    }
+}
+
+public struct WorkbenchStartRunResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchRetryRunPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let runId: String
+
+    public init(apiVersion: String? = nil, idempotencyKey: String? = nil, runId: String) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.runId = runId
+    }
+}
+
+public struct WorkbenchRetryRunResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchCancelRunPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let runId: String
+
+    public init(apiVersion: String? = nil, idempotencyKey: String? = nil, runId: String) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.runId = runId
+    }
+}
+
+public struct WorkbenchCancelRunResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchListRunsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let batchId: String?
+    public let queueItemId: String?
+    public let limit: Int?
+
+    public init(
+        apiVersion: String? = nil,
+        batchId: String? = nil,
+        queueItemId: String? = nil,
+        limit: Int? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.batchId = batchId
+        self.queueItemId = queueItemId
+        self.limit = limit
+    }
+}
+
+public struct WorkbenchListRunsResponsePayload: Codable, Sendable {
+    public let runs: [WorkbenchRun]
+}
+
+public struct WorkbenchGetRunPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let runId: String
+
+    public init(apiVersion: String? = nil, runId: String) {
+        self.apiVersion = apiVersion
+        self.runId = runId
+    }
+}
+
+public struct WorkbenchGetRunResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchApproveStagePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let runId: String
+    public let stage: WorkbenchRunStage?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        runId: String,
+        stage: WorkbenchRunStage? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.runId = runId
+        self.stage = stage
+    }
+}
+
+public struct WorkbenchApproveStageResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchRejectStagePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let runId: String
+    public let stage: WorkbenchRunStage?
+    public let reason: String?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        runId: String,
+        stage: WorkbenchRunStage? = nil,
+        reason: String? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.runId = runId
+        self.stage = stage
+        self.reason = reason
+    }
+}
+
+public struct WorkbenchRejectStageResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun
+}
+
+public struct WorkbenchSetModePayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let runId: String?
+    public let batchId: String?
+    public let executionMode: WorkbenchExecutionMode
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        runId: String? = nil,
+        batchId: String? = nil,
+        executionMode: WorkbenchExecutionMode
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.runId = runId
+        self.batchId = batchId
+        self.executionMode = executionMode
+    }
+}
+
+public struct WorkbenchSetModeResponsePayload: Codable, Sendable {
+    public let run: WorkbenchRun?
+    public let batch: WorkbenchBatch?
+}
+
+public struct WorkbenchListArtifactsPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let runId: String
+
+    public init(apiVersion: String? = nil, runId: String) {
+        self.apiVersion = apiVersion
+        self.runId = runId
+    }
+}
+
+public struct WorkbenchListArtifactsResponsePayload: Codable, Sendable {
+    public let artifacts: [WorkbenchArtifact]
+}
+
+public struct WorkbenchGetPolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+
+    public init(apiVersion: String? = nil) {
+        self.apiVersion = apiVersion
+    }
+}
+
+public struct WorkbenchGetPolicyResponsePayload: Codable, Sendable {
+    public let policy: WorkbenchPolicy
+}
+
+public struct WorkbenchUpdatePolicyPayload: Codable, Sendable {
+    public let apiVersion: String?
+    public let idempotencyKey: String?
+    public let defaultExecutionMode: WorkbenchExecutionMode?
+    public let autonomousEnabled: Bool?
+    public let maxParallelRuns: Int?
+    public let requireExplicitAutonomousOptIn: Bool?
+    public let requireAiShippableForAutonomous: Bool?
+
+    public init(
+        apiVersion: String? = nil,
+        idempotencyKey: String? = nil,
+        defaultExecutionMode: WorkbenchExecutionMode? = nil,
+        autonomousEnabled: Bool? = nil,
+        maxParallelRuns: Int? = nil,
+        requireExplicitAutonomousOptIn: Bool? = nil,
+        requireAiShippableForAutonomous: Bool? = nil
+    ) {
+        self.apiVersion = apiVersion
+        self.idempotencyKey = idempotencyKey
+        self.defaultExecutionMode = defaultExecutionMode
+        self.autonomousEnabled = autonomousEnabled
+        self.maxParallelRuns = maxParallelRuns
+        self.requireExplicitAutonomousOptIn = requireExplicitAutonomousOptIn
+        self.requireAiShippableForAutonomous = requireAiShippableForAutonomous
+    }
+}
+
+public struct WorkbenchUpdatePolicyResponsePayload: Codable, Sendable {
+    public let policy: WorkbenchPolicy
 }
 
 public struct OrchestratorCommandPayload: Codable, Sendable {
@@ -4968,6 +5359,8 @@ public enum MessageType {
     public static let libraryDeleteSkillDraft = "library.delete_skill_draft"
     public static let gatewayDiscoverLocalAgents = "gateway.discover_local_agents"
     public static let gatewayListProviderConfigs = "gateway.list_provider_configs"
+    public static let gatewayGetRuntimeDefaults = "gateway.get_runtime_defaults"
+    public static let gatewaySetRuntimeDefaults = "gateway.set_runtime_defaults"
     public static let gatewayGetMainAgent = "gateway.get_main_agent"
     public static let gatewaySetMainAgent = "gateway.set_main_agent"
     public static let gatewayGetConciergeAgent = "gateway.get_concierge_agent"
@@ -5031,12 +5424,29 @@ public enum MessageType {
     public static let schedulerCreateJob = "scheduler.create_job"
     public static let schedulerGetJob = "scheduler.get_job"
     public static let schedulerListJobs = "scheduler.list_jobs"
+    public static let schedulerListEvalDefinitions = "scheduler.list_eval_definitions"
     public static let schedulerUpdateJob = "scheduler.update_job"
     public static let schedulerDeleteJob = "scheduler.delete_job"
     public static let schedulerLinkSpace = "scheduler.link_space"
     public static let schedulerUnlinkSpace = "scheduler.unlink_space"
     public static let schedulerListRuns = "scheduler.list_runs"
     public static let schedulerRunNow = "scheduler.run_now"
+    public static let workbenchListQueue = "workbench.list_queue"
+    public static let workbenchGetQueueItem = "workbench.get_queue_item"
+    public static let workbenchCreateBatch = "workbench.create_batch"
+    public static let workbenchListBatches = "workbench.list_batches"
+    public static let workbenchUpdateBatch = "workbench.update_batch"
+    public static let workbenchStartRun = "workbench.start_run"
+    public static let workbenchRetryRun = "workbench.retry_run"
+    public static let workbenchCancelRun = "workbench.cancel_run"
+    public static let workbenchListRuns = "workbench.list_runs"
+    public static let workbenchGetRun = "workbench.get_run"
+    public static let workbenchApproveStage = "workbench.approve_stage"
+    public static let workbenchRejectStage = "workbench.reject_stage"
+    public static let workbenchSetMode = "workbench.set_mode"
+    public static let workbenchListArtifacts = "workbench.list_artifacts"
+    public static let workbenchGetPolicy = "workbench.get_policy"
+    public static let workbenchUpdatePolicy = "workbench.update_policy"
     public static let orchestratorCommand = "orchestrator.command"
     public static let orchestratorGetCommand = "orchestrator.get_command"
     public static let spaceLink = "space.link"

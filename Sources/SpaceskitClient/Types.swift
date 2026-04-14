@@ -494,6 +494,7 @@ public struct TurnStream: Codable, Sendable {
     public let conversationTopology: ConversationTopology?
     public let transcriptVisibility: TranscriptVisibility?
     public let summaryTurnId: String?
+    public let streamKind: TurnStreamKind?
     public let delta: String
     public let seq: Int
     public let done: Bool
@@ -508,6 +509,7 @@ public struct TurnStream: Codable, Sendable {
         conversationTopology: ConversationTopology? = nil,
         transcriptVisibility: TranscriptVisibility? = nil,
         summaryTurnId: String? = nil,
+        streamKind: TurnStreamKind? = nil,
         delta: String,
         seq: Int,
         done: Bool,
@@ -521,6 +523,7 @@ public struct TurnStream: Codable, Sendable {
         self.conversationTopology = conversationTopology
         self.transcriptVisibility = transcriptVisibility
         self.summaryTurnId = summaryTurnId
+        self.streamKind = streamKind
         self.delta = delta
         self.seq = seq
         self.done = done
@@ -536,6 +539,7 @@ public struct TurnStream: Codable, Sendable {
         case conversationTopology
         case transcriptVisibility
         case summaryTurnId
+        case streamKind
         case delta
         case seq
         case done
@@ -557,6 +561,7 @@ public struct TurnStream: Codable, Sendable {
         let conversationTopology = try? container.decodeIfPresent(ConversationTopology.self, forKey: .conversationTopology)
         let transcriptVisibility = try? container.decodeIfPresent(TranscriptVisibility.self, forKey: .transcriptVisibility)
         let summaryTurnId = try? container.decodeIfPresent(String.self, forKey: .summaryTurnId)
+        let streamKind = try? container.decodeIfPresent(TurnStreamKind.self, forKey: .streamKind)
         let timestamp = try? container.decode(String.self, forKey: .timestamp)
 
         // Current protocol shape.
@@ -574,6 +579,7 @@ public struct TurnStream: Codable, Sendable {
                 conversationTopology: conversationTopology,
                 transcriptVisibility: transcriptVisibility,
                 summaryTurnId: summaryTurnId,
+                streamKind: streamKind,
                 delta: delta,
                 seq: seq,
                 done: done,
@@ -608,6 +614,7 @@ public struct TurnStream: Codable, Sendable {
                 conversationTopology: conversationTopology,
                 transcriptVisibility: transcriptVisibility,
                 summaryTurnId: summaryTurnId,
+                streamKind: streamKind,
                 delta: text,
                 seq: seq,
                 done: done,
@@ -635,6 +642,7 @@ public struct TurnStream: Codable, Sendable {
         try container.encodeIfPresent(conversationTopology, forKey: .conversationTopology)
         try container.encodeIfPresent(transcriptVisibility, forKey: .transcriptVisibility)
         try container.encodeIfPresent(summaryTurnId, forKey: .summaryTurnId)
+        try container.encodeIfPresent(streamKind, forKey: .streamKind)
         try container.encode(delta, forKey: .delta)
         try container.encode(seq, forKey: .seq)
         try container.encode(done, forKey: .done)
@@ -1594,6 +1602,7 @@ public struct AgentUsageSessionSnapshot: Codable, Sendable {
     public let spaceId: String
     public let agentId: String
     public let agentRole: String
+    public let displayTitle: String?
     public let status: String
     public let startedAt: String
     public let endedAt: String?
@@ -2642,10 +2651,21 @@ public enum TranscriptVisibility: String, Codable, Sendable {
     case summary
 }
 
+public enum TurnStreamKind: String, Codable, Sendable {
+    case assistantOutput = "assistant_output"
+    case providerClient = "provider_client"
+}
+
+public enum TemplateAgentProfileBinding: String, Codable, Sendable {
+    case explicit
+    case gatewayDefaultMain = "gateway_default_main"
+}
+
 public struct TemplateAgentDefinition: Codable, Sendable {
     public let agentId: String
     public let agentDefinitionId: String
     public let profileId: String
+    public let profileBinding: TemplateAgentProfileBinding?
     public let role: SpaceAssignmentRole?
     public let turnOrder: Int?
     public let isPrimary: Bool?
@@ -2654,6 +2674,7 @@ public struct TemplateAgentDefinition: Codable, Sendable {
         case agentId
         case agentDefinitionId
         case profileId
+        case profileBinding
         case role
         case turnOrder
         case isPrimary
@@ -2663,6 +2684,7 @@ public struct TemplateAgentDefinition: Codable, Sendable {
         agentId: String,
         agentDefinitionId: String? = nil,
         profileId: String? = nil,
+        profileBinding: TemplateAgentProfileBinding? = nil,
         role: SpaceAssignmentRole? = nil,
         turnOrder: Int? = nil,
         isPrimary: Bool? = nil
@@ -2672,6 +2694,7 @@ public struct TemplateAgentDefinition: Codable, Sendable {
         self.agentId = agentId
         self.agentDefinitionId = resolvedAgentDefinitionId
         self.profileId = resolvedProfileId
+        self.profileBinding = profileBinding
         self.role = role
         self.turnOrder = turnOrder
         self.isPrimary = isPrimary
@@ -2697,6 +2720,7 @@ public struct TemplateAgentDefinition: Codable, Sendable {
             agentId: try container.decode(String.self, forKey: .agentId),
             agentDefinitionId: resolvedAgentDefinitionId,
             profileId: resolvedProfileId,
+            profileBinding: try container.decodeIfPresent(TemplateAgentProfileBinding.self, forKey: .profileBinding),
             role: try container.decodeIfPresent(SpaceAssignmentRole.self, forKey: .role),
             turnOrder: try container.decodeIfPresent(Int.self, forKey: .turnOrder),
             isPrimary: try container.decodeIfPresent(Bool.self, forKey: .isPrimary)
@@ -2708,6 +2732,7 @@ public struct TemplateAgentDefinition: Codable, Sendable {
         try container.encode(agentId, forKey: .agentId)
         try container.encode(agentDefinitionId, forKey: .agentDefinitionId)
         try container.encode(profileId, forKey: .profileId)
+        try container.encodeIfPresent(profileBinding, forKey: .profileBinding)
         try container.encodeIfPresent(role, forKey: .role)
         try container.encodeIfPresent(turnOrder, forKey: .turnOrder)
         try container.encodeIfPresent(isPrimary, forKey: .isPrimary)
@@ -3206,6 +3231,48 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
     }
 }
 
+public struct GatewayRuntimeDefaultSelection: Codable, Sendable, Equatable {
+    public let providerId: String
+    public let modelId: String
+
+    public init(providerId: String, modelId: String) {
+        self.providerId = providerId
+        self.modelId = modelId
+    }
+}
+
+public struct GatewayRuntimeDefaults: Codable, Sendable, Equatable {
+    public let main: GatewayRuntimeDefaultSelection
+    public let concierge: GatewayRuntimeDefaultSelection
+    public let updatedAt: String
+
+    public init(
+        main: GatewayRuntimeDefaultSelection,
+        concierge: GatewayRuntimeDefaultSelection,
+        updatedAt: String
+    ) {
+        self.main = main
+        self.concierge = concierge
+        self.updatedAt = updatedAt
+    }
+}
+
+public struct GatewaySetRuntimeDefaultsResult: Codable, Sendable {
+    public let defaults: GatewayRuntimeDefaults
+    public let mainAgentState: GatewayMainAgentState
+    public let conciergeAgentState: GatewayConciergeAgentState
+
+    public init(
+        defaults: GatewayRuntimeDefaults,
+        mainAgentState: GatewayMainAgentState,
+        conciergeAgentState: GatewayConciergeAgentState
+    ) {
+        self.defaults = defaults
+        self.mainAgentState = mainAgentState
+        self.conciergeAgentState = conciergeAgentState
+    }
+}
+
 public struct GatewayProviderRuntimeConfig: Codable, Sendable {
     public let providerId: String
     public let model: String
@@ -3313,6 +3380,20 @@ public struct GatewayModelCatalogEntry: Codable, Sendable {
     public let source: GatewayModelCatalogSource
     public let available: Bool
     public let contextWindow: Int?
+
+    public init(
+        id: String,
+        displayName: String,
+        source: GatewayModelCatalogSource,
+        available: Bool,
+        contextWindow: Int? = nil
+    ) {
+        self.id = id
+        self.displayName = displayName
+        self.source = source
+        self.available = available
+        self.contextWindow = contextWindow
+    }
 }
 
 public struct GatewayModelProviderCatalog: Codable, Sendable {
@@ -3356,6 +3437,48 @@ public struct GatewayModelProviderCatalog: Codable, Sendable {
         case recommended
         case supportsHostedBilling
         case configAllowed
+    }
+
+    public init(
+        providerId: String,
+        displayName: String,
+        group: GatewayProviderCatalogGroup,
+        integrationClass: GatewayIntegrationClass? = nil,
+        status: GatewayIntegrationStatus? = nil,
+        hasApiKey: Bool,
+        requiresApiKey: Bool,
+        supportedAuthModes: [GatewayProviderAuthMode] = [],
+        authMode: GatewayProviderAuthMode? = nil,
+        authStatus: GatewayProviderAuthStatus? = nil,
+        authAccount: GatewayProviderAuthAccount? = nil,
+        baseURL: String? = nil,
+        detectionStatus: GatewayModelDetectionStatus,
+        detectionError: String? = nil,
+        models: [GatewayModelCatalogEntry],
+        installHint: String? = nil,
+        recommended: Bool,
+        supportsHostedBilling: Bool,
+        configAllowed: Bool
+    ) {
+        self.providerId = providerId
+        self.displayName = displayName
+        self.group = group
+        self.integrationClass = integrationClass
+        self.status = status
+        self.hasApiKey = hasApiKey
+        self.requiresApiKey = requiresApiKey
+        self.supportedAuthModes = supportedAuthModes
+        self.authMode = authMode
+        self.authStatus = authStatus
+        self.authAccount = authAccount
+        self.baseURL = baseURL
+        self.detectionStatus = detectionStatus
+        self.detectionError = detectionError
+        self.models = models
+        self.installHint = installHint
+        self.recommended = recommended
+        self.supportsHostedBilling = supportsHostedBilling
+        self.configAllowed = configAllowed
     }
 
     public init(from decoder: Decoder) throws {
@@ -4381,6 +4504,34 @@ public enum SchedulerCalendarDriftStatus: String, Codable, Sendable {
     case drifted
 }
 
+public enum SchedulerEvalSummaryMode: String, Codable, Sendable {
+    case checkpoints
+    case finalSummary = "final_summary"
+}
+
+public enum SchedulerEvalRecommendationStatus: String, Codable, Sendable {
+    case suggested
+    case applied
+}
+
+public enum SchedulerEvalRecommendationKind: String, Codable, Sendable {
+    case flowVariant = "flow_variant"
+    case promptPack = "prompt_pack"
+    case summaryMode = "summary_mode"
+}
+
+public enum SchedulerEvalScenarioStatus: String, Codable, Sendable {
+    case pass
+    case fail
+    case skip
+}
+
+public enum SchedulerEvalCheckpointStatus: String, Codable, Sendable {
+    case completed
+    case failed
+    case observed
+}
+
 public struct SchedulerSchedulePreset: Codable, Sendable {
     public let kind: SchedulerScheduleKind
     public let intervalHours: Int?
@@ -4400,6 +4551,255 @@ public struct SchedulerSchedulePreset: Codable, Sendable {
         self.minute = minute
         self.hour = hour
         self.daysOfWeek = daysOfWeek
+    }
+}
+
+public struct SchedulerEvalConfig: Codable, Sendable {
+    public let evalDefinitionId: String
+    public let scenarioIds: [String]?
+    public let promptVariantId: String?
+    public let promptPackId: String?
+    public let flowVariantId: String?
+    public let summaryMode: SchedulerEvalSummaryMode?
+    public let selfImproveEnabled: Bool?
+
+    public init(
+        evalDefinitionId: String,
+        scenarioIds: [String]? = nil,
+        promptVariantId: String? = nil,
+        promptPackId: String? = nil,
+        flowVariantId: String? = nil,
+        summaryMode: SchedulerEvalSummaryMode? = nil,
+        selfImproveEnabled: Bool? = nil
+    ) {
+        self.evalDefinitionId = evalDefinitionId
+        self.scenarioIds = scenarioIds
+        self.promptVariantId = promptVariantId
+        self.promptPackId = promptPackId
+        self.flowVariantId = flowVariantId
+        self.summaryMode = summaryMode
+        self.selfImproveEnabled = selfImproveEnabled
+    }
+}
+
+public struct SchedulerEvalSelfImproveState: Codable, Sendable {
+    public let enabled: Bool
+    public let appliedRevisionIds: [String]
+    public let lastAppliedRunId: String?
+
+    public init(
+        enabled: Bool,
+        appliedRevisionIds: [String],
+        lastAppliedRunId: String? = nil
+    ) {
+        self.enabled = enabled
+        self.appliedRevisionIds = appliedRevisionIds
+        self.lastAppliedRunId = lastAppliedRunId
+    }
+}
+
+public struct SchedulerEvalCheckpoint: Codable, Sendable {
+    public let checkpointId: String
+    public let kind: String
+    public let status: SchedulerEvalCheckpointStatus
+    public let actorId: String?
+    public let createdAt: String
+    public let detail: [String: AnyCodable]?
+
+    public init(
+        checkpointId: String,
+        kind: String,
+        status: SchedulerEvalCheckpointStatus,
+        actorId: String? = nil,
+        createdAt: String,
+        detail: [String: AnyCodable]? = nil
+    ) {
+        self.checkpointId = checkpointId
+        self.kind = kind
+        self.status = status
+        self.actorId = actorId
+        self.createdAt = createdAt
+        self.detail = detail
+    }
+}
+
+public struct SchedulerEvalRecommendation: Codable, Sendable {
+    public let recommendationId: String
+    public let status: SchedulerEvalRecommendationStatus
+    public let kind: SchedulerEvalRecommendationKind
+    public let title: String
+    public let summary: String?
+    public let originatingRunId: String?
+    public let promptVariantId: String?
+    public let promptPackId: String?
+    public let flowVariantId: String?
+    public let appliedRevisionId: String?
+    public let createdAt: String
+    public let detail: [String: AnyCodable]?
+
+    public init(
+        recommendationId: String,
+        status: SchedulerEvalRecommendationStatus,
+        kind: SchedulerEvalRecommendationKind,
+        title: String,
+        summary: String? = nil,
+        originatingRunId: String? = nil,
+        promptVariantId: String? = nil,
+        promptPackId: String? = nil,
+        flowVariantId: String? = nil,
+        appliedRevisionId: String? = nil,
+        createdAt: String,
+        detail: [String: AnyCodable]? = nil
+    ) {
+        self.recommendationId = recommendationId
+        self.status = status
+        self.kind = kind
+        self.title = title
+        self.summary = summary
+        self.originatingRunId = originatingRunId
+        self.promptVariantId = promptVariantId
+        self.promptPackId = promptPackId
+        self.flowVariantId = flowVariantId
+        self.appliedRevisionId = appliedRevisionId
+        self.createdAt = createdAt
+        self.detail = detail
+    }
+}
+
+public struct SchedulerEvalScenarioResult: Codable, Sendable {
+    public let scenarioId: String
+    public let status: SchedulerEvalScenarioStatus
+    public let checkpointCount: Int
+    public let failureReason: String?
+
+    public init(
+        scenarioId: String,
+        status: SchedulerEvalScenarioStatus,
+        checkpointCount: Int,
+        failureReason: String? = nil
+    ) {
+        self.scenarioId = scenarioId
+        self.status = status
+        self.checkpointCount = checkpointCount
+        self.failureReason = failureReason
+    }
+}
+
+public struct SchedulerEvalArtifactRef: Codable, Sendable {
+    public enum Kind: String, Codable, Sendable {
+        case space
+        case turn
+        case schedulerRun = "scheduler_run"
+    }
+
+    public let kind: Kind
+    public let id: String
+    public let label: String?
+
+    public init(
+        kind: Kind,
+        id: String,
+        label: String? = nil
+    ) {
+        self.kind = kind
+        self.id = id
+        self.label = label
+    }
+}
+
+public struct SchedulerEvalRun: Codable, Sendable {
+    public let evalRunId: String
+    public let evalDefinitionId: String
+    public let scenarioIds: [String]
+    public let promptVariantId: String?
+    public let promptPackId: String?
+    public let flowVariantId: String?
+    public let summaryMode: SchedulerEvalSummaryMode
+    public let selfImproveEnabled: Bool
+    public let spaceId: String?
+    public let spaceUid: String?
+    public let rootTurnId: String?
+    public let finalSummaryText: String?
+    public let artifactRefs: [SchedulerEvalArtifactRef]
+    public let checkpoints: [SchedulerEvalCheckpoint]
+    public let scenarioResults: [SchedulerEvalScenarioResult]
+    public let recommendations: [SchedulerEvalRecommendation]
+
+    public init(
+        evalRunId: String,
+        evalDefinitionId: String,
+        scenarioIds: [String],
+        promptVariantId: String? = nil,
+        promptPackId: String? = nil,
+        flowVariantId: String? = nil,
+        summaryMode: SchedulerEvalSummaryMode,
+        selfImproveEnabled: Bool,
+        spaceId: String? = nil,
+        spaceUid: String? = nil,
+        rootTurnId: String? = nil,
+        finalSummaryText: String? = nil,
+        artifactRefs: [SchedulerEvalArtifactRef],
+        checkpoints: [SchedulerEvalCheckpoint],
+        scenarioResults: [SchedulerEvalScenarioResult],
+        recommendations: [SchedulerEvalRecommendation]
+    ) {
+        self.evalRunId = evalRunId
+        self.evalDefinitionId = evalDefinitionId
+        self.scenarioIds = scenarioIds
+        self.promptVariantId = promptVariantId
+        self.promptPackId = promptPackId
+        self.flowVariantId = flowVariantId
+        self.summaryMode = summaryMode
+        self.selfImproveEnabled = selfImproveEnabled
+        self.spaceId = spaceId
+        self.spaceUid = spaceUid
+        self.rootTurnId = rootTurnId
+        self.finalSummaryText = finalSummaryText
+        self.artifactRefs = artifactRefs
+        self.checkpoints = checkpoints
+        self.scenarioResults = scenarioResults
+        self.recommendations = recommendations
+    }
+}
+
+public struct SchedulerEvalDomain: Codable, Sendable {
+    public let domainId: String
+    public let description: String?
+    public let scenarioIds: [String]
+
+    public init(
+        domainId: String,
+        description: String? = nil,
+        scenarioIds: [String]
+    ) {
+        self.domainId = domainId
+        self.description = description
+        self.scenarioIds = scenarioIds
+    }
+}
+
+public struct SchedulerEvalDefinition: Codable, Sendable {
+    public let evalDefinitionId: String
+    public let suiteId: String
+    public let description: String?
+    public let domainIds: [String]
+    public let scenarioIds: [String]
+    public let domains: [SchedulerEvalDomain]
+
+    public init(
+        evalDefinitionId: String,
+        suiteId: String,
+        description: String? = nil,
+        domainIds: [String],
+        scenarioIds: [String],
+        domains: [SchedulerEvalDomain]
+    ) {
+        self.evalDefinitionId = evalDefinitionId
+        self.suiteId = suiteId
+        self.description = description
+        self.domainIds = domainIds
+        self.scenarioIds = scenarioIds
+        self.domains = domains
     }
 }
 
@@ -4485,6 +4885,8 @@ public struct SchedulerJob: Codable, Sendable {
     public let linkedSpaces: [SchedulerLinkedSpace]
     public let executionTarget: SchedulerExecutionTarget
     public let calendarBinding: SchedulerCalendarBinding?
+    public let evalConfig: SchedulerEvalConfig?
+    public let evalSelfImproveState: SchedulerEvalSelfImproveState?
 }
 
 public struct SchedulerJobRun: Codable, Sendable {
@@ -4500,6 +4902,7 @@ public struct SchedulerJobRun: Codable, Sendable {
     public let errorCode: String?
     public let errorMessage: String?
     public let result: [String: AnyCodable]?
+    public let evalRun: SchedulerEvalRun?
 }
 
 public struct SchedulerDeleteJobResult: Codable, Sendable {
@@ -4516,6 +4919,212 @@ public struct SchedulerListRunsResult: Codable, Sendable {
 public struct SchedulerRunNowResult: Codable, Sendable {
     public let run: SchedulerJobRun
     public let job: SchedulerJob
+}
+
+public enum WorkbenchExecutionMode: String, Codable, Sendable {
+    case supervised
+    case autonomous
+}
+
+public enum WorkbenchBatchStatus: String, Codable, Sendable {
+    case draft
+    case queued
+    case running
+    case completed
+    case cancelled
+}
+
+public enum WorkbenchRunStatus: String, Codable, Sendable {
+    case queued
+    case awaitingReview = "awaiting_review"
+    case running
+    case completed
+    case failed
+    case cancelled
+}
+
+public enum WorkbenchRunStage: String, Codable, Sendable {
+    case intake
+    case plan
+    case execute
+    case verify
+    case reviewGate = "review_gate"
+    case land
+    case report
+}
+
+public enum WorkbenchApprovalState: String, Codable, Sendable {
+    case pending
+    case approved
+    case rejected
+    case notRequired = "not_required"
+}
+
+public enum WorkbenchVerificationMode: String, Codable, Sendable {
+    case machineReadable = "machine_readable"
+    case reviewOnly = "review_only"
+}
+
+public enum WorkbenchVerificationSuiteStatus: String, Codable, Sendable {
+    case pending
+    case running
+    case passed
+    case failed
+    case skipped
+}
+
+public enum WorkbenchVerificationResultStatus: String, Codable, Sendable {
+    case pending
+    case passed
+    case failed
+}
+
+public enum WorkbenchLandingStatus: String, Codable, Sendable {
+    case notStarted = "not_started"
+    case blocked
+    case landed
+}
+
+public struct WorkbenchExecutionModeEligibility: Codable, Sendable {
+    public let supervised: Bool
+    public let autonomous: Bool
+}
+
+public struct WorkbenchQueueItem: Codable, Sendable {
+    public let queueItemId: String
+    public let queueIndex: Int
+    public let title: String
+    public let type: String
+    public let status: String
+    public let nextAction: String
+    public let taskFilePath: String
+    public let delegation: String
+    public let parallelKeys: [String]
+    public let aiShippable: Bool
+    public let executionModeEligibility: WorkbenchExecutionModeEligibility
+    public let verificationMode: WorkbenchVerificationMode
+    public let executionModeBlockers: [String]
+    public let products: [String]
+    public let verificationCommands: [String]
+}
+
+public struct WorkbenchBatch: Codable, Sendable {
+    public let batchId: String
+    public let name: String
+    public let status: WorkbenchBatchStatus
+    public let executionMode: WorkbenchExecutionMode
+    public let queueItemIds: [String]
+    public let createdByPrincipalId: String
+    public let createdAt: String
+    public let updatedAt: String
+}
+
+public struct WorkbenchWorktreeRef: Codable, Sendable {
+    public let path: String
+    public let branchName: String
+    public let baseBranchName: String
+    public let createdAt: String
+}
+
+public struct WorkbenchRepoTouch: Codable, Sendable {
+    public let repoId: String
+    public let repoPath: String
+    public let kind: String
+    public let committed: Bool
+}
+
+public struct WorkbenchVerificationSuite: Codable, Sendable {
+    public let suiteId: String
+    public let name: String
+    public let command: String
+    public let status: WorkbenchVerificationSuiteStatus
+    public let startedAt: String?
+    public let completedAt: String?
+    public let exitCode: Int?
+    public let durationMs: Int?
+    public let logArtifactId: String?
+    public let summary: String?
+}
+
+public struct WorkbenchVerificationResult: Codable, Sendable {
+    public let status: WorkbenchVerificationResultStatus
+    public let summary: String?
+    public let completedAt: String?
+}
+
+public struct WorkbenchLandingResult: Codable, Sendable {
+    public let status: WorkbenchLandingStatus
+    public let merged: Bool?
+    public let summary: String?
+    public let completedAt: String?
+}
+
+public enum WorkbenchExecutionContextStage: String, Codable, Sendable {
+    case planning
+    case implementation
+    case verification
+    case completed
+    case failed
+    case paused
+}
+
+public struct WorkbenchExecutionContext: Codable, Sendable {
+    public let spaceId: String
+    public let spaceUid: String?
+    public let spaceName: String
+    public let planningTurnId: String?
+    public let implementationTurnId: String?
+    public let stage: WorkbenchExecutionContextStage
+}
+
+public struct WorkbenchRun: Codable, Sendable {
+    public let runId: String
+    public let batchId: String?
+    public let queueItemId: String
+    public let queueItemPath: String
+    public let status: WorkbenchRunStatus
+    public let currentStage: WorkbenchRunStage
+    public let executionMode: WorkbenchExecutionMode
+    public let approvalState: WorkbenchApprovalState
+    public let worktree: WorkbenchWorktreeRef?
+    public let touchedRepos: [WorkbenchRepoTouch]
+    public let verificationMode: WorkbenchVerificationMode
+    public let executionModeBlockers: [String]
+    public let verificationSuites: [WorkbenchVerificationSuite]
+    public let verificationResult: WorkbenchVerificationResult?
+    public let landingResult: WorkbenchLandingResult?
+    public let executionContext: WorkbenchExecutionContext?
+    public let createdByPrincipalId: String
+    public let createdAt: String
+    public let updatedAt: String
+    public let startedAt: String?
+    public let finishedAt: String?
+    public let lastErrorCode: String?
+    public let lastErrorMessage: String?
+}
+
+public struct WorkbenchArtifact: Codable, Sendable {
+    public let artifactId: String
+    public let runId: String
+    public let kind: String
+    public let title: String
+    public let contentType: String
+    public let contentText: String
+    public let createdAt: String
+}
+
+public struct WorkbenchPolicy: Codable, Sendable {
+    public let defaultExecutionMode: WorkbenchExecutionMode
+    public let autonomousEnabled: Bool
+    public let maxParallelRuns: Int
+    public let requireExplicitAutonomousOptIn: Bool
+    public let requireAiShippableForAutonomous: Bool
+    public let updatedAt: String
+}
+
+public struct WorkbenchSetModeResult: Codable, Sendable {
+    public let run: WorkbenchRun?
+    public let batch: WorkbenchBatch?
 }
 
 public struct SpaceLinkResult: Codable, Sendable {

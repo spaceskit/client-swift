@@ -155,6 +155,8 @@ final class GatewayClientTests: XCTestCase {
             "spaceUid": "space-uid-1",
             "turnId": "turn-1",
             "agentId": "agent-1",
+            "transcriptVisibility": "activity_only",
+            "streamKind": "provider_client",
             "delta": "Hello ",
             "seq": 0,
             "done": false
@@ -166,6 +168,8 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(stream.delta, "Hello ")
         XCTAssertEqual(stream.seq, 0)
         XCTAssertFalse(stream.done)
+        XCTAssertEqual(stream.transcriptVisibility, .activityOnly)
+        XCTAssertEqual(stream.streamKind, .providerClient)
         XCTAssertNil(stream.timestamp)
     }
 
@@ -1390,6 +1394,7 @@ final class GatewayClientTests: XCTestCase {
                     "spaceId": "space-usage-1",
                     "agentId": "agent-main",
                     "agentRole": "participant",
+                    "displayTitle": "Plan provider session reuse",
                     "status": "active",
                     "startedAt": "2026-03-07T09:55:00.000Z",
                     "lastActivityAt": "2026-03-07T10:00:00.000Z",
@@ -1418,8 +1423,37 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(result.spaceUsage.usageSource, "ledger")
         XCTAssertEqual(result.agentSessions?.first?.tokenAccuracy, "estimated")
         XCTAssertEqual(result.agentSessions?.first?.usageSource, "legacy_turns")
+        XCTAssertEqual(result.agentSessions?.first?.displayTitle, "Plan provider session reuse")
         XCTAssertEqual(result.globalLifetime?.tokenAccuracy, "mixed")
         XCTAssertEqual(result.globalLifetime?.usageSource, "ledger")
+    }
+
+    func testAgentUsageSessionSnapshotDecodesLegacyPayloadWithoutDisplayTitle() throws {
+        let sessionJSON = """
+        {
+            "sessionId": "session-legacy",
+            "spaceId": "space-usage-1",
+            "agentId": "agent-main",
+            "agentRole": "participant",
+            "status": "active",
+            "startedAt": "2026-03-07T09:55:00.000Z",
+            "lastActivityAt": "2026-03-07T10:00:00.000Z",
+            "turnCount": 2,
+            "inputTokens": 90,
+            "outputTokens": 20,
+            "totalTokens": 110,
+            "spentUsd": 0.0033,
+            "tokenAccuracy": "estimated",
+            "usageSource": "legacy_turns"
+        }
+        """
+
+        let session = try JSONDecoder().decode(
+            AgentUsageSessionSnapshot.self,
+            from: Data(sessionJSON.utf8)
+        )
+        XCTAssertNil(session.displayTitle)
+        XCTAssertEqual(session.sessionId, "session-legacy")
     }
 
     func testGatewayFactoryResetPayloadAndResponseDecoding() throws {
@@ -2155,6 +2189,7 @@ final class GatewayClientTests: XCTestCase {
         let templateAgent = TemplateAgentDefinition(
             agentId: "agent-1",
             agentDefinitionId: "agent-definition-1",
+            profileBinding: .explicit,
             role: .participant,
             turnOrder: 1,
             isPrimary: true
@@ -2162,6 +2197,7 @@ final class GatewayClientTests: XCTestCase {
         let templateJSON = try encodeJSONObject(templateAgent)
         XCTAssertEqual(templateJSON["agentDefinitionId"] as? String, "agent-definition-1")
         XCTAssertEqual(templateJSON["profileId"] as? String, "agent-definition-1")
+        XCTAssertEqual(templateJSON["profileBinding"] as? String, "explicit")
 
         let updatePayload = SpaceUpdateAgentAssignmentPayload(
             apiVersion: "v1",
@@ -2201,6 +2237,34 @@ final class GatewayClientTests: XCTestCase {
         let decoded = try JSONDecoder().decode(SpaceConfig.self, from: Data(json.utf8))
         XCTAssertEqual(decoded.orchestratorAgentDefinitionId, "agent-definition-1")
         XCTAssertEqual(decoded.orchestratorProfileId, "agent-definition-1")
+    }
+
+    func testSchedulerUpdateJobPayloadEncodesEvalConfigTriState() throws {
+        let omitted = SchedulerUpdateJobPayload(jobId: "job-1")
+        let omittedJSON = try encodeJSONObject(omitted)
+        XCTAssertNil(omittedJSON["evalConfig"])
+
+        let clearedEvalConfig: SchedulerEvalConfig?? = .some(nil)
+        let cleared = SchedulerUpdateJobPayload(jobId: "job-1", evalConfig: clearedEvalConfig)
+        let clearedJSON = try encodeJSONObject(cleared)
+        XCTAssertTrue(clearedJSON.keys.contains("evalConfig"))
+        XCTAssertTrue(clearedJSON["evalConfig"] is NSNull)
+
+        let configured = SchedulerUpdateJobPayload(
+            jobId: "job-1",
+            evalConfig: .some(
+                SchedulerEvalConfig(
+                    evalDefinitionId: "summarization",
+                    scenarioIds: ["scenario-a"],
+                    summaryMode: .checkpoints,
+                    selfImproveEnabled: false
+                )
+            )
+        )
+        let configuredJSON = try encodeJSONObject(configured)
+        let evalConfigJSON = try XCTUnwrap(configuredJSON["evalConfig"] as? [String: Any])
+        XCTAssertEqual(evalConfigJSON["evalDefinitionId"] as? String, "summarization")
+        XCTAssertEqual(evalConfigJSON["scenarioIds"] as? [String], ["scenario-a"])
     }
 
     func testHardCutIdentityLibraryAndTemplatePayloads() throws {
@@ -2251,6 +2315,7 @@ final class GatewayClientTests: XCTestCase {
                 TemplateAgentDefinition(
                     agentId: "agent-1",
                     agentDefinitionId: "agent-definition-1",
+                    profileBinding: .explicit,
                     role: .participant,
                     turnOrder: 1,
                     isPrimary: true
@@ -2263,6 +2328,7 @@ final class GatewayClientTests: XCTestCase {
         let baseAgents = templatePayloadJSON["baseAgents"] as? [[String: Any]]
         XCTAssertEqual(baseAgents?.first?["agentDefinitionId"] as? String, "agent-definition-1")
         XCTAssertEqual(baseAgents?.first?["profileId"] as? String, "agent-definition-1")
+        XCTAssertEqual(baseAgents?.first?["profileBinding"] as? String, "explicit")
 
         let previewResponseJSON = """
         {
