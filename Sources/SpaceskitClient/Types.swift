@@ -1178,11 +1178,38 @@ public struct GatewayWorkspaceDefaults: Codable, Sendable {
 
 public struct GatewayExternalConnectivitySettings: Codable, Sendable {
     public let mode: String
+    public let funnelEnabled: Bool?
     public let updatedAt: String
 
-    public init(mode: String, updatedAt: String) {
+    public init(mode: String, funnelEnabled: Bool? = nil, updatedAt: String) {
         self.mode = mode
+        self.funnelEnabled = funnelEnabled
         self.updatedAt = updatedAt
+    }
+}
+
+public struct GatewayExternalConnectivityFunnelStatus: Codable, Sendable {
+    public let state: String
+    public let funnelConfigured: Bool
+    public let funnelUrl: String?
+    public let exposedPaths: [String]
+    public let summary: String?
+    public let remediation: String?
+
+    public init(
+        state: String,
+        funnelConfigured: Bool,
+        funnelUrl: String? = nil,
+        exposedPaths: [String],
+        summary: String? = nil,
+        remediation: String? = nil
+    ) {
+        self.state = state
+        self.funnelConfigured = funnelConfigured
+        self.funnelUrl = funnelUrl
+        self.exposedPaths = exposedPaths
+        self.summary = summary
+        self.remediation = remediation
     }
 }
 
@@ -1257,19 +1284,22 @@ public struct GatewayExternalConnectivityStatus: Codable, Sendable {
     public let remediation: String?
     public let advertisedEndpoints: [GatewayExternalConnectivityAdvertisedEndpoint]
     public let tailscaleStatus: GatewayExternalConnectivityTailscaleStatus?
+    public let funnelStatus: GatewayExternalConnectivityFunnelStatus?
 
     public init(
         state: String,
         summary: String,
         remediation: String? = nil,
         advertisedEndpoints: [GatewayExternalConnectivityAdvertisedEndpoint],
-        tailscaleStatus: GatewayExternalConnectivityTailscaleStatus? = nil
+        tailscaleStatus: GatewayExternalConnectivityTailscaleStatus? = nil,
+        funnelStatus: GatewayExternalConnectivityFunnelStatus? = nil
     ) {
         self.state = state
         self.summary = summary
         self.remediation = remediation
         self.advertisedEndpoints = advertisedEndpoints
         self.tailscaleStatus = tailscaleStatus
+        self.funnelStatus = funnelStatus
     }
 }
 
@@ -3374,25 +3404,35 @@ public enum GatewayIntegrationStatus: String, Codable, Sendable {
     case error
 }
 
+public enum GatewayModelTier: String, Codable, Sendable {
+    case fast
+    case balanced
+    case smartest
+    case local
+}
+
 public struct GatewayModelCatalogEntry: Codable, Sendable {
     public let id: String
     public let displayName: String
     public let source: GatewayModelCatalogSource
     public let available: Bool
     public let contextWindow: Int?
+    public let tier: GatewayModelTier?
 
     public init(
         id: String,
         displayName: String,
         source: GatewayModelCatalogSource,
         available: Bool,
-        contextWindow: Int? = nil
+        contextWindow: Int? = nil,
+        tier: GatewayModelTier? = nil
     ) {
         self.id = id
         self.displayName = displayName
         self.source = source
         self.available = available
         self.contextWindow = contextWindow
+        self.tier = tier
     }
 }
 

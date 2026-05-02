@@ -2158,10 +2158,12 @@ public struct GatewayGetExternalConnectivityPayload: Codable, Sendable {
 public struct GatewaySetExternalConnectivityPayload: Codable, Sendable {
     public let apiVersion: String?
     public let mode: String
+    public let funnelEnabled: Bool?
 
-    public init(apiVersion: String? = nil, mode: String) {
+    public init(apiVersion: String? = nil, mode: String, funnelEnabled: Bool? = nil) {
         self.apiVersion = apiVersion
         self.mode = mode
+        self.funnelEnabled = funnelEnabled
     }
 }
 
