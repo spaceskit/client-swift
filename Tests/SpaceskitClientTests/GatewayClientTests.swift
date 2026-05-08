@@ -258,6 +258,83 @@ final class GatewayClientTests: XCTestCase {
         XCTAssertEqual(statePayload.state, .acting)
     }
 
+    func testApplePushDeviceRegistrationRequestEncoding() throws {
+        let request = ApplePushDeviceRegistrationRequest(
+            deviceId: "device-1",
+            platform: .ios,
+            tokenKind: .voip,
+            pushToken: "voip-token-1",
+            topic: "io.spaces.app.voip",
+            environment: .sandbox,
+            appBundleId: "io.spaces.app",
+            deviceName: "iPhone",
+            metadata: ["locale": AnyCodable("en-US")]
+        )
+
+        let json = try encodeJSONObject(request)
+
+        XCTAssertEqual(json["deviceId"] as? String, "device-1")
+        XCTAssertEqual(json["platform"] as? String, "ios")
+        XCTAssertEqual(json["tokenKind"] as? String, "voip")
+        XCTAssertEqual(json["pushToken"] as? String, "voip-token-1")
+        XCTAssertEqual(json["topic"] as? String, "io.spaces.app.voip")
+        XCTAssertEqual(json["environment"] as? String, "sandbox")
+    }
+
+    func testNotificationActionPayloadDecoding() throws {
+        let json = """
+        {
+            "gatewayId": "gateway-1",
+            "deliveryId": "delivery-1",
+            "feedbackId": "feedback-1",
+            "action": "approve",
+            "deepLink": "spaces://feedback/feedback-1",
+            "payload": {
+                "source": "push"
+            }
+        }
+        """
+
+        let context = try JSONDecoder().decode(NotificationActionContext.self, from: Data(json.utf8))
+
+        XCTAssertEqual(context.gatewayId, "gateway-1")
+        XCTAssertEqual(context.deliveryId, "delivery-1")
+        XCTAssertEqual(context.feedbackId, "feedback-1")
+        XCTAssertEqual(context.action, .approve)
+        XCTAssertEqual(context.payload?["source"]?.value as? String, "push")
+    }
+
+    func testBackgroundFeedbackResolveModelsRoundTrip() throws {
+        let request = BackgroundFeedbackResolveRequest(
+            deliveryId: "delivery-1",
+            action: .revise,
+            message: "Use a safer rollout",
+            payload: ["scope": AnyCodable("staging")]
+        )
+        let encoded = try JSONEncoder().encode(request)
+        let encodedJSON = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+
+        XCTAssertEqual(encodedJSON?["deliveryId"] as? String, "delivery-1")
+        XCTAssertEqual(encodedJSON?["action"] as? String, "revise")
+
+        let resultJSON = """
+        {
+            "feedbackId": "feedback-1",
+            "action": "revise",
+            "status": "resolved",
+            "result": {
+                "requestId": "feedback-1"
+            }
+        }
+        """
+        let result = try JSONDecoder().decode(BackgroundFeedbackActionResult.self, from: Data(resultJSON.utf8))
+
+        XCTAssertEqual(result.feedbackId, "feedback-1")
+        XCTAssertEqual(result.action, .revise)
+        XCTAssertEqual(result.status, "resolved")
+        XCTAssertEqual(result.result?["requestId"]?.value as? String, "feedback-1")
+    }
+
     func testTurnEventResolvedAgentActivityStateFallsBackToLegacyEventPayload() throws {
         let json = """
         {

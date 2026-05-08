@@ -5660,6 +5660,222 @@ public struct GatewayNotification: Codable, Sendable {
     }
 }
 
+public enum ApplePushPlatform: String, Codable, Sendable {
+    case ios
+    case macos
+}
+
+public enum ApplePushTokenKind: String, Codable, Sendable {
+    case alert
+    case voip
+}
+
+public enum ApplePushEnvironment: String, Codable, Sendable {
+    case sandbox
+    case production
+}
+
+public enum NotificationActionIdentifier: String, Codable, Sendable {
+    case approve
+    case reject
+    case deferAction = "defer"
+    case revise
+    case openApp = "open_app"
+}
+
+public struct ApplePushDeviceRegistrationRequest: Codable, Sendable {
+    public let registrationId: String?
+    public let deviceId: String?
+    public let platform: ApplePushPlatform
+    public let tokenKind: ApplePushTokenKind
+    public let pushToken: String
+    public let topic: String?
+    public let environment: ApplePushEnvironment
+    public let appBundleId: String?
+    public let deviceName: String?
+    public let metadata: [String: AnyCodable]?
+
+    public init(
+        registrationId: String? = nil,
+        deviceId: String? = nil,
+        platform: ApplePushPlatform,
+        tokenKind: ApplePushTokenKind = .alert,
+        pushToken: String,
+        topic: String? = nil,
+        environment: ApplePushEnvironment = .sandbox,
+        appBundleId: String? = nil,
+        deviceName: String? = nil,
+        metadata: [String: AnyCodable]? = nil
+    ) {
+        self.registrationId = registrationId
+        self.deviceId = deviceId
+        self.platform = platform
+        self.tokenKind = tokenKind
+        self.pushToken = pushToken
+        self.topic = topic
+        self.environment = environment
+        self.appBundleId = appBundleId
+        self.deviceName = deviceName
+        self.metadata = metadata
+    }
+}
+
+public struct ApplePushDeviceRegistration: Codable, Sendable {
+    public let registrationId: String
+    public let principalId: String
+    public let deviceId: String
+    public let platform: ApplePushPlatform
+    public let tokenKind: ApplePushTokenKind
+    public let pushToken: String
+    public let topic: String
+    public let environment: ApplePushEnvironment
+    public let appBundleId: String?
+    public let deviceName: String?
+    public let enabled: Bool
+    public let createdAt: String
+    public let updatedAt: String
+    public let lastSeenAt: String
+    public let staleAt: String?
+    public let metadata: [String: AnyCodable]
+}
+
+public struct AppleNotificationQuietHours: Codable, Sendable, Equatable {
+    public let enabled: Bool
+    public let startMinute: Int
+    public let endMinute: Int
+    public let timeZone: String?
+
+    public init(
+        enabled: Bool,
+        startMinute: Int,
+        endMinute: Int,
+        timeZone: String? = nil
+    ) {
+        self.enabled = enabled
+        self.startMinute = startMinute
+        self.endMinute = endMinute
+        self.timeZone = timeZone
+    }
+}
+
+public struct AppleNotificationPreferences: Codable, Sendable {
+    public let principalId: String
+    public let enabled: Bool
+    public let quietHours: AppleNotificationQuietHours
+    public let cooldownSeconds: Int
+    public let allowCritical: Bool
+    public let updatedAt: String
+}
+
+public struct AppleNotificationPreferencesPatch: Codable, Sendable {
+    public struct QuietHoursPatch: Codable, Sendable {
+        public let enabled: Bool?
+        public let startMinute: Int?
+        public let endMinute: Int?
+        public let timeZone: String?
+
+        public init(
+            enabled: Bool? = nil,
+            startMinute: Int? = nil,
+            endMinute: Int? = nil,
+            timeZone: String? = nil
+        ) {
+            self.enabled = enabled
+            self.startMinute = startMinute
+            self.endMinute = endMinute
+            self.timeZone = timeZone
+        }
+    }
+
+    public let enabled: Bool?
+    public let quietHours: QuietHoursPatch?
+    public let cooldownSeconds: Int?
+    public let allowCritical: Bool?
+
+    public init(
+        enabled: Bool? = nil,
+        quietHours: QuietHoursPatch? = nil,
+        cooldownSeconds: Int? = nil,
+        allowCritical: Bool? = nil
+    ) {
+        self.enabled = enabled
+        self.quietHours = quietHours
+        self.cooldownSeconds = cooldownSeconds
+        self.allowCritical = allowCritical
+    }
+}
+
+public struct NotificationActionContext: Codable, Sendable {
+    public let gatewayId: String?
+    public let deliveryId: String?
+    public let feedbackId: String?
+    public let action: NotificationActionIdentifier
+    public let deepLink: String?
+    public let payload: [String: AnyCodable]?
+
+    public init(
+        gatewayId: String? = nil,
+        deliveryId: String? = nil,
+        feedbackId: String? = nil,
+        action: NotificationActionIdentifier,
+        deepLink: String? = nil,
+        payload: [String: AnyCodable]? = nil
+    ) {
+        self.gatewayId = gatewayId
+        self.deliveryId = deliveryId
+        self.feedbackId = feedbackId
+        self.action = action
+        self.deepLink = deepLink
+        self.payload = payload
+    }
+}
+
+public struct BackgroundFeedbackResolveRequest: Codable, Sendable {
+    public let deliveryId: String?
+    public let action: NotificationActionIdentifier
+    public let message: String?
+    public let payload: [String: AnyCodable]?
+
+    public init(
+        deliveryId: String? = nil,
+        action: NotificationActionIdentifier,
+        message: String? = nil,
+        payload: [String: AnyCodable]? = nil
+    ) {
+        self.deliveryId = deliveryId
+        self.action = action
+        self.message = message
+        self.payload = payload
+    }
+}
+
+public struct BackgroundFeedbackActionResult: Codable, Sendable {
+    public let feedbackId: String
+    public let action: NotificationActionIdentifier
+    public let status: String
+    public let result: [String: AnyCodable]?
+}
+
+public struct AppleNotificationDelivery: Codable, Sendable {
+    public let deliveryId: String
+    public let principalId: String
+    public let registrationId: String?
+    public let notificationId: String?
+    public let feedbackId: String?
+    public let callId: String?
+    public let gatewayId: String?
+    public let channel: String
+    public let status: String
+    public let action: NotificationActionIdentifier?
+    public let deepLink: String?
+    public let errorMessage: String?
+    public let createdAt: String
+    public let sentAt: String?
+    public let openedAt: String?
+    public let actionedAt: String?
+    public let payload: [String: AnyCodable]
+}
+
 public struct AppNavigateEvent: Codable, Sendable {
     public let destination: String
     public let gatewayId: String?

@@ -1267,6 +1267,90 @@ public actor GatewayClient {
         return try decoder.decode(AuthIssueHttpPrincipalTokenResponsePayload.self, from: data)
     }
 
+    public func registerApplePushDevice(
+        _ request: ApplePushDeviceRegistrationRequest,
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> ApplePushDeviceRegistration {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/devices",
+            method: "POST",
+            body: request,
+            responseType: ApplePushDeviceRegistrationResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.registration
+    }
+
+    public func deleteApplePushDevice(
+        registrationId: String,
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> Bool {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/devices/\(registrationId)",
+            method: "DELETE",
+            body: Optional<EmptyRequestBody>.none,
+            responseType: DeleteApplePushDeviceResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.deleted
+    }
+
+    public func getAppleNotificationPreferences(
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> AppleNotificationPreferences {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/preferences",
+            method: "GET",
+            body: Optional<EmptyRequestBody>.none,
+            responseType: AppleNotificationPreferencesResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.preferences
+    }
+
+    public func patchAppleNotificationPreferences(
+        _ patch: AppleNotificationPreferencesPatch,
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> AppleNotificationPreferences {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/preferences",
+            method: "PATCH",
+            body: patch,
+            responseType: AppleNotificationPreferencesResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.preferences
+    }
+
+    public func markNotificationDeliveryOpened(
+        deliveryId: String,
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> AppleNotificationDelivery {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/deliveries/\(deliveryId)/opened",
+            method: "POST",
+            body: Optional<EmptyRequestBody>.none,
+            responseType: AppleNotificationDeliveryResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.delivery
+    }
+
+    public func resolveBackgroundFeedback(
+        feedbackId: String,
+        request: BackgroundFeedbackResolveRequest,
+        tokenTTLSeconds: Int? = 300
+    ) async throws -> BackgroundFeedbackActionResult {
+        let response = try await sendNotificationRestRequest(
+            path: "/v1/notifications/feedback/\(feedbackId)/resolve",
+            method: "POST",
+            body: request,
+            responseType: BackgroundFeedbackActionResponse.self,
+            tokenTTLSeconds: tokenTTLSeconds
+        )
+        return response.result
+    }
+
     /// Discover supported local CLI executors and local runtimes available on this gateway host.
     public func discoverLocalAgents(apiVersion: String? = nil) async throws -> [DiscoveredLocalAgent] {
         let payload = GatewayDiscoverLocalAgentsPayload(apiVersion: apiVersion)
@@ -3478,6 +3562,63 @@ public actor GatewayClient {
 
     var reconnectAllowedForTesting: Bool { reconnectAllowed }
 
+    private func sendNotificationRestRequest<Body: Encodable, ResponseBody: Decodable>(
+        path: String,
+        method: String,
+        body: Body?,
+        responseType: ResponseBody.Type,
+        tokenTTLSeconds: Int?
+    ) async throws -> ResponseBody {
+        let token = try await issueHttpPrincipalToken(ttlSeconds: tokenTTLSeconds)
+        let url = try notificationRestURL(path: path)
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("\(token.tokenType) \(token.token)", forHTTPHeaderField: "Authorization")
+
+        if let body {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try encoder.encode(body)
+        }
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw GatewayError(code: "HTTP_ERROR", message: "Notification REST response was not HTTP.")
+        }
+        guard (200..<300).contains(httpResponse.statusCode) else {
+            if let gatewayError = try? decoder.decode(GatewayError.self, from: data) {
+                throw gatewayError
+            }
+            throw GatewayError(
+                code: "HTTP_\(httpResponse.statusCode)",
+                message: String(data: data, encoding: .utf8) ?? "Notification REST request failed."
+            )
+        }
+        return try decoder.decode(responseType, from: data)
+    }
+
+    private func notificationRestURL(path: String) throws -> URL {
+        guard var components = URLComponents(url: options.url, resolvingAgainstBaseURL: false) else {
+            throw GatewayError(code: "INVALID_URL", message: "Gateway URL is invalid.")
+        }
+        switch components.scheme?.lowercased() {
+        case "ws":
+            components.scheme = "http"
+        case "wss":
+            components.scheme = "https"
+        case "http", "https":
+            break
+        default:
+            throw GatewayError(code: "INVALID_URL", message: "Gateway URL must use ws, wss, http, or https.")
+        }
+        components.path = path.hasPrefix("/") ? path : "/\(path)"
+        components.query = nil
+        components.fragment = nil
+        guard let url = components.url else {
+            throw GatewayError(code: "INVALID_URL", message: "Notification REST URL is invalid.")
+        }
+        return url
+    }
+
     private func emit(_ event: GatewayEvent) {
         eventContinuations.yield(event)
     }
@@ -3512,6 +3653,28 @@ public actor GatewayClient {
 // MARK: - Empty Payload
 
 private struct EmptyPayload: Codable {}
+
+private struct EmptyRequestBody: Codable {}
+
+private struct ApplePushDeviceRegistrationResponse: Codable {
+    let registration: ApplePushDeviceRegistration
+}
+
+private struct DeleteApplePushDeviceResponse: Codable {
+    let deleted: Bool
+}
+
+private struct AppleNotificationPreferencesResponse: Codable {
+    let preferences: AppleNotificationPreferences
+}
+
+private struct AppleNotificationDeliveryResponse: Codable {
+    let delivery: AppleNotificationDelivery
+}
+
+private struct BackgroundFeedbackActionResponse: Codable {
+    let result: BackgroundFeedbackActionResult
+}
 
 private struct ExecuteTurnAckCompat: Codable {
     let turnId: String
