@@ -7,7 +7,6 @@ import Foundation
 public struct SpaceCreateInitialAgentPayload: Codable, Sendable {
     public let agentId: String
     public let profileId: String
-    public let securityScope: [String: AnyCodable]?
     public let role: String?
     public let turnOrder: Int?
     public let isPrimary: Bool?
@@ -15,14 +14,12 @@ public struct SpaceCreateInitialAgentPayload: Codable, Sendable {
     public init(
         agentId: String,
         profileId: String,
-        securityScope: [String: Any]? = nil,
         role: String? = nil,
         turnOrder: Int? = nil,
         isPrimary: Bool? = nil
     ) {
         self.agentId = agentId
         self.profileId = profileId
-        self.securityScope = securityScope?.mapValues { AnyCodable($0) }
         self.role = role
         self.turnOrder = turnOrder
         self.isPrimary = isPrimary
@@ -32,42 +29,16 @@ public struct SpaceCreateInitialAgentPayload: Codable, Sendable {
 public struct SpaceCreateResponsePayload: Codable, Sendable {
     public let space: SpaceConfig
 
-    private enum CodingKeys: String, CodingKey {
-        case space
-    }
-
     public init(space: SpaceConfig) {
         self.space = space
-    }
-
-    public init(from decoder: Decoder) throws {
-        if let container = try? decoder.container(keyedBy: CodingKeys.self),
-           let wrapped = try container.decodeIfPresent(SpaceConfig.self, forKey: .space) {
-            self.space = wrapped
-            return
-        }
-        self.space = try SpaceConfig(from: decoder)
     }
 }
 
 public struct SpaceGetResponsePayload: Codable, Sendable {
     public let space: SpaceConfig
 
-    private enum CodingKeys: String, CodingKey {
-        case space
-    }
-
     public init(space: SpaceConfig) {
         self.space = space
-    }
-
-    public init(from decoder: Decoder) throws {
-        if let container = try? decoder.container(keyedBy: CodingKeys.self),
-           let wrapped = try container.decodeIfPresent(SpaceConfig.self, forKey: .space) {
-            self.space = wrapped
-            return
-        }
-        self.space = try SpaceConfig(from: decoder)
     }
 }
 
@@ -79,21 +50,8 @@ public struct SpaceGetMemoryPolicyResponsePayload: Codable, Sendable {
 public struct SpaceListResponsePayload: Codable, Sendable {
     public let spaces: [SpaceConfig]
 
-    private enum CodingKeys: String, CodingKey {
-        case spaces
-    }
-
     public init(spaces: [SpaceConfig]) {
         self.spaces = spaces
-    }
-
-    public init(from decoder: Decoder) throws {
-        if let container = try? decoder.container(keyedBy: CodingKeys.self),
-           let wrapped = try container.decodeIfPresent([SpaceConfig].self, forKey: .spaces) {
-            self.spaces = wrapped
-            return
-        }
-        self.spaces = try [SpaceConfig](from: decoder)
     }
 }
 

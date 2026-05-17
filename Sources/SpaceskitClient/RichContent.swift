@@ -64,71 +64,14 @@ public struct ContentEnvelope: Codable, Sendable, Equatable {
     }
 
     public static func markdown(_ markdown: String) -> ContentEnvelope {
-        fromLegacyText(markdown, mimeType: "text/markdown")
+        textEnvelope(markdown, mimeType: "text/markdown")
     }
 
     public static func plainText(_ text: String) -> ContentEnvelope {
-        fromLegacyText(text, mimeType: "text/plain")
+        textEnvelope(text, mimeType: "text/plain")
     }
 
-    public static func fromLegacyText(_ text: String, mimeType: String) -> ContentEnvelope {
-        let normalizedMimeType = normalizeMimeType(mimeType)
-        let safeMimeType = normalizedMimeType == "text/html" ? "text/plain" : normalizedMimeType
-        return ContentEnvelope(
-            schemaVersion: 1,
-            kind: "rich_content",
-            primaryMimeType: safeMimeType,
-            previewText: truncatePreview(text),
-            supportsInline: supportsInlineMimeType(safeMimeType),
-            parts: [
-                ContentPart(
-                    type: .text,
-                    mimeType: safeMimeType,
-                    text: text,
-                    data: nil,
-                    uri: nil,
-                    title: nil,
-                    previewText: truncatePreview(text),
-                    metadata: nil
-                )
-            ],
-            metadata: nil
-        )
-    }
-
-    public static func fromLegacyValue(
-        _ value: AnyCodable,
-        mimeType: String? = nil,
-        title: String? = nil
-    ) -> ContentEnvelope {
-        if let envelope = decodeContentEnvelope(from: value.value) {
-            return envelope
-        }
-
-        if let record = value.value as? [String: Any] {
-            if let kind = record["kind"] as? String,
-               kind == "space.basic_md",
-               let markdown = record["markdown"] as? String {
-                return .markdown(markdown)
-            }
-            let json = prettyPrintedJSON(from: record) ?? String(describing: record)
-            return dataEnvelope(json, mimeType: mimeType ?? "application/json")
-        }
-
-        if let array = value.value as? [Any] {
-            let json = prettyPrintedJSON(from: array) ?? String(describing: array)
-            return dataEnvelope(json, mimeType: mimeType ?? "application/json")
-        }
-
-        if let string = value.value as? String {
-            let normalizedMimeType = normalizedMimeTypeForLegacyText(mimeType: mimeType, title: title)
-            return fromLegacyText(string, mimeType: normalizedMimeType)
-        }
-
-        return fromLegacyText(String(describing: value.value), mimeType: normalizedMimeTypeForLegacyText(mimeType: mimeType, title: title))
-    }
-
-    private static func dataEnvelope(_ data: String, mimeType: String) -> ContentEnvelope {
+    fileprivate static func dataEnvelope(_ data: String, mimeType: String) -> ContentEnvelope {
         let normalizedMimeType = normalizeMimeType(mimeType)
         let safeMimeType = normalizedMimeType.isEmpty ? "application/json" : normalizedMimeType
         return ContentEnvelope(
@@ -177,7 +120,7 @@ public extension SpaceArtifactDetail {
         if let contentEnvelope {
             return contentEnvelope
         }
-        return .fromLegacyValue(content, mimeType: primaryMimeType ?? mimeType, title: title)
+        return adaptedContentEnvelope(from: content, mimeType: primaryMimeType ?? mimeType, title: title)
     }
 }
 
@@ -205,6 +148,66 @@ private func decodeContentEnvelope(from value: Any) -> ContentEnvelope? {
     return decoded
 }
 
+private func textEnvelope(_ text: String, mimeType: String) -> ContentEnvelope {
+    let normalizedMimeType = normalizeMimeType(mimeType)
+    let safeMimeType = normalizedMimeType == "text/html" ? "text/plain" : normalizedMimeType
+    return ContentEnvelope(
+        schemaVersion: 1,
+        kind: "rich_content",
+        primaryMimeType: safeMimeType,
+        previewText: truncatePreview(text),
+        supportsInline: supportsInlineMimeType(safeMimeType),
+        parts: [
+            ContentPart(
+                type: .text,
+                mimeType: safeMimeType,
+                text: text,
+                data: nil,
+                uri: nil,
+                title: nil,
+                previewText: truncatePreview(text),
+                metadata: nil
+            )
+        ],
+        metadata: nil
+    )
+}
+
+private func adaptedContentEnvelope(
+    from value: AnyCodable,
+    mimeType: String? = nil,
+    title: String? = nil
+) -> ContentEnvelope {
+    if let envelope = decodeContentEnvelope(from: value.value) {
+        return envelope
+    }
+
+    if let record = value.value as? [String: Any] {
+        if let kind = record["kind"] as? String,
+           kind == "space.basic_md",
+           let markdown = record["markdown"] as? String {
+            return .markdown(markdown)
+        }
+        let json = prettyPrintedJSON(from: record) ?? String(describing: record)
+        return ContentEnvelope.dataEnvelope(json, mimeType: mimeType ?? "application/json")
+    }
+
+    if let array = value.value as? [Any] {
+        let json = prettyPrintedJSON(from: array) ?? String(describing: array)
+        return ContentEnvelope.dataEnvelope(json, mimeType: mimeType ?? "application/json")
+    }
+
+    if let string = value.value as? String {
+        let normalizedMimeType = normalizedMimeTypeForTextContent(mimeType: mimeType, title: title)
+        return textEnvelope(string, mimeType: normalizedMimeType)
+    }
+
+    return textEnvelope(
+        String(describing: value.value),
+        mimeType: normalizedMimeTypeForTextContent(mimeType: mimeType, title: title)
+    )
+}
+
 private func prettyPrintedJSON(from value: Any) -> String? {
     guard JSONSerialization.isValidJSONObject(value),
           let data = try? JSONSerialization.data(withJSONObject: value, options: [.prettyPrinted, .sortedKeys]),
@@ -214,7 +217,7 @@ private func prettyPrintedJSON(from value: Any) -> String? {
     return output
 }
 
-private func normalizedMimeTypeForLegacyText(mimeType: String?, title: String?) -> String {
+private func normalizedMimeTypeForTextContent(mimeType: String?, title: String?) -> String {
     if let mimeType {
         let normalized = normalizeMimeType(mimeType)
         if !normalized.isEmpty {

@@ -50,25 +50,7 @@ extension GatewayClient {
     ) async throws -> TurnEvent {
         let payload = ExecuteTurnPayload(options)
         let data = try await sendAndWait(type: MessageType.executeTurn, payload: payload)
-        do {
-            return try decoder.decode(TurnEvent.self, from: data)
-        } catch {
-            // Backward compatibility: some gateways can reply with a minimal
-            // ack shape lacking full TurnEvent fields.
-            if let compat = try? decoder.decode(ExecuteTurnAckCompat.self, from: data),
-               !compat.turnId.isEmpty {
-                let ackSpaceUid = compat.spaceUid ?? options.spaceUid
-                let ackSpaceId = compat.spaceId ?? ackSpaceUid
-                return TurnEvent(
-                    spaceId: ackSpaceId,
-                    spaceUid: ackSpaceUid,
-                    turnId: compat.turnId,
-                    eventType: compat.eventType ?? "started",
-                    data: compat.data
-                )
-            }
-            throw error
-        }
+        return try decoder.decode(TurnEvent.self, from: data)
     }
 
     /// Execute a turn and return the immediate lifecycle event ack.

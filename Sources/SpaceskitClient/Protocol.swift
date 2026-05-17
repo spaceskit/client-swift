@@ -121,7 +121,6 @@ public enum MessageType {
     public static let toolRegister = "tool.register"
     public static let toolRemove = "tool.remove"
     public static let toolSetEnabled = "tool.set_enabled"
-    public static let toolRescanJira = "tool.rescan_jira"
     public static let toolListGrants = "tool.list_grants"
     public static let toolRevokeGrant = "tool.revoke_grant"
     public static let gatewayGetProviderTelemetry = "gateway.get_provider_telemetry"

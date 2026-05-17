@@ -12,12 +12,16 @@
       "assignedAgentDefinitionId": "sample-assignedAgentDefinitionId",
       "assignedProfileId": "sample-assignedProfileId",
       "providerHint": "sample-providerHint",
-      "modelHint": "sample-modelHint",
       "status": "healthy",
       "repaired": true,
       "fallbackApplied": true,
       "fallbackReason": "sample-fallbackReason",
-      "updatedAt": "sample-updatedAt"
+      "updatedAt": "sample-updatedAt",
+      "modelConfig": {
+        "preferredModels": [
+          "sample-modelId"
+        ]
+      }
     }
   }
 }

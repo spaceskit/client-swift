@@ -30,10 +30,6 @@ public struct GatewayNotification: Codable, Sendable {
         case createdAt
     }
 
-    private enum LegacyCodingKeys: String, CodingKey {
-        case message
-    }
-
     public init(
         notificationId: String,
         category: String,
@@ -64,11 +60,7 @@ public struct GatewayNotification: Codable, Sendable {
         category = try container.decode(String.self, forKey: .category)
         severity = try container.decode(String.self, forKey: .severity)
         title = try container.decode(String.self, forKey: .title)
-        body = try container.decodeIfPresent(String.self, forKey: .body)
-            ?? {
-                let legacyContainer = try decoder.container(keyedBy: LegacyCodingKeys.self)
-                return try legacyContainer.decode(String.self, forKey: .message)
-            }()
+        body = try container.decode(String.self, forKey: .body)
         spaceId = try container.decodeIfPresent(String.self, forKey: .spaceId)
         spaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid)
         agentId = try container.decodeIfPresent(String.self, forKey: .agentId)

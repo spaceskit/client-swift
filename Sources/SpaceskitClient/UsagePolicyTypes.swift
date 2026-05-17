@@ -136,10 +136,6 @@ public struct VoiceUsageSourceSummary: Codable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case source
         case usage
-        case sttSeconds
-        case ttsChars
-        case ttsSeconds
-        case estimatedCostUsd
     }
 
     public init(source: String, usage: VoiceUsageWindowSummary) {
@@ -149,16 +145,9 @@ public struct VoiceUsageSourceSummary: Codable, Sendable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let usage = try container.decodeIfPresent(VoiceUsageWindowSummary.self, forKey: .usage)
-            ?? VoiceUsageWindowSummary(
-                sttSeconds: try container.decodeIfPresent(Double.self, forKey: .sttSeconds) ?? 0,
-                ttsChars: try container.decodeIfPresent(Int.self, forKey: .ttsChars) ?? 0,
-                ttsSeconds: try container.decodeIfPresent(Double.self, forKey: .ttsSeconds) ?? 0,
-                estimatedCostUsd: try container.decodeIfPresent(Double.self, forKey: .estimatedCostUsd) ?? 0
-            )
         self.init(
             source: try container.decode(String.self, forKey: .source),
-            usage: usage
+            usage: try container.decode(VoiceUsageWindowSummary.self, forKey: .usage)
         )
     }
 

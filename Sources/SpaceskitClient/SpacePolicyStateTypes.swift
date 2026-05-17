@@ -157,7 +157,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
     public let safetyProfileId: String?
     public let toolPolicyOverride: ToolAccessPolicy?
     public let effectiveToolAccess: EffectiveToolAccess?
-    public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
     public let role: SpaceAssignmentRole
@@ -173,7 +172,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
         case safetyProfileId
         case toolPolicyOverride
         case effectiveToolAccess
-        case securityScope
         case spawnContext
         case contextOverrides
         case role
@@ -190,7 +188,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
         safetyProfileId: String? = nil,
         toolPolicyOverride: ToolAccessPolicy? = nil,
         effectiveToolAccess: EffectiveToolAccess? = nil,
-        securityScope: [String: AnyCodable]? = nil,
         spawnContext: String? = nil,
         contextOverrides: [String: AnyCodable]? = nil,
         role: SpaceAssignmentRole,
@@ -207,7 +204,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
         self.safetyProfileId = safetyProfileId
         self.toolPolicyOverride = toolPolicyOverride
         self.effectiveToolAccess = effectiveToolAccess
-        self.securityScope = securityScope
         self.spawnContext = spawnContext
         self.contextOverrides = contextOverrides
         self.role = role
@@ -242,7 +238,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
             safetyProfileId: try container.decodeIfPresent(String.self, forKey: .safetyProfileId),
             toolPolicyOverride: try container.decodeIfPresent(ToolAccessPolicy.self, forKey: .toolPolicyOverride),
             effectiveToolAccess: try container.decodeIfPresent(EffectiveToolAccess.self, forKey: .effectiveToolAccess),
-            securityScope: try container.decodeIfPresent([String: AnyCodable].self, forKey: .securityScope),
             spawnContext: try container.decodeIfPresent(String.self, forKey: .spawnContext),
             contextOverrides: try container.decodeIfPresent([String: AnyCodable].self, forKey: .contextOverrides),
             role: try container.decodeIfPresent(SpaceAssignmentRole.self, forKey: .role) ?? .participant,
@@ -261,7 +256,6 @@ public struct SpaceAgentAssignment: Codable, Sendable {
         try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
         try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
         try container.encodeIfPresent(effectiveToolAccess, forKey: .effectiveToolAccess)
-        try container.encodeIfPresent(securityScope, forKey: .securityScope)
         try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
         try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
         try container.encode(role, forKey: .role)

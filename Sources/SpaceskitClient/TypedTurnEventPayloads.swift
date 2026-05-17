@@ -130,6 +130,22 @@ public enum TypedTurnEventPayload: Sendable, Equatable {
     case approvalRequested(ApprovalRequestedPayload)
     case approvalResolved(ApprovalResolvedPayload)
     case rateLimited(RateLimitedPayload)
+
+    public var kind: String {
+        switch self {
+        case .turnStarted: return "turn.started"
+        case .turnCompleted: return "turn.completed"
+        case .turnCancelled: return "turn.cancelled"
+        case .turnFailed: return "turn.failed"
+        case .reasoningDelta: return "reasoning.delta"
+        case .toolStarted: return "tool.started"
+        case .toolCompleted: return "tool.completed"
+        case .stateChanged: return "state.changed"
+        case .approvalRequested: return "approval.requested"
+        case .approvalResolved: return "approval.resolved"
+        case .rateLimited: return "rate_limited"
+        }
+    }
 }
 
 extension TypedTurnEventPayload: Codable {
@@ -175,7 +191,9 @@ extension TypedTurnEventPayload: Codable {
     }
 
     public func encode(to encoder: Encoder) throws {
-        // Encode the case payload — the kind field is embedded in each payload struct
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(kind, forKey: .kind)
+
         switch self {
         case .turnStarted(let p): try p.encode(to: encoder)
         case .turnCompleted(let p): try p.encode(to: encoder)

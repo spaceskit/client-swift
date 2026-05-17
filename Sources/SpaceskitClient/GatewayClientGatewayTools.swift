@@ -79,15 +79,6 @@ extension GatewayClient {
         return response.interconnectors
     }
 
-    /// Compatibility alias for `rescanInterconnectors()` kept for older clients.
-    public func rescanJiraCliTools(
-        apiVersion: String? = nil
-    ) async throws -> GatewayRescanJiraCliToolsResponsePayload {
-        let payload = GatewayRescanJiraCliToolsPayload(apiVersion: apiVersion)
-        let data = try await sendAndWait(type: MessageType.toolRescanJira, payload: payload)
-        return try decoder.decode(GatewayRescanJiraCliToolsResponsePayload.self, from: data)
-    }
-
     /// List active or historical CLI tool approval grants.
     public func listToolApprovalGrants(
         apiVersion: String? = nil,
@@ -117,7 +108,7 @@ extension GatewayClient {
         _ payload: GatewayRevokeToolApprovalGrantPayload
     ) async throws -> GatewayRevokeToolApprovalGrantResult {
         let data = try await sendAndWait(type: MessageType.toolRevokeGrant, payload: payload)
-        return try decoder.decode(GatewayRevokeToolApprovalGrantResponsePayload.self, from: data)
+        return try decoder.decode(GatewayRevokeToolApprovalGrantResult.self, from: data)
     }
 
     /// Read telemetry for configured model runtimes.

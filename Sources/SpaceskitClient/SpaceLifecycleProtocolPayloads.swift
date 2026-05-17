@@ -217,7 +217,6 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
     public let profileId: String?
     public let safetyProfileId: String?
     public let toolPolicyOverride: ToolAccessPolicy?
-    public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
     public let role: String?
@@ -233,7 +232,6 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
         case profileId
         case safetyProfileId
         case toolPolicyOverride
-        case securityScope
         case spawnContext
         case contextOverrides
         case role
@@ -250,7 +248,6 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
         profileId: String? = nil,
         safetyProfileId: String? = nil,
         toolPolicyOverride: ToolAccessPolicy? = nil,
-        securityScope: [String: Any]? = nil,
         spawnContext: String? = nil,
         contextOverrides: [String: Any]? = nil,
         role: String? = nil,
@@ -265,7 +262,6 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
         self.profileId = profileId ?? agentDefinitionId
         self.safetyProfileId = safetyProfileId
         self.toolPolicyOverride = toolPolicyOverride
-        self.securityScope = securityScope?.mapValues { AnyCodable($0) }
         self.spawnContext = spawnContext
         self.contextOverrides = contextOverrides?.mapValues { AnyCodable($0) }
         self.role = role
@@ -283,7 +279,6 @@ public struct SpaceAddAgentPayload: Codable, Sendable {
         try container.encodeIfPresent(profileId ?? agentDefinitionId, forKey: .profileId)
         try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
         try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
-        try container.encodeIfPresent(securityScope, forKey: .securityScope)
         try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
         try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
         try container.encodeIfPresent(role, forKey: .role)
@@ -320,7 +315,6 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
     public let profileId: String?
     public let safetyProfileId: String?
     public let toolPolicyOverride: ToolAccessPolicy?
-    public let securityScope: [String: AnyCodable]?
     public let spawnContext: String?
     public let contextOverrides: [String: AnyCodable]?
     public let role: String?
@@ -337,7 +331,6 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         case profileId
         case safetyProfileId
         case toolPolicyOverride
-        case securityScope
         case spawnContext
         case contextOverrides
         case role
@@ -355,7 +348,6 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         profileId: String? = nil,
         safetyProfileId: String? = nil,
         toolPolicyOverride: ToolAccessPolicy? = nil,
-        securityScope: [String: Any]? = nil,
         spawnContext: String? = nil,
         contextOverrides: [String: Any]? = nil,
         role: String? = nil,
@@ -371,7 +363,6 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         self.profileId = profileId ?? agentDefinitionId
         self.safetyProfileId = safetyProfileId
         self.toolPolicyOverride = toolPolicyOverride
-        self.securityScope = securityScope?.mapValues { AnyCodable($0) }
         self.spawnContext = spawnContext
         self.contextOverrides = contextOverrides?.mapValues { AnyCodable($0) }
         self.role = role
@@ -390,7 +381,6 @@ public struct SpaceUpdateAgentAssignmentPayload: Codable, Sendable {
         try container.encodeIfPresent(profileId ?? agentDefinitionId, forKey: .profileId)
         try container.encodeIfPresent(safetyProfileId, forKey: .safetyProfileId)
         try container.encodeIfPresent(toolPolicyOverride, forKey: .toolPolicyOverride)
-        try container.encodeIfPresent(securityScope, forKey: .securityScope)
         try container.encodeIfPresent(spawnContext, forKey: .spawnContext)
         try container.encodeIfPresent(contextOverrides, forKey: .contextOverrides)
         try container.encodeIfPresent(role, forKey: .role)

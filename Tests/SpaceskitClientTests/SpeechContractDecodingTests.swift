@@ -79,29 +79,7 @@ final class SpeechContractDecodingTests: XCTestCase {
         XCTAssertEqual(event.engineMetrics?.ttsFirstAudioMs, 180)
     }
 
-    func testSpeechSessionEventDecodesLegacyFields() throws {
-        let json = """
-        {
-          "sessionId": "speech-legacy",
-          "spaceId": "main-space",
-          "spaceUid": "main-space-uid",
-          "state": "running",
-          "eventType": "transcript_segment",
-          "sequence": 3,
-          "ts": "2026-03-20T10:05:00Z"
-        }
-        """
-
-        let event = try JSONDecoder().decode(SpeechSessionEvent.self, from: Data(json.utf8))
-
-        XCTAssertEqual(event.spaceUid, "main-space-uid")
-        XCTAssertEqual(event.sequence, 3)
-        XCTAssertEqual(event.sequenceNo, 3)
-        XCTAssertEqual(event.emittedAt, "2026-03-20T10:05:00Z")
-        XCTAssertEqual(event.ts, "2026-03-20T10:05:00Z")
-    }
-
-    func testVoiceUsageSourceSummaryDecodesNestedAndLegacyShapes() throws {
+    func testVoiceUsageSourceSummaryDecodesNestedShape() throws {
         let nested = """
         {
           "source": "managed",
@@ -114,23 +92,9 @@ final class SpeechContractDecodingTests: XCTestCase {
         }
         """
 
-        let legacy = """
-        {
-          "source": "local_model",
-          "sttSeconds": 8.0,
-          "ttsChars": 45,
-          "ttsSeconds": 2.0,
-          "estimatedCostUsd": 0.0
-        }
-        """
-
         let nestedSummary = try JSONDecoder().decode(VoiceUsageSourceSummary.self, from: Data(nested.utf8))
-        let legacySummary = try JSONDecoder().decode(VoiceUsageSourceSummary.self, from: Data(legacy.utf8))
 
         XCTAssertEqual(nestedSummary.source, "managed")
         XCTAssertEqual(nestedSummary.usage.sttSeconds, 12.5)
-        XCTAssertEqual(legacySummary.source, "local_model")
-        XCTAssertEqual(legacySummary.usage.ttsChars, 45)
-        XCTAssertEqual(legacySummary.estimatedCostUsd, 0.0)
     }
 }

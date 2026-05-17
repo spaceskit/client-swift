@@ -8,12 +8,16 @@
     "assignedAgentDefinitionId": "concierge-profile",
     "assignedProfileId": "concierge-profile",
     "providerHint": "openai",
-    "modelHint": "openai/gpt-4.1",
     "status": "fallback",
     "repaired": true,
     "fallbackApplied": true,
     "fallbackReason": "Configured provider unavailable: missing-provider",
     "runtimeIssueReason": "Configured provider unavailable: missing-provider",
-    "updatedAt": "2026-03-29T12:00:00.000Z"
+    "updatedAt": "2026-03-29T12:00:00.000Z",
+    "modelConfig": {
+      "preferredModels": [
+        "openai/gpt-4.1"
+      ]
+    }
   }
 }

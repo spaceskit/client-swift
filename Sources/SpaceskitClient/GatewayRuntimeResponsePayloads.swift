@@ -13,8 +13,6 @@ public struct AuthRotateDeviceKeyResponsePayload: Codable, Sendable {
     public let device: DeviceIdentity
 }
 
-public typealias AuthRevokeDeviceResponsePayload = AuthRevokeDeviceResult
-
 public struct AuthListDevicesResponsePayload: Codable, Sendable {
     public let devices: [DeviceIdentity]
 }
@@ -151,13 +149,9 @@ public struct GatewayRescanInterconnectorsResponsePayload: Codable, Sendable {
     public let generatedAt: String
 }
 
-public typealias GatewayRescanJiraCliToolsResponsePayload = GatewayJiraCliRescanResult
-
 public struct GatewayListToolApprovalGrantsResponsePayload: Codable, Sendable {
     public let grants: [GatewayToolApprovalGrant]
 }
-
-public typealias GatewayRevokeToolApprovalGrantResponsePayload = GatewayRevokeToolApprovalGrantResult
 
 public struct GatewayGetProviderTelemetryResponsePayload: Codable, Sendable {
     public let telemetry: [ProviderTelemetry]
@@ -192,8 +186,6 @@ public struct GatewayFactoryResetResponsePayload: Codable, Sendable {
     public let tablesCleared: Int
     public let rowsDeleted: UInt64
 }
-
-public typealias SpaceResetResponsePayload = SpaceResetResult
 
 public struct SpaceGetEffectiveToolsResponsePayload: Codable, Sendable {
     public let matrix: EffectiveToolMatrix
@@ -241,10 +233,6 @@ public struct GatewayProvisionLocalProfileResponsePayload: Codable, Sendable {
     public let assignmentCreated: Bool?
 }
 
-public typealias GatewayPutSecretRefResponsePayload = GatewayPutSecretRefResult
-
 public struct GatewayListSecretRefsResponsePayload: Codable, Sendable {
     public let secretRefs: [GatewaySecretRef]
 }
-
-public typealias GatewayDeleteSecretRefResponsePayload = GatewayDeleteSecretRefResult

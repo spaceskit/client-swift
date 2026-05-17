@@ -6,7 +6,7 @@ import Foundation
 
 public enum GatewayBuiltinMcpAdminAuthMode: String, Codable, Sendable, Equatable {
     case strict
-    case compat
+    case principalToken = "principal_token"
     case unavailable
 }
 

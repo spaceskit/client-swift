@@ -32,7 +32,6 @@ public struct IdentityCreateAgentDefinitionPayload: Codable, Sendable {
     public let instructions: String?
     public let defaultSkillIds: [String]?
     public let providerHint: String?
-    public let modelHint: String?
     public let modelConfig: ProfileModelConfig?
     public let isDefault: Bool?
 
@@ -46,7 +45,6 @@ public struct IdentityCreateAgentDefinitionPayload: Codable, Sendable {
         instructions: String? = nil,
         defaultSkillIds: [String]? = nil,
         providerHint: String? = nil,
-        modelHint: String? = nil,
         modelConfig: ProfileModelConfig? = nil,
         isDefault: Bool? = nil
     ) {
@@ -59,7 +57,6 @@ public struct IdentityCreateAgentDefinitionPayload: Codable, Sendable {
         self.instructions = instructions
         self.defaultSkillIds = defaultSkillIds
         self.providerHint = providerHint
-        self.modelHint = modelHint
         self.modelConfig = modelConfig
         self.isDefault = isDefault
     }
@@ -75,7 +72,6 @@ public struct IdentityUpdateAgentDefinitionPayload: Codable, Sendable {
     public let instructions: String?
     public let defaultSkillIds: [String]?
     public let providerHint: String?
-    public let modelHint: String?
     public let modelConfig: ProfileModelConfig?
     public let isDefault: Bool?
 
@@ -89,7 +85,6 @@ public struct IdentityUpdateAgentDefinitionPayload: Codable, Sendable {
         instructions: String? = nil,
         defaultSkillIds: [String]? = nil,
         providerHint: String? = nil,
-        modelHint: String? = nil,
         modelConfig: ProfileModelConfig? = nil,
         isDefault: Bool? = nil
     ) {
@@ -102,7 +97,6 @@ public struct IdentityUpdateAgentDefinitionPayload: Codable, Sendable {
         self.instructions = instructions
         self.defaultSkillIds = defaultSkillIds
         self.providerHint = providerHint
-        self.modelHint = modelHint
         self.modelConfig = modelConfig
         self.isDefault = isDefault
     }

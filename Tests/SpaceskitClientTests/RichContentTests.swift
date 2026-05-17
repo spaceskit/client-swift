@@ -2,7 +2,7 @@ import XCTest
 @testable import SpaceskitClient
 
 final class RichContentTests: XCTestCase {
-    func testSpaceTurnFallsBackToPlainTextEnvelope() throws {
+    func testSpaceTurnUsesPlainTextEnvelopeWhenRichContentIsMissing() throws {
         let json = """
         {
           "turnId": "turn-1",
@@ -47,7 +47,7 @@ final class RichContentTests: XCTestCase {
         XCTAssertEqual(turn.resolvedInputContent?.inlineText, "# Heading")
     }
 
-    func testArtifactDetailFallsBackToLegacyObjectContent() {
+    func testArtifactDetailAdaptsObjectContent() {
         let detail = SpaceArtifactDetail(
             artifactId: "artifact-1",
             spaceId: "space-1",

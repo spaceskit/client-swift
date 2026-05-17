@@ -87,99 +87,24 @@ public struct SpaceWorkspace: Codable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         spaceId = try container.decode(String.self, forKey: .spaceId)
-        let decodedSpaceUid = try container.decodeIfPresent(String.self, forKey: .spaceUid)?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        spaceUid = (decodedSpaceUid?.isEmpty == false ? decodedSpaceUid : nil) ?? spaceId
+        spaceUid = try container.decode(String.self, forKey: .spaceUid)
+        mode = try container.decode(String.self, forKey: .mode)
         explicitWorkspaceRoot = try container.decodeIfPresent(String.self, forKey: .explicitWorkspaceRoot)
-        let decodedEffectiveWorkspaceRoot = try container.decodeIfPresent(
+        effectiveWorkspaceRoot = try container.decode(
             String.self,
             forKey: .effectiveWorkspaceRoot
-        )?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let decodedMetaPath = try container.decodeIfPresent(String.self, forKey: .metaPath)?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        effectiveWorkspaceRoot = Self.resolveEffectiveWorkspaceRoot(
-            decodedEffectiveWorkspaceRoot,
-            explicitWorkspaceRoot: explicitWorkspaceRoot,
-            metaPath: decodedMetaPath
         )
-        let resolvedMetaPath = Self.resolveMetaPath(
-            decodedMetaPath,
-            effectiveWorkspaceRoot: effectiveWorkspaceRoot
-        )
-        metaPath = resolvedMetaPath
-        logsPath = Self.resolvePath(
-            try container.decodeIfPresent(String.self, forKey: .logsPath),
-            fallbackBasePath: resolvedMetaPath,
-            component: "logs"
-        )
-        workPath = Self.resolvePath(
-            try container.decodeIfPresent(String.self, forKey: .workPath),
-            fallbackBasePath: resolvedMetaPath,
-            component: "work"
-        )
-        sharedContextPath = Self.resolvePath(
-            try container.decodeIfPresent(String.self, forKey: .sharedContextPath),
-            fallbackBasePath: resolvedMetaPath,
-            component: "shared-context"
-        )
-        scratchpadsPath = Self.resolvePath(
-            try container.decodeIfPresent(String.self, forKey: .scratchpadsPath),
-            fallbackBasePath: resolvedMetaPath,
-            component: "scratchpads"
-        )
-        artifactsPath = Self.resolvePath(
-            try container.decodeIfPresent(String.self, forKey: .artifactsPath),
-            fallbackBasePath: resolvedMetaPath,
-            component: "artifacts"
-        )
-        layoutVersion = try container.decodeIfPresent(Int.self, forKey: .layoutVersion) ?? 2
+        metaPath = try container.decode(String.self, forKey: .metaPath)
+        logsPath = try container.decode(String.self, forKey: .logsPath)
+        workPath = try container.decode(String.self, forKey: .workPath)
+        sharedContextPath = try container.decode(String.self, forKey: .sharedContextPath)
+        scratchpadsPath = try container.decode(String.self, forKey: .scratchpadsPath)
+        artifactsPath = try container.decode(String.self, forKey: .artifactsPath)
+        layoutVersion = try container.decode(Int.self, forKey: .layoutVersion)
         gitRepoDetected = try container.decodeIfPresent(Bool.self, forKey: .gitRepoDetected) ?? false
         metadataStatus = try container.decodeIfPresent(SpaceWorkspaceMetadataStatus.self, forKey: .metadataStatus) ?? .unknown
         discoveredProjectFiles = try container.decodeIfPresent([String].self, forKey: .discoveredProjectFiles) ?? []
-        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
-            ?? ISO8601DateFormatter().string(from: Date())
-        mode = try container.decodeIfPresent(String.self, forKey: .mode)
-            ?? (explicitWorkspaceRoot == nil ? "managed" : "folder_bound")
-    }
-
-    private static func resolveEffectiveWorkspaceRoot(
-        _ decodedEffectiveWorkspaceRoot: String?,
-        explicitWorkspaceRoot: String?,
-        metaPath: String?
-    ) -> String {
-        if let decodedEffectiveWorkspaceRoot, !decodedEffectiveWorkspaceRoot.isEmpty {
-            return decodedEffectiveWorkspaceRoot
-        }
-        if let explicitWorkspaceRoot, !explicitWorkspaceRoot.isEmpty {
-            return explicitWorkspaceRoot
-        }
-        if let metaPath, !metaPath.isEmpty {
-            return (metaPath as NSString).deletingLastPathComponent
-        }
-        return ""
-    }
-
-    private static func resolveMetaPath(
-        _ decodedMetaPath: String?,
-        effectiveWorkspaceRoot: String
-    ) -> String {
-        if let decodedMetaPath, !decodedMetaPath.isEmpty {
-            return decodedMetaPath
-        }
-        guard !effectiveWorkspaceRoot.isEmpty else { return ".space" }
-        return (effectiveWorkspaceRoot as NSString).appendingPathComponent(".space")
-    }
-
-    private static func resolvePath(
-        _ decodedPath: String?,
-        fallbackBasePath: String,
-        component: String
-    ) -> String {
-        let trimmedPath = decodedPath?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let trimmedPath, !trimmedPath.isEmpty {
-            return trimmedPath
-        }
-        return (fallbackBasePath as NSString).appendingPathComponent(component)
+        updatedAt = try container.decode(String.self, forKey: .updatedAt)
     }
 }
 

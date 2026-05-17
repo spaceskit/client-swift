@@ -175,7 +175,7 @@ public struct GatewayGetConciergeAgentPayload: Codable, Sendable {
 public struct GatewaySetConciergeAgentPayload: Codable, Sendable {
     public let apiVersion: String?
     public let spaceId: String?
-    public let selectionMode: ConciergeAgentSelectionMode
+    public let selectionMode: MainAgentSelectionMode
     public let providerId: String?
     public let modelId: String?
     public let sourceAgentDefinitionId: String?
@@ -184,7 +184,7 @@ public struct GatewaySetConciergeAgentPayload: Codable, Sendable {
     public init(
         apiVersion: String? = nil,
         spaceId: String? = nil,
-        selectionMode: ConciergeAgentSelectionMode,
+        selectionMode: MainAgentSelectionMode,
         providerId: String? = nil,
         modelId: String? = nil,
         sourceAgentDefinitionId: String? = nil,
@@ -363,14 +363,6 @@ public struct GatewaySetToolEnabledPayload: Codable, Sendable {
         self.apiVersion = apiVersion
         self.toolId = toolId
         self.enabled = enabled
-    }
-}
-
-public struct GatewayRescanJiraCliToolsPayload: Codable, Sendable {
-    public let apiVersion: String?
-
-    public init(apiVersion: String? = nil) {
-        self.apiVersion = apiVersion
     }
 }
 

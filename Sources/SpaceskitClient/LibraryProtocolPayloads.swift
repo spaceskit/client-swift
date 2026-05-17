@@ -42,7 +42,7 @@ public struct GatewaySkillListResponsePayload: Codable, Sendable {
     public let skills: [GatewaySkillEntry]
 }
 
-// MARK: - Library (Legacy)
+// MARK: - Library
 
 public struct LibraryListEntriesPayload: Codable, Sendable {
     public let apiVersion: String?

@@ -106,16 +106,12 @@ public enum MainAgentSelectionMode: String, Codable, Sendable {
     case agentDefinition = "agent_definition"
 }
 
-public typealias ConciergeAgentSelectionMode = MainAgentSelectionMode
-
 public enum GatewayMainAgentStatus: String, Codable, Sendable {
     case healthy
     case repaired
     case degraded
     case fallback
 }
-
-public typealias GatewayConciergeAgentStatus = GatewayMainAgentStatus
 
 public struct GatewayMainAgentState: Codable, Sendable {
     public let spaceId: String
@@ -126,7 +122,7 @@ public struct GatewayMainAgentState: Codable, Sendable {
     public let assignedAgentDefinitionId: String?
     public let assignedProfileId: String?
     public let providerHint: String?
-    public let modelHint: String?
+    public let modelConfig: ProfileModelConfig
     public let status: GatewayMainAgentStatus
     public let repaired: Bool
     public let fallbackApplied: Bool
@@ -143,7 +139,7 @@ public struct GatewayMainAgentState: Codable, Sendable {
         case assignedAgentDefinitionId
         case assignedProfileId
         case providerHint
-        case modelHint
+        case modelConfig
         case status
         case repaired
         case fallbackApplied
@@ -161,7 +157,7 @@ public struct GatewayMainAgentState: Codable, Sendable {
         assignedAgentDefinitionId: String? = nil,
         assignedProfileId: String? = nil,
         providerHint: String? = nil,
-        modelHint: String? = nil,
+        modelConfig: ProfileModelConfig,
         status: GatewayMainAgentStatus,
         repaired: Bool,
         fallbackApplied: Bool,
@@ -177,7 +173,7 @@ public struct GatewayMainAgentState: Codable, Sendable {
         self.assignedAgentDefinitionId = assignedAgentDefinitionId ?? assignedProfileId
         self.assignedProfileId = assignedProfileId ?? assignedAgentDefinitionId
         self.providerHint = providerHint
-        self.modelHint = modelHint
+        self.modelConfig = modelConfig
         self.status = status
         self.repaired = repaired
         self.fallbackApplied = fallbackApplied
@@ -197,7 +193,6 @@ public struct GatewayMainAgentState: Codable, Sendable {
         let assignedProfileId = try container.decodeIfPresent(String.self, forKey: .assignedProfileId)
         let fallbackReason = try container.decodeIfPresent(String.self, forKey: .fallbackReason)
         let runtimeIssueReason = try container.decodeIfPresent(String.self, forKey: .runtimeIssueReason)
-            ?? fallbackReason
 
         self.init(
             spaceId: try container.decode(String.self, forKey: .spaceId),
@@ -208,7 +203,7 @@ public struct GatewayMainAgentState: Codable, Sendable {
             assignedAgentDefinitionId: assignedAgentDefinitionId ?? assignedProfileId,
             assignedProfileId: assignedProfileId ?? assignedAgentDefinitionId,
             providerHint: try container.decodeIfPresent(String.self, forKey: .providerHint),
-            modelHint: try container.decodeIfPresent(String.self, forKey: .modelHint),
+            modelConfig: try container.decode(ProfileModelConfig.self, forKey: .modelConfig),
             status: try container.decode(GatewayMainAgentStatus.self, forKey: .status),
             repaired: try container.decode(Bool.self, forKey: .repaired),
             fallbackApplied: try container.decode(Bool.self, forKey: .fallbackApplied),
@@ -216,6 +211,10 @@ public struct GatewayMainAgentState: Codable, Sendable {
             runtimeIssueReason: runtimeIssueReason,
             updatedAt: try container.decode(String.self, forKey: .updatedAt)
         )
+    }
+
+    public var preferredModelId: String? {
+        modelConfig.preferredModels.first
     }
 }
 
@@ -228,8 +227,8 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
     public let assignedAgentDefinitionId: String?
     public let assignedProfileId: String?
     public let providerHint: String?
-    public let modelHint: String?
-    public let status: GatewayConciergeAgentStatus
+    public let modelConfig: ProfileModelConfig
+    public let status: GatewayMainAgentStatus
     public let repaired: Bool
     public let fallbackApplied: Bool
     public let fallbackReason: String?
@@ -245,7 +244,7 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
         case assignedAgentDefinitionId
         case assignedProfileId
         case providerHint
-        case modelHint
+        case modelConfig
         case status
         case repaired
         case fallbackApplied
@@ -263,8 +262,8 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
         assignedAgentDefinitionId: String? = nil,
         assignedProfileId: String? = nil,
         providerHint: String? = nil,
-        modelHint: String? = nil,
-        status: GatewayConciergeAgentStatus,
+        modelConfig: ProfileModelConfig,
+        status: GatewayMainAgentStatus,
         repaired: Bool,
         fallbackApplied: Bool,
         fallbackReason: String? = nil,
@@ -279,7 +278,7 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
         self.assignedAgentDefinitionId = assignedAgentDefinitionId ?? assignedProfileId
         self.assignedProfileId = assignedProfileId ?? assignedAgentDefinitionId
         self.providerHint = providerHint
-        self.modelHint = modelHint
+        self.modelConfig = modelConfig
         self.status = status
         self.repaired = repaired
         self.fallbackApplied = fallbackApplied
@@ -302,7 +301,6 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
         let assignedProfileId = try container.decodeIfPresent(String.self, forKey: .assignedProfileId)
         let fallbackReason = try container.decodeIfPresent(String.self, forKey: .fallbackReason)
         let runtimeIssueReason = try container.decodeIfPresent(String.self, forKey: .runtimeIssueReason)
-            ?? fallbackReason
 
         self.init(
             spaceId: try container.decode(String.self, forKey: .spaceId),
@@ -313,14 +311,18 @@ public struct GatewayConciergeAgentState: Codable, Sendable {
             assignedAgentDefinitionId: assignedAgentDefinitionId ?? assignedProfileId,
             assignedProfileId: assignedProfileId ?? assignedAgentDefinitionId,
             providerHint: try container.decodeIfPresent(String.self, forKey: .providerHint),
-            modelHint: try container.decodeIfPresent(String.self, forKey: .modelHint),
-            status: try container.decode(GatewayConciergeAgentStatus.self, forKey: .status),
+            modelConfig: try container.decode(ProfileModelConfig.self, forKey: .modelConfig),
+            status: try container.decode(GatewayMainAgentStatus.self, forKey: .status),
             repaired: try container.decode(Bool.self, forKey: .repaired),
             fallbackApplied: try container.decode(Bool.self, forKey: .fallbackApplied),
             fallbackReason: fallbackReason,
             runtimeIssueReason: runtimeIssueReason,
             updatedAt: try container.decode(String.self, forKey: .updatedAt)
         )
+    }
+
+    public var preferredModelId: String? {
+        modelConfig.preferredModels.first
     }
 }
 

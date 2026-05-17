@@ -64,9 +64,6 @@ public struct SpacePreviewTemplateResponsePayload: Codable, Sendable {
     public let warnings: [String]
 }
 
-public typealias SpaceCreateFromTemplateResultPayload = SpaceCreateFromTemplateResult
-public typealias SpaceSaveTemplateResultPayload = SpaceSaveTemplateResult
-
 public struct SpaceTemplateListResponsePayload: Codable, Sendable {
     public let templates: [SpaceTemplateRecord]
 }

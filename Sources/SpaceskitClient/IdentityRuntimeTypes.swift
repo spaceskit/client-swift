@@ -34,7 +34,6 @@ public struct AgentDefinitionSummary: Codable, Sendable {
     public let instructions: String
     public let defaultSkillIds: [String]
     public let providerHint: String?
-    public let modelHint: String?
     public let modelConfig: ProfileModelConfig?
     public let isDefault: Bool
     public let status: ManagedRecordStatus

@@ -116,7 +116,7 @@ extension GatewayClient {
     public func setConciergeAgent(
         apiVersion: String? = nil,
         spaceId: String? = nil,
-        selectionMode: ConciergeAgentSelectionMode,
+        selectionMode: MainAgentSelectionMode,
         providerId: String? = nil,
         modelId: String? = nil,
         sourceAgentDefinitionId: String? = nil,

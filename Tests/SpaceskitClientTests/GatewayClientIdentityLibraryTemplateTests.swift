@@ -42,13 +42,13 @@ final class GatewayClientIdentityLibraryTemplateTests: GatewayClientTestCase {
             instructions: "Be precise.",
             defaultSkillIds: ["skill-1"],
             providerHint: "openai",
-            modelHint: "gpt-4.1",
             modelConfig: ProfileModelConfig(preferredModels: ["gpt-4.1"]),
             isDefault: true
         )
         let agentDefinitionJSON = try encodeJSONObject(createAgentDefinitionPayload)
         XCTAssertEqual(agentDefinitionJSON["agentDefinitionId"] as? String, "agent-definition-1")
         XCTAssertEqual(agentDefinitionJSON["personaId"] as? String, "persona-1")
+        XCTAssertNil(agentDefinitionJSON["modelId"])
 
         let saveSkillPayload = LibrarySaveSkillPayload(
             apiVersion: "v1",
@@ -248,13 +248,10 @@ final class GatewayClientIdentityLibraryTemplateTests: GatewayClientTestCase {
             "GatewayFactoryResetPayload",
             "GatewayFactoryResetResponsePayload",
             "SpaceResetPayload",
-            "SpaceResetResponsePayload",
             "GatewayPutSecretRefPayload",
-            "GatewayPutSecretRefResponsePayload",
             "GatewayListSecretRefsPayload",
             "GatewayListSecretRefsResponsePayload",
             "GatewayDeleteSecretRefPayload",
-            "GatewayDeleteSecretRefResponsePayload",
             "GatewayListConnectorFamiliesPayload",
             "GatewayListConnectorFamiliesResponsePayload",
             "GatewayListConnectorsPayload",

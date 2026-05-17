@@ -1,4 +1,4 @@
-// Gateway client compatibility and REST helper payloads.
+// Gateway client REST helper payloads.
 
 import Foundation
 
@@ -26,12 +26,4 @@ struct AppleNotificationDeliveryResponse: Codable {
 
 struct BackgroundFeedbackActionResponse: Codable {
     let result: BackgroundFeedbackActionResult
-}
-
-struct ExecuteTurnAckCompat: Codable {
-    let turnId: String
-    let spaceId: String?
-    let spaceUid: String?
-    let eventType: String?
-    let data: AnyCodable?
 }

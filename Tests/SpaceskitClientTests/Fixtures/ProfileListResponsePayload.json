@@ -9,7 +9,6 @@
         "sample-defaultSkillIds"
       ],
       "providerHint": "sample-providerHint",
-      "modelHint": "sample-modelHint",
       "modelConfig": {
         "preferredModels": [
           "sample-preferredModels"

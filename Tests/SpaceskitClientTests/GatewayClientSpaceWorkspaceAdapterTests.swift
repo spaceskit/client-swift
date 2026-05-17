@@ -32,29 +32,6 @@ final class GatewayClientSpaceWorkspaceAdapterTests: GatewayClientTestCase {
         XCTAssertEqual(decoded.metadataStatus, .ready)
     }
 
-    func testSpaceWorkspaceDecodingFallsBackForLegacyPartialPayload() throws {
-        let json = """
-        {
-            "spaceId": "space-legacy",
-            "mode": "managed",
-            "effectiveWorkspaceRoot": "/tmp/spaces/space-legacy",
-            "metaPath": "/tmp/spaces/space-legacy/.space",
-            "logsPath": "/tmp/spaces/space-legacy/.space/logs",
-            "workPath": "/tmp/spaces/space-legacy/.space/work",
-            "scratchpadsPath": "/tmp/spaces/space-legacy/.space/scratchpads"
-        }
-        """
-
-        let decoded = try JSONDecoder().decode(SpaceWorkspace.self, from: Data(json.utf8))
-        XCTAssertEqual(decoded.spaceId, "space-legacy")
-        XCTAssertEqual(decoded.spaceUid, "space-legacy")
-        XCTAssertEqual(decoded.sharedContextPath, "/tmp/spaces/space-legacy/.space/shared-context")
-        XCTAssertEqual(decoded.scratchpadsPath, "/tmp/spaces/space-legacy/.space/scratchpads")
-        XCTAssertEqual(decoded.artifactsPath, "/tmp/spaces/space-legacy/.space/artifacts")
-        XCTAssertEqual(decoded.layoutVersion, 2)
-        XCTAssertEqual(decoded.metadataStatus, .unknown)
-    }
-
     func testSpaceConfigDecodingIncludesWorkspace() throws {
         let json = """
         {

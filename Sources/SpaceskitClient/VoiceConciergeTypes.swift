@@ -114,7 +114,6 @@ public struct SpeechSessionEvent: Codable, Sendable {
         case lockReason
         case transcript
         case turnId
-        case sequence
         case sequenceNo
         case reason
         case emittedAt
@@ -124,7 +123,6 @@ public struct SpeechSessionEvent: Codable, Sendable {
         case fallbackEvent
         case providerConfigs
         case engineMetrics
-        case ts
     }
 
     public init(from decoder: Decoder) throws {
@@ -144,21 +142,19 @@ public struct SpeechSessionEvent: Codable, Sendable {
         lockReason = try container.decodeIfPresent(String.self, forKey: .lockReason)
         transcript = try container.decodeIfPresent(String.self, forKey: .transcript)
         turnId = try container.decodeIfPresent(String.self, forKey: .turnId)
-        let decodedSequence = try container.decodeIfPresent(Int.self, forKey: .sequence)
         let decodedSequenceNo = try container.decodeIfPresent(Int.self, forKey: .sequenceNo)
-        sequence = decodedSequence ?? decodedSequenceNo
-        sequenceNo = decodedSequenceNo ?? decodedSequence
+        sequence = decodedSequenceNo
+        sequenceNo = decodedSequenceNo
         reason = try container.decodeIfPresent(String.self, forKey: .reason)
         let decodedEmittedAt = try container.decodeIfPresent(String.self, forKey: .emittedAt)
-        let decodedTs = try container.decodeIfPresent(String.self, forKey: .ts)
-        emittedAt = decodedEmittedAt ?? decodedTs
+        emittedAt = decodedEmittedAt
         sttRoute = try container.decodeIfPresent(VoiceRoute.self, forKey: .sttRoute)
         ttsRoute = try container.decodeIfPresent(VoiceRoute.self, forKey: .ttsRoute)
         lockDecision = try container.decodeIfPresent(VoiceLockDecision.self, forKey: .lockDecision)
         fallbackEvent = try container.decodeIfPresent(VoiceFallbackEvent.self, forKey: .fallbackEvent)
         providerConfigs = try container.decodeIfPresent([VoiceProviderConfig].self, forKey: .providerConfigs) ?? []
         engineMetrics = try container.decodeIfPresent(SpeechEngineMetrics.self, forKey: .engineMetrics)
-        ts = decodedTs ?? decodedEmittedAt ?? ""
+        ts = decodedEmittedAt ?? ""
     }
 }
 
